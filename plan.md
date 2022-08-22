@@ -1,6 +1,17 @@
 # STREUSEL-based steric parameters
 Essentially an article expanding the utility of the electric field size metric by allowing the calculation of additional steric
 parameters at the electric field surface
+
+## functionality
+The major functionality is:
+1. efficient electric field generation (2 potential avenues)
+	1. electric field from multipole expansion -- where multipoles are predicted using [6]`https://github.com/rinikerlab/EquivariantMultipoleGNN`
+	2. electric field from electrostatic potential predicted using [5]`https://github.com/AstexUK/ESP_DNN`
+	3. this will be validated against the results presented in the original STREUSEL paper and DeRose-JACS implementation of STREUSEL. Visualization can be similar to that presented in the GNN (EquivariantMultipoleGNN paper)
+2. electric field-based sterimol (via DBStep) and weighted sterimol (via wSterimol, [3]) parameters will be generated
+	1. weighted and unweighted sterimol parameters (L, B1, B2) will be validated/compared with those presented by DBStep and wSterimol [3]
+3. electric field-based sterimol parameters will be used to parameterize the catalytic examples in [1]
+
 To accomlish this we will develop a multi-step workflow, as follows:
 1. 
 
@@ -10,13 +21,21 @@ extension to the STREUSEL package that requires minimal additional calculations 
 perform similarly to accepted steric metrics.
 
 # Relevant literature
-| title | DOI |
-| ----- | --- |
-| Multidimensional steric parameters in the analysis of asymmetric catalytic reactions | 10.1038/NCHEM.1297 |
-| | |
-| Selection of low-dimensional 3D geometric descriptors for accurate enantioselectivity prediction | 10.1021/acscatal.2c00976 |
-| | |
-| Conformational effects on physical-organic descriptors: the case of Sterimol steric parameters | 10.1021/acscatal.8b04043 |
+| Ref. No. | title | DOI |
+| -------- | ----- | --- |
+| 1 | Multidimensional steric parameters in the analysis of asymmetric catalytic reactions | 10.1038/NCHEM.1297 |
+| | | |
+| 2 | Selection of low-dimensional 3D geometric descriptors for accurate enantioselectivity prediction | 10.1021/acscatal.2c00976 |
+| | | |
+| 3 | Conformational effects on physical-organic descriptors: the case of Sterimol steric parameters | 10.1021/acscatal.8b04043 |
+| | | |
+| 4 | Practical High-Quality Electrostatic Potential Surfaces for Drug Discovery Using a Graph-Convolutional Deep Neural Network | 10.1021/acs.jmedchem.9b01129 |
+| | | |
+| 5 | ESP-DNN: a graph-convolutional DNN for predicting electrostatic potential surfaces | 10.1021/acs.jmedchem.9b01129 |
+| | | |
+| 6 | Learning atomic multipoles: prediction of the electrostatic potential with equivariant GNNs | 10.1021/acs.jctc.1c01021 |
+| | | |
+
 
 # Steric metrics we will compare against
 
