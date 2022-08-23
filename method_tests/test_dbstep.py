@@ -13,7 +13,7 @@ def _get_command_line_arguments() -> argparse.Namespace:
 def main() -> None:
 
     cli_args = _get_command_line_arguments()
-    classic_mol = db.dbstep(
+    db.dbstep(
         cli_args.log_file,
         atom1=2,
         atom2=5,
@@ -23,14 +23,7 @@ def main() -> None:
         measure="classic",
     )
 
-    print(
-        f"CLASSIC "
-        f"-- L: {classic_mol.L} "
-        f"-- BMIN: {classic_mol.Bmin} "
-        f"-- BMAX: {classic_mol.Bmax}"
-    )
-
-    grid_mol = db.dbstep(
+    db.dbstep(
         cli_args.cube_file,
         atom1=2,
         atom2=5,
@@ -39,13 +32,6 @@ def main() -> None:
         sterimol=True,
         measure="grid",
         surface="vdw",
-    )
-
-    print(
-        f"GRID "
-        f"-- L: {grid_mol.L} "
-        f"-- BMIN: {grid_mol.Bmin} "
-        f"-- BMAX: {grid_mol.Bmax}"
     )
 
 
