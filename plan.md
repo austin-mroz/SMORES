@@ -3,7 +3,7 @@ Essentially an article expanding the utility of the electric field size metric b
 parameters at the electric field surface
 
 ## functionality
-The major functionality is:
+The major functionalities are outlined by the multi-step workflow:
 1. efficient electric field generation (2 potential avenues)
 	1. electric field from multipole expansion -- where multipoles are predicted using [6]`https://github.com/rinikerlab/EquivariantMultipoleGNN`
 	2. electric field from electrostatic potential predicted using [5]`https://github.com/AstexUK/ESP_DNN`
@@ -12,8 +12,7 @@ The major functionality is:
 	1. weighted and unweighted sterimol parameters (L, B1, B2) will be validated/compared with those presented by DBStep and wSterimol [3]
 3. electric field-based sterimol parameters will be used to parameterize the catalytic examples in [1]
 
-To accomlish this we will develop a multi-step workflow, as follows:
-1. 
+
 
 # Outline
 Here, we describe the implementation of varying steric metrics evaluated at the STREUSEL surface. This work merely presents an
