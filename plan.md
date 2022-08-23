@@ -7,7 +7,8 @@ The major functionalities are outlined by the multi-step workflow:
 1. efficient electric field generation (2 potential avenues)
 	1. electric field from multipole expansion -- where multipoles are predicted using [6]`https://github.com/rinikerlab/EquivariantMultipoleGNN`
 	2. electric field from electrostatic potential predicted using [5]`https://github.com/AstexUK/ESP_DNN`
-	3. this will be validated against the results presented in the original STREUSEL paper and DeRose-JACS implementation of STREUSEL. Visualization can be similar to that presented in the GNN (EquivariantMultipoleGNN paper)
+        1. ESP_DNN outputs .pqr files > by extension, this means that [5] actually predicts atomic charges and radii, which are the final two columns in a .pqr file
+    3. this will be validated against the results presented in the original STREUSEL paper and DeRose-JACS implementation of STREUSEL. Visualization can be similar to that presented in the GNN (EquivariantMultipoleGNN paper)
 2. electric field-based sterimol (via DBStep) and weighted sterimol (via wSterimol, [3]) parameters will be generated
 	1. weighted and unweighted sterimol parameters (L, B1, B2) will be validated/compared with those presented by DBStep and wSterimol [3]
 3. electric field-based sterimol parameters will be used to parameterize the catalytic examples in [1]
