@@ -1,58 +1,74 @@
-import streusel
-from streusel.gaussian_cube import *
-from tqdm import tqdm
-import pandas as pd 
-import numpy as np 
-import math
-import glob
-import os
-from scipy.spatial.distance import cdist, squareform, pdist
+import argparse
 
-def get_overlap(R, r, d):
-    numerator = np.pi * np.power((R + r - d),2) * (np.power(d,2) + 2*d*r - 3*np.power(r,2) + 2*d*R + 6*r*R - 3*np.power(R,2))
-    denomenator = 12*d
-    return np.divide(numerator, denomenator) 
-def get_vol(r):
-    return np.divide(4,3)*np.pi*np.power(r,3)
+import numpy as np
+from scipy.spatial.distance import cdist
+from streusel import gaussian_cube
 
-vdw_radii = {'H':1.2, 'C':1.70, 'N':1.55, 'S':1.8, 'O':1.52,
-        'Br':1.85, 'Kr':2.02, 'Cl':1.75, 'Ne':1.54, 'F':1.47}
 
-for mol_func in glob.glob(os.getcwd() + '/ethane/*.cube'):
-    mol = Molecule(mol_func)
-    crds = mol.coords_and_atoms
+def _get_command_line_arguments() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "cube_file",
+        nargs="+",
+        help="The .cube file used to calculate van der Waals volumes.",
+    )
+    return parser.parse_args()
 
-    # generate distance matrix for the molecule and save as a pandas dataframe
-    crds_array = crds[['x', 'y', 'z']].to_numpy()
-    dist_mat = cdist(crds_array, crds_array)
-    dist_df = pd.DataFrame(dist_mat, columns = crds['atom'], index = crds['atom'])
-    print(dist_df)
-    print(dist_df.columns)
-    dist_row, dist_col = dist_mat.shape
-    overlap_matrix = np.zeros(shape=(dist_row, dist_col))
 
-    idx_cnt = 0
+def _get_distance_matrix(molecule: gaussian_cube.Molecule) -> np.ndarray:
+    position_matrix = molecule.coords_and_atoms[["x", "y", "z"]].to_numpy()
+    return cdist(position_matrix, position_matrix)
 
-    for index, row in dist_df.iterrows():
-        col_cnt = 0
-        
-        R = vdw_radii[index]
 
-        for el in row:
-            
-            if el > 0:
-                r = vdw_radii[dist_df.columns[col_cnt]]
-                if (r+R) < el:
-                    overlap_matrix[idx_cnt, col_cnt] = get_overlap(R, r, el)        
-            
-            col_cnt += 1
-        idx_cnt += 1
-    tot_vol = 0
+def _get_overlap_matrix(
+    distance_matrix: np.ndarray,
+    radii_i: np.ndarray,
+    radii_j: np.ndarray,
+) -> np.ndarray:
 
-    for atom in dist_df.columns:
-        tot_vol += get_vol(vdw_radii[atom])
+    return (
+        np.square(radii_i + radii_j - distance_matrix)
+        + 2 * distance_matrix * radii_j
+        - 3 * np.square(radii_j)
+        + 2 * distance_matrix * radii_i
+        - 3 * np.square(radii_i)
+        + 6 * radii_i * radii_j
+    ) / (12 * distance_matrix)
 
-    tot_overlap = np.sum(overlap_matrix)/2
-    print(tot_vol)
-    print(tot_vol - tot_overlap)
-    # print(overlap_matrix)
+
+def main() -> None:
+
+    vdw_radii = {
+        "H": 1.2,
+        "C": 1.70,
+        "N": 1.55,
+        "S": 1.8,
+        "O": 1.52,
+        "Br": 1.85,
+        "Kr": 2.02,
+        "Cl": 1.75,
+        "Ne": 1.54,
+        "F": 1.47,
+    }
+
+    cli_args = _get_command_line_arguments()
+
+    for cube_file in cli_args.cube_file:
+        mol = gaussian_cube.Molecule(cube_file)
+        radii = np.array([vdw_radii[element] for element in mol.atoms])
+        radii_j = np.tile(radii, (len(radii), 1))
+        radii_i = radii_j.T
+        distance_matrix = _get_distance_matrix(mol)
+        overlap_matrix = _get_overlap_matrix(distance_matrix, radii_i, radii_j)
+        total_volume = np.sum(radii)
+        total_overlap = np.sum(overlap_matrix) / 2
+        print(
+            f"{cube_file} "
+            f"-- VOLUME: {total_volume} "
+            f"-- OVERLAP: {total_overlap} "
+            f"-- DIFFERENCE: {total_volume - total_overlap}"
+        )
+
+
+if __name__ == "__main__":
+    main()
