@@ -26,14 +26,22 @@ def _get_overlap_matrix(
     radii_j: np.ndarray,
 ) -> np.ndarray:
 
-    return (
-        np.square(radii_i + radii_j - distance_matrix)
-        + 2 * distance_matrix * radii_j
-        - 3 * np.square(radii_j)
-        + 2 * distance_matrix * radii_i
-        - 3 * np.square(radii_i)
-        + 6 * radii_i * radii_j
+    radii_sum = radii_i + radii_j
+    overlap = (
+        np.pi
+        * np.square(radii_sum - distance_matrix)
+        * (
+            np.square(distance_matrix)
+            + 2 * distance_matrix * radii_j
+            - 3 * np.square(radii_j)
+            + 2 * distance_matrix * radii_i
+            - 3 * np.square(radii_i)
+            + 6 * radii_j * radii_j
+        )
     ) / (12 * distance_matrix)
+    overlap[np.isinf(overlap)] = 0
+    overlap[radii_sum >= distance_matrix] = 0
+    return overlap
 
 
 def main() -> None:
@@ -55,12 +63,12 @@ def main() -> None:
 
     for cube_file in cli_args.cube_file:
         mol = gaussian_cube.Molecule(cube_file)
-        radii = np.array([vdw_radii[element] for element in mol.atoms])
+        radii = np.array([vdw_radii[element.symbol] for element in mol.atoms])
         radii_j = np.tile(radii, (len(radii), 1))
         radii_i = radii_j.T
         distance_matrix = _get_distance_matrix(mol)
         overlap_matrix = _get_overlap_matrix(distance_matrix, radii_i, radii_j)
-        total_volume = np.sum(radii)
+        total_volume = np.sum(4 * np.pi * np.power(radii, 3) / 3)
         total_overlap = np.sum(overlap_matrix) / 2
         print(
             f"{cube_file} "
