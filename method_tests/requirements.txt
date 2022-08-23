@@ -7,6 +7,7 @@ greenlet==1.1.2
 kiwisolver==1.4.4
 llvmlite==0.39.0
 matplotlib==3.5.3
+morfeus-ml==0.7.1
 msgpack==1.0.4
 numba==0.56.0
 numpy==1.22.4
