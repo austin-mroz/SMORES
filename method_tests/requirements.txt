@@ -1,0 +1,25 @@
+ase==3.22.1
+cclib==1.7.2
+certifi @ file:///opt/conda/conda-bld/certifi_1655968806487/work/certifi
+cycler==0.11.0
+dbstep==1.0.0
+fonttools==4.37.0
+greenlet==1.1.2
+kiwisolver==1.4.4
+llvmlite==0.39.0
+matplotlib==3.5.3
+msgpack==1.0.4
+numba==0.56.0
+numpy==1.22.4
+packaging==21.3
+pandas==1.4.3
+periodictable==1.6.1
+Pillow==9.2.0
+pynvim==0.4.3
+pyparsing==3.0.9
+python-dateutil==2.8.2
+pytz==2022.2.1
+scipy==1.9.0
+six==1.16.0
+streusel==1.0.18
+tqdm==4.64.0
