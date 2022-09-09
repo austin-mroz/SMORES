@@ -41,6 +41,7 @@ class Molecule:
         self.coordinates = self.xyz[['x','y','z']].to_numpy()
 
     def init_from_smiles(self, smiles):
+
         def mk_xyz(self):
             with open(f'{self.calc_path}sol.xyz','w') as f:
                 f.write(f'{len(self.elements)}\n')
@@ -53,6 +54,7 @@ class Molecule:
 
         # Create a molecule with RDKit
         rdkit_mol = Chem.AddHs(Chem.MolFromSmiles(self.smiles))
+
         self.elements = [a.GetSymbol() for a in rdkit_mol.GetAtoms()]
         
         # Generate a conformation
@@ -142,6 +144,7 @@ class Molecule:
         self.coordinates = trans_mol[['x','y','z']].to_numpy()
         
         print('generating voxel grid')
+
         gen_voxel_grid(self, res)
         os.chdir(self.calc_path)
         print(os.getcwd())
@@ -152,6 +155,7 @@ class Molecule:
                             'reference': 'uhf',
                             })
         psi4.core.set_num_threads(14)
+
         psi4_mol = psi4.core.Molecule.from_arrays(self.coordinates, elem=self.elements)
         psi4.core.set_output_file(self.calc_path + 'output.dat', False)
         self.output = self.calc_path + 'output.dat'
