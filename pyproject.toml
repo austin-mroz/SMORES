@@ -1,0 +1,29 @@
+[project]
+name = "smores"
+dynamic = ["version"]
+dependencies = [
+    'tqdm','numpy','pandas','rdkit'
+]
+
+[project.optional-dependencies]
+dev = [
+    'black','flake8','mypy','isort'
+]
+
+[build-system]
+requires = ["setuptools","setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_.scm]
+
+[tool.black]
+line-length = 79
+
+[tool.isort]
+line_length = 79
+profile = "black"
+
+[tool.mypy]
+no_implicit_optional = true
+
+
