@@ -10,6 +10,9 @@ from rdkit.Chem import AllChem
 
 import psi4
 
+import utilities as util
+
+
 class Molecule:
     """
     class to handle molecule objects for featurization
@@ -38,17 +41,27 @@ class Molecule:
         self.coordinates = self.xyz[['x','y','z']].to_numpy()
 
     def init_from_smiles(self, smiles):
+
+        def mk_xyz(self):
+            with open(f'{self.calc_path}sol.xyz','w') as f:
+                f.write(f'{len(self.elements)}\n')
+                f.write(f'{self.smiles}\n')
+                for element, coordinate in zip(self.elements, self.coordinates):
+                    f.write(f'{element} {coordinate[0]} {coordinate[1]} {coordinate[2]}\n')
+            
+            return f'{self.calc_path}sol.xyz'
         self.smiles = smiles
 
         # Create a molecule with RDKit
-        rdkit_mol = Chem.AddHs(Chem.MolfromSmiles(self.smiles))
+        rdkit_mol = Chem.AddHs(Chem.MolFromSmiles(self.smiles))
+
         self.elements = [a.GetSymbol() for a in rdkit_mol.GetAtoms()]
         
         # Generate a conformation
         AllChem.EmbedMolecule(rdkit_mol)
         self.coordinates = rdkit_mol.GetConformer(0).GetPositions().astype(np.float32)
-
-        self.xyz = 0
+        xyz_file = mk_xyz(self)
+        self.xyz = util.read_xyz(xyz_file)
 
     def gen_esp_cube(self, res=51, optimize=False):
         def translate_molecule(self):
@@ -125,9 +138,12 @@ class Molecule:
                     file.write('\n')
             self.grid = self.calc_path + 'grid.dat'
 
+        print('translating molecule to (0,0,0')
         trans_mol = translate_molecule(self)
         self.elements = list(trans_mol['atom'])
         self.coordinates = trans_mol[['x','y','z']].to_numpy()
+        
+        print('generating voxel grid')
 
         gen_voxel_grid(self, res)
         os.chdir(self.calc_path)
@@ -135,19 +151,25 @@ class Molecule:
         #import psi4
         psi4.set_options({'basis': 'aug-cc-pVDZ',
                             'CUBEPROP_TASKS': ['ESP'],
-                            'CUBEPROP_FILEPATH': self.calc_path
+                            'CUBEPROP_FILEPATH': self.calc_path,
+                            'reference': 'uhf',
                             })
+        psi4.core.set_num_threads(14)
+
         psi4_mol = psi4.core.Molecule.from_arrays(self.coordinates, elem=self.elements)
         psi4.core.set_output_file(self.calc_path + 'output.dat', False)
         self.output = self.calc_path + 'output.dat'
         
         if optimize:
+            print('optimizing!')
             psi4.optimize('PBE',molecule=psi4_mol)
-            
-        E, wfn = psi4.prop('scf', molecule=psi4_mol, properties=['GRID_ESP'], return_wfn=True)
+        
+        print('calculating ESP')
+        E, wfn = psi4.prop('PBE', molecule=psi4_mol, properties=['GRID_ESP'], return_wfn=True)
         psi4.cubeprop(wfn)
         self.cubefile = self.calc_path + 'ESP.cube'
-
+    
+        os.chdir(self.parent_path)
 
 
 
