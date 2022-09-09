@@ -1,0 +1,4 @@
+__pycache__
+*.dat
+*.csv
+method_tests/efield_generation/res_check
