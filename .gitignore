@@ -1,5 +1,4 @@
 __pycache__
 *.dat
-*.csv
 *.egg-info
 method_tests/efield_generation/res_check
