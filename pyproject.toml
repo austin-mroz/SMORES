@@ -1,18 +1,18 @@
 [project]
 name = "smores"
 dynamic = ["version"]
-dependencies = [
-    'tqdm','numpy','pandas','rdkit'
-]
+dependencies = ['tqdm', 'numpy', 'pandas', 'rdkit']
 
 [project.optional-dependencies]
-dev = [
-    'black','flake8','mypy','isort'
-]
+dev = ['black', 'flake8', 'mypy', 'isort']
+
 
 [build-system]
-requires = ["setuptools","setuptools-scm"]
+requires = ["setuptools", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools.package-data]
+smores = ["py.typed"]
 
 [tool.setuptools_.scm]
 
@@ -26,4 +26,6 @@ profile = "black"
 [tool.mypy]
 no_implicit_optional = true
 
-
+[[tool.mypy.overrides]]
+module = ["rdkit.*", "psi4.*"]
+ignore_missing_imports = true
