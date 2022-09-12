@@ -3,7 +3,7 @@ import os
 import argparse
 import smores
 from itertools import product
-
+import pathlib
 
 def _get_command_line_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
@@ -31,10 +31,12 @@ def optimize_and_gen_esp(substituent_name: str,
             substituent,
             )
     print(mol_smiles)
-    output_directory = f'{calculation_directory}/{r_group}/{substituent_name}/'
-
-    mol = smores.Molecule(mol_smiles)
-    mol.calculate_electrostatic_potential(output_directory, optimize=True)
+    output_directory = pathlib.Path(f'{calculation_directory}/{r_group}/{substituent_name}/')
+    if output_directory.exists():
+        pass
+    else:
+        mol = smores.Molecule(mol_smiles)
+        mol.calculate_electrostatic_potential(output_directory, optimize=True)
 
 
 def main() -> None:
@@ -54,7 +56,6 @@ def main() -> None:
                 cli_args.replacement_group,
                 cli_args.calculation_directory,
             )
-        exit()
         print('---------------------------------')
 
 

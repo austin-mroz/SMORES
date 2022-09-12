@@ -6,7 +6,6 @@ from itertools import product
 
 import numpy as np
 import numpy.typing as npt
-import pandas as pd
 import psi4
 import rdkit.Chem.AllChem as AllChem
 
