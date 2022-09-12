@@ -60,7 +60,9 @@ class Molecule:
         resolution: int,
         output_directory: pathlib.Path,
     ) -> None:
-        # we want to make a box with one corner at (-5,5,5)A and one at (5,5,5)A with a resolution of 0.2 A
+        # we want to make a box with one corner at (-5,5,5)A and one at
+        # (5,5,5)A with a resolution of 0.2 A
+        # this should be left to the user eventually
         grid_xyz_coords = []
         for i, j, k in product(
             range(resolution),
@@ -78,7 +80,7 @@ class Molecule:
                     file.write(str(c) + " ")
                 file.write("\n")
 
-    def calculate_electostatic_potential(
+    def calculate_electrostatic_potential(
         self,
         output_directory: pathlib.Path | str,
         resolution: int = 51,
@@ -97,7 +99,7 @@ class Molecule:
             {
                 "basis": "aug-cc-pVDZ",
                 "CUBEPROP_TASKS": ["ESP"],
-                "CUBEPROP_FILEPATH": output_directory,
+                "CUBEPROP_FILEPATH": str(output_directory),
                 "reference": "uhf",
             }
         )
@@ -107,7 +109,7 @@ class Molecule:
             self._coordinates, elem=self._elements
         )
         psi4.core.set_output_file(
-            output_directory.joinpath("output.dat"), False
+            str(output_directory.joinpath("output.dat")), False
         )
         self.output = output_directory.joinpath("output.dat")
 
@@ -139,5 +141,5 @@ def _get_center_of_mass(
     atom_masses = np.array(
         [utilities.atomic_mass[element] for element in elements]
     )
-    scaled_coordinates = atom_masses * coordinates
-    return scaled_coordinates.sum(axis=1) / atom_masses.sum()
+    scaled_coordinates = coordinates * atom_masses[:, np.newaxis]
+    return scaled_coordinates.sum(axis=0) / atom_masses.sum()
