@@ -77,4 +77,16 @@ paper cited above (wSterimol paper presented by Paton).
 
 # Benchmark progress
 We have generated a cube file for the ethane.xyz structure presented on the DBstep github page.
+We will validate SMORES via several systems. These are located:
+`/SMORES/validation-systems/*/`. Scripts that were used to generate the systems can also be found in this
+directory.
+
+# Project progress
+We have generated the systems that will be used to validate SMORES.
+The first 2 steps of the 3 step worklow are complete.
+1. ESP maps may be generated using Psi4
+2. STREUSEL has been integrated with SMORES -- this reuqires additional validation steps (for the optimized
+binning method).
+3. SMORES sterimol paramters must yet be integrated with MOR 
+
 
