@@ -51,6 +51,15 @@ system directories and initial structures.
 
 
 ## catalytic reactions
-1. NHK allylations of benzaldehyde and acetophenone
-2. desymmetrization of bisphenols
-3. propargylation of acetophenone
+We will validate SMORES with the following catalytic reactions:
+1. NHK allylations of benzaldehyde
+2. NHK allylation of acetophenone
+3. desymmetrization of bisphenols
+4. propargylation of acetophenone
+
+The catalysts for each of these are found in:
+`catalytic_reaction_smiles.csv`
+The subsitunt placement is denoted by `Br` for the cases where there is only one
+substituent (1,2,3). In cases where 2 substiutents are used (1,4), `Lu` is used
+as the second placement atom for enumeration purposes.
+
