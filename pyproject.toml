@@ -1,7 +1,7 @@
 [project]
 name = "smores"
 dynamic = ["version"]
-dependencies = ['tqdm', 'numpy', 'pandas', 'rdkit']
+dependencies = ['tqdm', 'numpy', 'pandas', 'rdkit', 'stk', 'xtb']
 
 [project.optional-dependencies]
 dev = ['black', 'flake8', 'mypy', 'isort']
