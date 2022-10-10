@@ -34,6 +34,7 @@ class Molecule:
         center_of_mass = _get_center_of_mass(self._elements, rdkit_coordinates)
         self._coordinates = rdkit_coordinates - center_of_mass
 
+
     @classmethod
     def init_from_xyz(
         cls,
@@ -53,6 +54,7 @@ class Molecule:
         )
         instance._coordinates = xyz_data.coordinates - center_of_mass
         return instance
+
 
     def _generate_voxel_grid(
         self,
@@ -78,6 +80,7 @@ class Molecule:
                 for c in xyz:
                     file.write(str(c) + " ")
                 file.write("\n")
+
 
     def calculate_electrostatic_potential(
         self,

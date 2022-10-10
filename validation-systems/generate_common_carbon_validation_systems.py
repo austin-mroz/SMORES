@@ -8,8 +8,11 @@ import pathlib
 def _get_command_line_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("substituent_csv")
-    parser.add_argument("replacement_group")
     parser.add_argument("calculation_directory")
+    parser.add_argument("-r","--replacement_group",type=str)
+    parser.set_defaults(replacement_group='Br')
+    parser.add_argument("-r2","--replacement_group2",type=str)
+    parser.set_defaults(replacement_group='Lu')
     return parser.parse_args()
 
 
@@ -19,9 +22,9 @@ def gen_molecule_smiles(replacement_group: str,
     return substituent.replace(replacement_group, r_group)
 
 
-def optimize_and_gen_esp(substituent_name: str, 
+def optimize_and_gen_esp(substituent_name: str,
         r_group: str,
-        substituent: str, 
+        substituent: str,
         replacement_group: str,
         calculation_directory: str) -> None:
 
@@ -43,10 +46,9 @@ def main() -> None:
     cli_args = _get_command_line_arguments()
 
     substituents = pd.read_csv(cli_args.substituent_csv)
-    r_groups = ['C', 'c1ccccc1']
-    # molecule_combos = [combo for combo in product(r_groups, list(substituents['substituent_smiles']))]
-    # print(molecule_combos)
-    # exit()
+    
+    r_groups = pd.DataFrame([['C', 'c1ccccc1']])
+    
     for molecule_combo in product(r_groups, list(substituents['substituent_smiles'])):
         substituent_name = substituents.loc[substituents['substituent_smiles'] == molecule_combo[1]]['substituent_name'].values[0]
         optimize_and_gen_esp(
