@@ -78,3 +78,6 @@ allylation with the oxazoline-proline-library require 2 substituent groups
 `generate_catalyst_validation_systems.py` needs to be modified to accomodate
 these cases.
 
+should also add an option to optimize with xtb instead of psi4 -- xtb would be
+much faster
+
