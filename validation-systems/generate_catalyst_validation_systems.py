@@ -1,5 +1,4 @@
 import pandas as pd
-import os
 import argparse
 import smores
 from itertools import product
@@ -74,7 +73,7 @@ def gen_molecule_smiles(
     return parent_group_smiles
 
 
-def optimize_and_gen_esp(
+def generate_xtb_xyz(
         substituent_name: str,
         parent_group: str,
         substituent: str,
@@ -89,22 +88,53 @@ def optimize_and_gen_esp(
             output_directory,
             )
 
-    """
-    if output_directory.exists():
-        pass
-    else:
+    if smiles is not None:
         mol = smores.Molecule(smiles)
-        mol.calculate_electrostatic_potential(output_directory, optimize=False)
-    """
+        mol.generate_xtb_starting_structure(output_directory)
+    else:
+        logging.error(f'{output_directory} xyz not generated.')
+    # mol.calculate_electrostatic_potential(output_directory, optimize=False)
+
+
+def generate_xtb_submission(
+        calculation_directory: pathlib.Path,
+        initial_xyz_file_name: str = "initial_structure.xyz",
+) -> None:
+    xtb_sub = []
+    xtb_sub.append('#!/bin/bash')
+    xtb_sub.append('')
+    xtb_sub.append('run_xtb () {')
+    xtb_sub.append('')
+    xtb_sub.append('    cd $2')
+    xtb_sub.append('    DIR="$(dirname "$1")"')
+    xtb_sub.append('    cd "$2$DIR"')
+    xtb_sub.append(f'    xyz="{initial_xyz_file_name}"')
+    xtb_sub.append('    xtb $xyz --opt')
+    xtb_sub.append('    cd "$2"')
+    xtb_sub.append('}')
+    xtb_sub.append('')
+    xtb_sub.append('export -f run_xtb')
+    xtb_sub.append(f'parentDIR="{str(calculation_directory)}"')
+    xtb_sub.append('cd $parentDIR')
+
+    xtb_sub_content = '\n'.join(xtb_sub)
+    with open("opt_with_xtb.sh", 'w') as xtb_sub_file:
+        xtb_sub_file.write(f'{xtb_sub_content}\n')
+        xtb_sub_file.write(f'find . -name "{initial_xyz_file_name}" -exec bash -c ')
+        xtb_sub_file.write("'")
+        xtb_sub_file.write('run_xtb "$@" "')
+        xtb_sub_file.write("'${parentDIR}'")
+        xtb_sub_file.write('"')
+        xtb_sub_file.write("'")
+        xtb_sub_file.write(' bash {} \;')
+
 
 def main() -> None:
     cli_args = _get_command_line_arguments()
 
     logging.basicConfig(
-            filename=str(pathlib.Path(cli_args.calculation_directory).joinpath(
-                'validation_generation_log.log'
-                )),
-            level=logging.DEBUG
+            filename='validation_generation_log.log',
+            level=logging.DEBUG,
             )
 
     substituents = pd.read_csv(cli_args.substituent_csv)
@@ -121,15 +151,21 @@ def main() -> None:
         output_directory = pathlib.Path(
                 f'{cli_args.calculation_directory}/{reaction_name}/{catalyst_name}/{substituent_name}/'
                 )
-        output_directory.mkdir(exist_ok=True, parents=True) 
-        optimize_and_gen_esp(
+        print(output_directory)
+
+        output_directory.mkdir(exist_ok=True, parents=True)
+
+        generate_xtb_xyz(
                 substituent_name,
                 molecule_combo[0],
                 molecule_combo[1],
                 cli_args.replacement_groups,
                 output_directory,
-            )
-        # print('---------------------------------')
+        )
+    generate_xtb_submission(
+            cli_args.calculation_directory,
+    )
+    # print('---------------------------------')
 
 
 if __name__ == '__main__':
