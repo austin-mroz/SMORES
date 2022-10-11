@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import pathlib
 from itertools import product
+import logging
 
 import numpy as np
 import numpy.typing as npt
@@ -54,6 +55,29 @@ class Molecule:
         )
         instance._coordinates = xyz_data.coordinates - center_of_mass
         return instance
+
+
+    def generate_xtb_starting_structure(
+            self,
+            output_directory: pathlib.Path | str,
+            xyz_file_name: str = "initial_structure",
+    ) -> None:
+
+        # create the output directory
+        if isinstance(output_directory, str):
+            output_directory = pathlib.Path(output_directory)
+        _create_directory(output_directory)
+
+        # write the xyz file with the updated coordinates
+        xyz_data = utilities.XyzData(
+                elements=self._elements,
+                coordinates=self._coordinates,
+        )
+        xyz_path = output_directory.joinpath(f"{xyz_file_name}.xyz")
+        utilities.write_xyz(
+                xyz_path,
+                xyz_data,
+        )
 
 
     def _generate_voxel_grid(
