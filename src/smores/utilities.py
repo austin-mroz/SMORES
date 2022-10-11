@@ -5,6 +5,8 @@ from dataclasses import dataclass
 import numpy as np
 import numpy.typing as npt
 
+from . import molecule
+
 
 @dataclass(frozen=True)
 class XyzData:
@@ -29,6 +31,23 @@ def read_xyz(
         elements=elements,
         coordinates=np.array(coordinates),
     )
+
+
+def write_xyz(
+        path: pathlib.Path,
+        xyz_data: XyzData,
+) -> None:
+    xyz_lines = []
+    xyz_lines.append(f'{len(xyz_data.elements)}')
+    xyz_lines.append('')
+
+    for element, coordinate in zip(xyz_data.elements, xyz_data.coordinates):
+        xyz_lines.append(
+                f'{element}   {coordinate[0]}   {coordinate[1]}   {coordinate[2]}'
+        )
+    content = '\n'.join(xyz_lines)
+    with open(path, 'w') as xyz_file:
+        xyz_file.write(f'{content}\n')
 
 
 atomic_mass: typing.Final = {
