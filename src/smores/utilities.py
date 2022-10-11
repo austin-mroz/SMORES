@@ -29,7 +29,7 @@ def read_xyz(
         coordinates.append((x, y, z))
     return XyzData(
         elements=elements,
-        coordinates=np.array(coordinates),
+        coordinates=np.array(coordinates).astype(np.float32),
     )
 
 
