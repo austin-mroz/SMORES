@@ -99,6 +99,7 @@ def generate_xtb_xyz(
 def generate_xtb_submission(
         calculation_directory: pathlib.Path,
         initial_xyz_file_name: str = "initial_structure.xyz",
+        calculation_type:str = 'opt', #options are esp or opt
 ) -> None:
     xtb_sub = []
     xtb_sub.append('#!/bin/bash')
@@ -109,7 +110,7 @@ def generate_xtb_submission(
     xtb_sub.append('    DIR="$(dirname "$1")"')
     xtb_sub.append('    cd "$2$DIR"')
     xtb_sub.append(f'    xyz="{initial_xyz_file_name}"')
-    xtb_sub.append('    xtb $xyz --opt')
+    xtb_sub.append(f'    xtb $xyz --{calculation_type}')
     xtb_sub.append('    cd "$2"')
     xtb_sub.append('}')
     xtb_sub.append('')
