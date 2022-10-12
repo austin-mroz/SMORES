@@ -78,10 +78,11 @@ allylation with the oxazoline-proline-library require 2 substituent groups
 `generate_catalyst_validation_systems.py` needs to be modified to accomodate
 these cases.
 
-should also add an option to optimize with xtb instead of psi4 -- xtb would be
-much faster
-
 need to reorganize workflow -- psi4 is not compatible with xtb and cannot be run
 from the same virtual environment...
 One solution to this is to offer the ability to generate xtb starting structures
 and then write the bash script that automatically runs the optimizations
+^ this has been done
+
+ESP.cube will be calculated in the `SMORES/calculate-sterimol-for-validation-systems/`
+directory.
