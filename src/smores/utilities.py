@@ -55,7 +55,7 @@ def get_streusel_radii(
         xyz_data: XyzData,
 ) -> npt.NDArray[str]:
     streusel_radii = np.array(
-            [streusel_radii[element] for element in xyz_data.elements]
+            [constants.streusel_radii[element] for element in xyz_data.elements]
     )
     return streusel_radii
 
