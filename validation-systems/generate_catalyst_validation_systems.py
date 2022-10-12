@@ -119,7 +119,7 @@ def generate_xtb_submission(
     xtb_sub.append('cd $parentDIR')
 
     xtb_sub_content = '\n'.join(xtb_sub)
-    with open("opt_with_xtb.sh", 'w') as xtb_sub_file:
+    with open(f"{calculation_type}_with_xtb.sh", 'w') as xtb_sub_file:
         xtb_sub_file.write(f'{xtb_sub_content}\n')
         xtb_sub_file.write(f'find . -name "{initial_xyz_file_name}" -exec bash -c ')
         xtb_sub_file.write("'")
