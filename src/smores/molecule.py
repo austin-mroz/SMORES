@@ -11,6 +11,7 @@ import psi4
 import rdkit.Chem.AllChem as AllChem
 
 from . import utilities
+from . import constants
 
 
 class InvalidDirectoryError(Exception):
@@ -165,7 +166,7 @@ def _get_center_of_mass(
     coordinates: npt.NDArray[np.float32],
 ) -> npt.NDArray[np.float32]:
     atom_masses = np.array(
-        [utilities.atomic_mass[element] for element in elements]
+        [constants.atomic_mass[element] for element in elements]
     )
     scaled_coordinates = coordinates * atom_masses[:, np.newaxis]
     return scaled_coordinates.sum(axis=0) / atom_masses.sum()
