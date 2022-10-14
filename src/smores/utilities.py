@@ -51,6 +51,16 @@ def write_xyz(
         xyz_file.write(f'{content}\n')
 
 
+def get_full_xyz_array(
+        xyz_data: XyzData,
+) -> npt.NDArray:
+    return np.concatenate(
+            (np.asarray(xyz_data.elements).T.reshape(-1,1),
+                xyz_data.coordinates),
+            axis=1,
+            )
+
+
 def get_streusel_radii(
         xyz_data: XyzData,
 ) -> npt.NDArray[str]:
