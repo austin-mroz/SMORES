@@ -53,8 +53,21 @@ def write_xyz(
 
 def get_full_xyz_array(
         xyz_data: XyzData,
+        removeHs: bool= False,
 ) -> npt.NDArray:
-    return np.concatenate(
+    if removeHs:
+        xyz_array = np.concatenate(
+                (np.asarray(xyz_data.elements).T.reshape(-1,1),
+                    xyz_data.coordinates),
+                axis=1,
+                )
+        return np.delete(
+                xyz_array,
+                np.where(xyz_array[:, 0] == 'H')[0],
+                0,
+                )
+    else:
+        return np.concatenate(
             (np.asarray(xyz_data.elements).T.reshape(-1,1),
                 xyz_data.coordinates),
             axis=1,
