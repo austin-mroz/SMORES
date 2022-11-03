@@ -32,7 +32,7 @@ following form::
   Total successful validations: X
   Total failed validations: Y
 
-Each step will also produce a folder holding it output, you will end up
+Each step will also produce a folder holding its output, you will end up
 with the folders
 
 * ``1_output``
