@@ -1,10 +1,12 @@
-:author: Austin Mroz
-         Lukas Turcani
+:authors: - Austin Mroz
+          - Lukas Turcani
 
 Overview
 ========
-``flock-it`` enables calculation of electric-field-based steric parameters. This package is an expansion of the utility of the STREUSEL
-size metric and enables the calculation of electric-field-based wSterimol parameters from .xyz files.
+``smores`` enables calculation of electric-field-based steric
+parameters. This package is an expansion of the utility of the STREUSEL
+size metric and enables the calculation of electric-field-based
+wSterimol parameters from ``.xyz`` files.
 
 A detailed project plan can be found in `plan.md`
 
