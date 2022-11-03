@@ -2,3 +2,5 @@ __pycache__
 *.dat
 *.egg-info
 method_tests/efield_generation/res_check
+**/?_output
+timer.dat
