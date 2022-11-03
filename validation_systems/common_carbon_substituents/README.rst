@@ -4,8 +4,8 @@ Validation with common carbon substituents
 In here you will find all the code required to compare
 ``SMORES`` parameters to sterimol parameters for
 systems with common carbon substituents. You will find a script
-for each step of the validation process, helpfully beginning with the
-step number.
+for each step of the validation process, each helpfully beginning with
+the step number.
 
 To get more details about what each step does, use the ``-h``
 parameter, for example
