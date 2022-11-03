@@ -43,7 +43,7 @@ Requirements
 ............
 
 The ``conda`` envionrment file which has all the dependencies needed
-to run run_validation.sh__ can be found here__
+to run run_validation.sh__ can be found here__.
 
 __ run_validation.sh
 __ ../../smores.yml
