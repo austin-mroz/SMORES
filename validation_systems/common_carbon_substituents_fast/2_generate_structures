@@ -7,6 +7,14 @@ from dataclasses import dataclass
 
 import rdkit.Chem.AllChem as rdkit
 
+_OUTPUT_CSV_COLUMNS = (
+    "name",
+    "smiles",
+    "xyz_file",
+    "dummy_index",
+    "attached_index",
+)
+
 
 def main() -> None:
     args = _get_command_line_arguments()
@@ -35,13 +43,7 @@ def _write_molecule_files(
     with open(csv_path, "a") as csv_file:
         writer = csv.DictWriter(
             csv_file,
-            fieldnames=[
-                "name",
-                "smiles",
-                "xyz_file",
-                "dummy_index",
-                "attached_index",
-            ],
+            fieldnames=_OUTPUT_CSV_COLUMNS,
         )
         for molecule in molecules:
             rdkit_molecule = rdkit.AddHs(rdkit.MolFromSmiles(molecule.smiles))
@@ -55,7 +57,7 @@ def _write_molecule_files(
                 {
                     "name": molecule.name,
                     "smiles": molecule.smiles,
-                    "xyz_file": xyz_file,
+                    "xyz_file": xyz_file.resolve(),
                     "dummy_index": molecule.dummy_index,
                     "attached_index": molecule.attached_index,
                 },
@@ -78,13 +80,7 @@ def _write_csv_header(path: pathlib.Path) -> None:
     with open(path, "w") as csv_file:
         writer = csv.DictWriter(
             csv_file,
-            fieldnames=[
-                "name",
-                "smiles",
-                "xyz_file",
-                "dummy_index",
-                "attached_index",
-            ],
+            fieldnames=_OUTPUT_CSV_COLUMNS,
         )
         writer.writeheader()
 

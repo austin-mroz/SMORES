@@ -8,6 +8,14 @@ from dataclasses import dataclass
 
 import smores
 
+_OUTPUT_CSV_COLUMNS = (
+    "name",
+    "smiles",
+    "xyz_file",
+    "dummy_index",
+    "attached_index",
+)
+
 
 def main() -> None:
     args = _get_command_line_arguments()
@@ -30,6 +38,8 @@ def main() -> None:
                 )
                 _append_to_csv(
                     path=csv_output,
+                    name=molecule_input.name,
+                    smiles=molecule_input.smiles,
                     xyz_file=calculation_directory / "geom.xyz",
                     dummy_index=molecule_input.dummy_index,
                     attached_index=molecule_input.attached_index,
@@ -66,13 +76,15 @@ def _write_csv_header(path: pathlib.Path) -> None:
     with open(path, "w") as csv_file:
         writer = csv.DictWriter(
             csv_file,
-            fieldnames=["xyz_file", "dummy_index", "attached_index"],
+            fieldnames=_OUTPUT_CSV_COLUMNS,
         )
         writer.writeheader()
 
 
 def _append_to_csv(
     path: pathlib.Path,
+    name: str,
+    smiles: str,
     xyz_file: pathlib.Path,
     dummy_index: int,
     attached_index: int,
@@ -81,13 +93,15 @@ def _append_to_csv(
     with open(path, "a") as csv_file:
         writer = csv.DictWriter(
             csv_file,
-            fieldnames=["xyz_file", "dummy_index", "attached_index"],
+            fieldnames=_OUTPUT_CSV_COLUMNS,
         )
         writer.writerow(
             {
-                "xyz_file": str(xyz_file.resolve()),
-                "dummy_index": str(dummy_index),
-                "attached_index": str(attached_index),
+                "name": name,
+                "smiles": smiles,
+                "xyz_file": xyz_file.resolve(),
+                "dummy_index": dummy_index,
+                "attached_index": attached_index,
             }
         )
 
