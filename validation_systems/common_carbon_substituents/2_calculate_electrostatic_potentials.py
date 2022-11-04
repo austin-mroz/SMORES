@@ -12,7 +12,11 @@ def main() -> None:
     args = _get_command_line_arguments()
     args.output_directory.mkdir(parents=True, exist_ok=True)
     molecules = tuple(_read_molecules(args.input_file))
+
     csv_output = args.output_directory / "xyz_files.csv"
+    if not csv_output.exists():
+        _write_csv_header(csv_output)
+
     for molecule_input in molecules:
         calculation_directory = args.output_directory / molecule_input.name
         if not calculation_directory.exists():
@@ -57,6 +61,15 @@ def _read_molecules(path: pathlib.Path) -> typing.Iterator[Molecule]:
             )
 
 
+def _write_csv_header(path: pathlib.Path) -> None:
+    with open(path, "w") as csv_file:
+        writer = csv.DictWriter(
+            csv_file,
+            fieldnames=["xyz_file", "dummy_index", "attached_index"],
+        )
+        writer.writeheader()
+
+
 def _append_to_csv(
     path: pathlib.Path,
     xyz_file: pathlib.Path,
@@ -69,7 +82,6 @@ def _append_to_csv(
             csv_file,
             fieldnames=["xyz_file", "dummy_index", "attached_index"],
         )
-        writer.writeheader()
         writer.writerow(
             {
                 "xyz_file": str(xyz_file.resolve()),
