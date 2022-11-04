@@ -25,6 +25,7 @@ dependencies:
   - intel-openmp=2021.4.0=h06a4308_3561
   - ld_impl_linux-64=2.38=h1181459_1
   - libblas=3.9.0=12_linux64_mkl
+  - libcblas=3.9.0=12_linux64_mkl
   - libecpint=1.0.7=hfebba4c_0
   - libffi=3.3=he6710b0_2
   - libgcc-ng=11.2.0=h1234567_1
@@ -69,6 +70,8 @@ dependencies:
   - sqlite=3.39.3=h5082296_0
   - tk=8.6.12=h1ccaba5_0
   - tomli=2.0.1=py310h06a4308_0
+  - typing-extensions=4.4.0=hd8ed1ab_0
+  - typing_extensions=4.4.0=pyha770c72_0
   - tzdata=2022c=h04d1e81_0
   - wheel=0.37.1=pyhd3eb1b0_0
   - xtb=6.3.3=h323e27b_1
@@ -84,6 +87,7 @@ dependencies:
     - cycler==0.11.0
     - dill==0.3.5.1
     - dnspython==2.2.1
+    - fire==0.4.0
     - flake8==5.0.4
     - fonttools==4.37.4
     - hidapi==0.12.0.post2
@@ -92,7 +96,7 @@ dependencies:
     - matplotlib==3.6.1
     - mccabe==0.7.0
     - mchammer==1.0.4
-    - morfeus==0.3
+    - morfeus-ml==0.7.2
     - multiprocess==0.70.13
     - mypy==0.982
     - mypy-extensions==0.4.3
@@ -114,6 +118,6 @@ dependencies:
     - seaborn==0.12.0
     - spindry==0.0.91
     - stk==2022.6.17.0
+    - termcolor==2.1.0
     - tqdm==4.64.1
-    - typing-extensions==4.4.0
     - vabene==0.0.5
