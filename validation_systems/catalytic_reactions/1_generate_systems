@@ -163,6 +163,16 @@ def main() -> None:
                 f"{molecule.catalyst_name}_{molecule.substituent_name}.xyz"
             )
             stk.XyzWriter().write(molecule.molecule, str(xyz_file))
+            writer.writerow(
+                {
+                    "reaction_name": molecule.reaction_name,
+                    "catalyst_name": molecule.catalyst_name,
+                    "substituent_name": molecule.substituent_name,
+                    "xyz_file": xyz_file.resolve(),
+                    "dummy_index": molecule.dummy_index,
+                    "attached_index": molecule.attached_index,
+                },
+            )
 
 
 @dataclass(frozen=True, slots=True)
