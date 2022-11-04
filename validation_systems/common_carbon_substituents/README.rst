@@ -23,6 +23,7 @@ You can run all the steps in order with
 Note that this may take some time, but will print output of the
 following form::
 
+  NAME: C_H
   SMILES: C
     SMORES L: ...   STERIMOL L: ...   Diff: ...
     SMORES B_1: ... STERIMOL B_1: ... Diff: ...
