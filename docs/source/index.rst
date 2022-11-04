@@ -3,13 +3,101 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to smores's documentation!
-==================================
+Welcome to SMORES' documentation!
+=================================
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
+
+:mod:`smores` is a Python library which
+
+
+It can lead to much better result than traditional
+steric metrics, because ... See the paper ...
+
+Installation
+............
+
+
+.. code-block:: bash
+
+  pip install smores
+
+
+Quickstart
+----------
+
+Getting started with :mod:`smores` is really simple!
+
+You start with
+
+.. testcode:: quickstart
+
+  import smores
+
+and then you load a molecule, either from one of the supported
+file formats
+
+.. testcode:: quickstart
+
+  molecule = smores.Molecule.from_xyz_file("my_molecule.xyz")
+
+or directy from atomic coordinates
+
+.. testcode:: quickstart
+
+  molecule = smores.Molecule(
+      atoms=["He"],
+      positions=[[0., 0., 0.]],
+  )
+
+
+.. seealso::
+
+  `Loading molecules`__ provides more examples on how you can easily
+  get your molecule loaded into :mod:`smores`.
+
+You can get the SMORES steric parameters by running
+
+.. testcode:: quickstart
+
+  params = molecule.get_steric_parameters()
+  print(
+      params.l,
+      params.b1,
+      params.b5,
+  )
+
+Which will calculate the parameters using the STREUSEL radii
+of the atoms.
+
+
+.. seealso::
+
+  :class:`.Molecule`
+  :meth:`.Molecule.get_steric_parameters`
+
+More accurate paramters through electrostatic potentials
+........................................................
+
+:mod:`smores` can also calculate the steric parameters using electrostatic
+potentials defined on a voxel grid
+
+.. testcode:: quickstart
+
+  molecule = smores.EspMolecule.from_cube_file("my_molecule.cube")
+
+
+.. testcode:: quickstart
+
+  molecule =
+
+.. seealso::
+
+  :class:`.EspMolecule`
+  :meth:`.EspMolecule.get_steric_parameters`
 
 
 Indices and tables
