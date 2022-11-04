@@ -40,7 +40,9 @@ class Result(enum.Enum):
     FAILURE = "FAILURE"
 
 
-def _get_sterimol(xyz_file: pathlib.Path) -> morfeus.Sterimol:
+def _get_sterimol(
+    xyz_file: pathlib.Path,
+) -> morfeus.Sterimol:
     elements, coordinates = morfeus.read_xyz(xyz_file)
     return morfeus.Sterimol(
         elements=elements,
@@ -85,16 +87,14 @@ def _get_command_line_arguments() -> argparse.Namespace:
         description="Calculate and compare SMORES and sterimol parameters.",
     )
 
-    default_input_directory = pathlib.Path(__file__).parent / "2_output"
     parser.add_argument(
-        "--xyz_files",
+        "--input_file",
         help=(
-            "The xyz files for which SMORES and sterimol parameters "
-            "are compared."
+            'A csv file with columns: "xyz_file", "dummy_index" and '
+            '"attached_index".'
         ),
-        nargs="+",
         type=pathlib.Path,
-        default=default_input_directory.glob("**/*.xyz"),
+        default=pathlib.Path(__file__).parent / "2_output" / "xyz_files.csv",
     )
     parser.add_argument(
         "--success_tolerance",

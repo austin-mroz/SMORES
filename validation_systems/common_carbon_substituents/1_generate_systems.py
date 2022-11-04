@@ -11,24 +11,92 @@ def main() -> None:
     args.output_file.parent.mkdir(parents=True, exist_ok=True)
 
     substituents = (
-        Substituent(name="H", smiles="[DUMMY]"),
-        Substituent(name="Me", smiles="[DUMMY]C"),
-        Substituent(name="Et", smiles="[DUMMY]CC"),
-        Substituent(name="Ph", smiles="[DUMMY]c1ccccc1"),
-        Substituent(name="Bn", smiles="[DUMMY]Cc1ccccc1"),
-        Substituent(name="CH2-iPr", smiles="[DUMMY]C(C)CC"),
-        Substituent(name="CH2-tBu", smiles="[DUMMY]C(C)(C)CC"),
-        Substituent(name="i-Pr", smiles="[DUMMY](C)CC"),
-        Substituent(name="CHPr2", smiles="CCCC([DUMMY])CCC"),
-        Substituent(name="Cy", smiles="N#C[DUMMY]"),
-        Substituent(name="CH(i-Pr)2", smiles="CC(C)C([DUMMY])C(C)C"),
-        Substituent(name="CHEt2", smiles="CCC([DUMMY])CC"),
-        Substituent(name="CEt3", smiles="CCC([DUMMY])(CC)CC"),
+        Substituent(
+            name="H",
+            smiles="[DUMMY]",
+            dummy_index=0,
+            attached_index=1,
+        ),
+        Substituent(
+            name="Me",
+            smiles="[DUMMY]C",
+            dummy_index=0,
+            attached_index=1,
+        ),
+        Substituent(
+            name="Et",
+            smiles="[DUMMY]CC",
+            dummy_index=0,
+            attached_index=1,
+        ),
+        Substituent(
+            name="Ph",
+            smiles="[DUMMY]c1ccccc1",
+            dummy_index=0,
+            attached_index=1,
+        ),
+        Substituent(
+            name="Bn",
+            smiles="[DUMMY]Cc1ccccc1",
+            dummy_index=0,
+            attached_index=1,
+        ),
+        Substituent(
+            name="CH2-iPr",
+            smiles="[DUMMY]C(C)CC",
+            dummy_index=0,
+            attached_index=1,
+        ),
+        Substituent(
+            name="CH2-tBu",
+            smiles="[DUMMY]C(C)(C)CC",
+            dummy_index=0,
+            attached_index=1,
+        ),
+        Substituent(
+            name="i-Pr",
+            smiles="[DUMMY](C)CC",
+            dummy_index=0,
+            attached_index=1,
+        ),
+        Substituent(
+            name="CHPr2",
+            smiles="CCCC([DUMMY])CCC",
+            dummy_index=4,
+            attached_index=3,
+        ),
+        Substituent(
+            name="Cy",
+            smiles="N#C[DUMMY]",
+            dummy_index=2,
+            attached_index=1,
+        ),
+        Substituent(
+            name="CH(i-Pr)2",
+            smiles="CC(C)C([DUMMY])C(C)C",
+            dummy_index=4,
+            attached_index=3,
+        ),
+        Substituent(
+            name="CHEt2",
+            smiles="CCC([DUMMY])CC",
+            dummy_index=3,
+            attached_index=2,
+        ),
+        Substituent(
+            name="CEt3",
+            smiles="CCC([DUMMY])(CC)CC",
+            dummy_index=3,
+            attached_index=2,
+        ),
     )
     r_groups = ("C", "c1ccccc1")
 
     with open(args.output_file, "w") as csv_file:
-        writer = csv.DictWriter(csv_file, fieldnames=["name", "smiles"])
+        writer = csv.DictWriter(
+            csv_file,
+            fieldnames=["name", "smiles", "dummy_index", "attached_index"],
+        )
         writer.writeheader()
         writer.writerows(_get_csv_rows(substituents, r_groups))
 
@@ -37,6 +105,8 @@ def main() -> None:
 class Substituent:
     name: str
     smiles: str
+    dummy_index: int
+    attached_index: int
 
 
 def _get_command_line_arguments() -> argparse.Namespace:
@@ -58,6 +128,8 @@ def _get_command_line_arguments() -> argparse.Namespace:
 class CsvRow(typing.TypedDict):
     name: str
     smiles: str
+    dummy_index: int
+    attached_index: int
 
 
 def _get_csv_rows(
@@ -69,6 +141,8 @@ def _get_csv_rows(
         yield CsvRow(
             name=f"{r_group}_{substituent.name}",
             smiles=substituent.smiles.replace("[DUMMY]", r_group),
+            dummy_index=substituent.dummy_index,
+            attached_index=substituent.attached_index,
         )
 
 
