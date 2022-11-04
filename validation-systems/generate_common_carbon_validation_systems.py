@@ -46,9 +46,9 @@ def main() -> None:
     cli_args = _get_command_line_arguments()
 
     substituents = pd.read_csv(cli_args.substituent_csv)
-    
+
     r_groups = pd.DataFrame([['C', 'c1ccccc1']])
-    
+
     for molecule_combo in product(r_groups, list(substituents['substituent_smiles'])):
         substituent_name = substituents.loc[substituents['substituent_smiles'] == molecule_combo[1]]['substituent_name'].values[0]
         optimize_and_gen_esp(
