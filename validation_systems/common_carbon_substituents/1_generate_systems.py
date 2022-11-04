@@ -41,7 +41,9 @@ class Substituent:
 
 def _get_command_line_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Generate the SMILES of systems which are to be validated.",
+        description=(
+            "Generate the SMILES of systems which are to be validated."
+        ),
     )
     parser.add_argument(
         "-o",

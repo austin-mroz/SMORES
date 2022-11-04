@@ -5,6 +5,8 @@ import textwrap
 
 import morfeus
 
+import smores
+
 
 def main() -> None:
     args = _get_command_line_arguments()
@@ -14,7 +16,7 @@ def main() -> None:
     for xyz_file in args.xyz_files:
         sterimol = _get_sterimol(xyz_file)
         smores = _get_smores(xyz_file)
-        result = _get_result(smores, sterimol)
+        result = _get_result(smores, sterimol, args.success_tolerance)
         output = textwrap.dedent(
             f"""
             FILE: {xyz_file}
@@ -29,6 +31,8 @@ def main() -> None:
             num_successes += 1
         else:
             num_failures += 1
+    print(f"TOTAL SUCCESSES: {num_successes}")
+    print(f"TOTAL FAILURES: {num_failures}")
 
 
 class Result(enum.Enum):
@@ -38,18 +42,42 @@ class Result(enum.Enum):
 
 def _get_sterimol(xyz_file: pathlib.Path) -> morfeus.Sterimol:
     elements, coordinates = morfeus.read_xyz(xyz_file)
-    return morfeus.Sterimol(element, coordinates)
+    return morfeus.Sterimol(
+        elements=elements,
+        coordinates=coordinates,
+        dummy_index=0,
+        attached_index=1,
+    )
 
 
 def _get_smores(xyz_file: pathlib.Path) -> morfeus.Sterimol:
     elements, coordinates = morfeus.read_xyz(xyz_file)
-    return morfeus.Sterimol(element, coordinates)
+    return morfeus.Sterimol(
+        elements=elements,
+        coordinates=coordinates,
+        dummy_index=0,
+        attached_index=1,
+        radii=[smores.streusel_radii[element] for element in elements],
+    )
 
 
 def _get_result(
-    smores: morfeus.Sterimol, sterimol: morfeus.Sterimol
+    smores: morfeus.Sterimol,
+    sterimol: morfeus.Sterimol,
+    success_tolerance: float,
 ) -> Result:
-    pass
+
+    l_diff = abs(smores.L_value - sterimol.L_value)
+    b1_diff = abs(smores.B_1_value - sterimol.B_1_value)
+    b5_diff = abs(smores.B_5_value - sterimol.B_5_value)
+    if (
+        l_diff < success_tolerance
+        and b1_diff < success_tolerance
+        and b5_diff < success_tolerance
+    ):
+        return Result.SUCCESS
+    else:
+        return Result.FAILURE
 
 
 def _get_command_line_arguments() -> argparse.Namespace:
@@ -60,10 +88,22 @@ def _get_command_line_arguments() -> argparse.Namespace:
     default_input_directory = pathlib.Path(__file__).parent / "2_output"
     parser.add_argument(
         "--xyz_files",
-        help="",
+        help=(
+            "The xyz files for which SMORES and sterimol parameters "
+            "are compared."
+        ),
         nargs="+",
         type=pathlib.Path,
         default=default_input_directory.glob("**/*.xyz"),
+    )
+    parser.add_argument(
+        "--success_tolerance",
+        help=(
+            "The maximum allowed difference between SMORES and sterimol "
+            "parameters for the validation to be considere a success."
+        ),
+        type=float,
+        default=0.001,
     )
     return parser.parse_args()
 
