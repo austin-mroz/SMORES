@@ -1,5 +1,5 @@
-Validation with common carbon substituents
-==========================================
+Fast validation with common carbon substituents
+===============================================
 
 In here you will find all the code required to compare
 ``SMORES`` parameters to sterimol parameters for
@@ -7,26 +7,27 @@ systems with common carbon substituents. You will find a script
 for each step of the validation process, each helpfully beginning with
 the step number.
 
+The difference between this validation and
+common_carbon_substituents__ is that the XYZ coordiantes of the
+tested structures are generated using ``ETKDGv2`` rather than
+``psi4``, making this validation significantly faster.
+
+__ ../common_carbon_substituents
+
 To get more details about what each step does, use the ``-h``
 parameter, for example
 
 .. code-block:: bash
 
-  python 1_generate_systems.py -h
-
-You can run all the steps in order with
-
-.. code-block:: bash
-
-  ./run_validation.sh
+  ./1_generate_systems -h
 
 Note that this may take some time, but will print output of the
 following form::
 
-  FILE: C_H/geom.xyz
+  NAME: C_H
     SMORES L: ...   STERIMOL L: ...   Diff: ...
-    SMORES B1: ... STERIMOL B1: ... Diff: ...
-    SMORES B5: ... STERIMOL B5: ... Diff: ...
+    SMORES B1: ...  STERIMOL B1: ...  Diff: ...
+    SMORES B5: ...  STERIMOL B5: ...  Diff: ...
     RESULT: SUCCESS
 
   Total successful validations: X
@@ -43,7 +44,6 @@ Requirements
 ............
 
 The ``conda`` envionrment file which has all the dependencies needed
-to run run_validation.sh__ can be found here__.
+to run the validation steps can be found here__.
 
-__ run_validation.sh
 __ ../../smores.yml
