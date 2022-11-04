@@ -1,1 +1,1 @@
-python ../common_carbon_substituents/1_generate_systems
+python ../common_carbon_substituents/1_generate_systems "$@"
