@@ -17,9 +17,11 @@ systems.
 offered in morfeus and sterimol >
 `common_carbon_morfeus_xyz_sterimol_parameters.csv`
 - [ ] generate sterimol parameters from streusel surface using cube file
-- [ ] generate catalyst sterimol parameters for all radii types offered in
+- [X] generate catalyst sterimol parameters for all radii types offered in
 morfeus and sterimol
-- [ ] algorithm to determine the atom indices for the sterimol calculations
+- [X] algorithm to determine the atom indices for the sterimol calculations of 
+common carbon substituents
+- [ ] algorithm to determine the atom indices for the catalysts
 
 ### notes on the algorithm to determine the atom indices
 In order to do this automatically, we should probably refactor the smores
