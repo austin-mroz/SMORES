@@ -1,0 +1,116 @@
+#!python
+import argparse
+import csv
+import pathlib
+import typing
+from dataclasses import dataclass
+
+import rdkit.Chem.AllChem as rdkit
+
+
+def main() -> None:
+    args = _get_command_line_arguments()
+    args.output_directory.mkdir(parents=True, exist_ok=True)
+    input_molecules = tuple(_read_molecules(args.input_file))
+    _write_molecule_files(input_molecules, args.output_directory)
+
+
+@dataclass(frozen=True, slots=True)
+class Molecule:
+    name: str
+    smiles: str
+    dummy_index: int
+    attached_index: int
+
+
+def _write_molecule_files(
+    molecules: typing.Iterable[Molecule],
+    output_directory: pathlib.Path,
+) -> None:
+
+    csv_path = output_directory / "xyz_files.csv"
+    if not csv_path.exists():
+        _write_csv_header(csv_path)
+
+    with open(csv_path, "a") as csv_file:
+        writer = csv.DictWriter(
+            csv_file,
+            fieldnames=[
+                "name",
+                "smiles",
+                "xyz_file",
+                "dummy_index",
+                "attached_index",
+            ],
+        )
+        for molecule in molecules:
+            rdkit_molecule = rdkit.AddHs(rdkit.MolFromSmiles(molecule.smiles))
+            etkdg_params = rdkit.ETKDGv2()
+            etkdg_params.randomSeed = 4
+            if rdkit.EmbedMolecule(rdkit_molecule, etkdg_params) == -1:
+                raise RuntimeError(f"Embedding the {molecule.smiles} failed.")
+            xyz_file = output_directory / f"{molecule.name}.xyz"
+            rdkit.MolToXYZFile(rdkit_molecule, str(xyz_file))
+            writer.writerow(
+                {
+                    "name": molecule.name,
+                    "smiles": molecule.smiles,
+                    "xyz_file": xyz_file,
+                    "dummy_index": molecule.dummy_index,
+                    "attached_index": molecule.attached_index,
+                },
+            )
+
+
+def _read_molecules(path: pathlib.Path) -> typing.Iterator[Molecule]:
+    with open(path) as csv_file:
+        reader = csv.DictReader(csv_file)
+        for row in reader:
+            yield Molecule(
+                name=row["name"],
+                smiles=row["smiles"],
+                dummy_index=int(row["dummy_index"]),
+                attached_index=int(row["attached_index"]),
+            )
+
+
+def _write_csv_header(path: pathlib.Path) -> None:
+    with open(path, "w") as csv_file:
+        writer = csv.DictWriter(
+            csv_file,
+            fieldnames=[
+                "name",
+                "smiles",
+                "xyz_file",
+                "dummy_index",
+                "attached_index",
+            ],
+        )
+        writer.writeheader()
+
+
+def _get_command_line_arguments() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Create xyz structures using ETKDGv2",
+    )
+    parser.add_argument(
+        "-i",
+        "--input_file",
+        type=pathlib.Path,
+        help=(
+            'A csv file with columns: "name", "smiles", '
+            '"dummy_index", "attached_index".'
+        ),
+        default=pathlib.Path.cwd() / "1_output" / "smiles.csv",
+    )
+    parser.add_argument(
+        "-o",
+        "--output_directory",
+        help="The directory into which results are written.",
+        default=pathlib.Path.cwd() / "2_output",
+    )
+    return parser.parse_args()
+
+
+if __name__ == "__main__":
+    main()

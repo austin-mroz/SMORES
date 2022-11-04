@@ -1,3 +1,4 @@
+#!python
 import argparse
 import csv
 import pathlib
@@ -98,16 +99,19 @@ def _get_command_line_arguments() -> argparse.Namespace:
     parser.add_argument(
         "-i",
         "--input_file",
-        help='A csv file with two columns: "name" and "smiles".',
+        help=(
+            'A csv file with columns: "name", "smiles", '
+            '"dummy_index", "attached_index".'
+        ),
         type=pathlib.Path,
-        default=pathlib.Path(__file__).parent / "1_output" / "smiles.csv",
+        default=pathlib.Path.cwd() / "1_output" / "smiles.csv",
     )
     parser.add_argument(
         "-o",
         "--output_directory",
         help="The directory into which the results are written.",
         type=pathlib.Path,
-        default=pathlib.Path(__file__).parent / "2_output",
+        default=pathlib.Path.cwd() / "2_output",
     )
     return parser.parse_args()
 

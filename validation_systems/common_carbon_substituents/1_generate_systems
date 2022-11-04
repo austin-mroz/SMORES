@@ -1,3 +1,4 @@
+#!python
 import argparse
 import csv
 import itertools
@@ -54,12 +55,6 @@ def main() -> None:
             attached_index=1,
         ),
         Substituent(
-            name="i-Pr",
-            smiles="[DUMMY](C)CC",
-            dummy_index=0,
-            attached_index=1,
-        ),
-        Substituent(
             name="CHPr2",
             smiles="CCCC([DUMMY])CCC",
             dummy_index=4,
@@ -99,6 +94,19 @@ def main() -> None:
         )
         writer.writeheader()
         writer.writerows(_get_csv_rows(substituents, r_groups))
+        writer.writerows(
+            _get_csv_rows(
+                substituents=(
+                    Substituent(
+                        name="i-Pr",
+                        smiles="[DUMMY](C)CC",
+                        dummy_index=0,
+                        attached_index=1,
+                    ),
+                ),
+                r_groups=("C",),
+            ),
+        )
 
 
 @dataclass(frozen=True, slots=True)
@@ -118,7 +126,7 @@ def _get_command_line_arguments() -> argparse.Namespace:
     parser.add_argument(
         "-o",
         "--output_file",
-        default=pathlib.Path(__file__).parent / "1_output" / "smiles.csv",
+        default=pathlib.Path.cwd() / "1_output" / "smiles.csv",
         type=pathlib.Path,
         help="The csv file into which the generated SMILES are written.",
     )
