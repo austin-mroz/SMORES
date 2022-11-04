@@ -11,7 +11,7 @@ configuration options, for example
 .. code-block:: bash
 
   ./1_generate_systems
-  ./2_calculate_electrostatic_potentials
+  ./2_generate_structures
   ./3_compare_smores_with_sterimol
 
 Each step produces an output folder which holds the input for
