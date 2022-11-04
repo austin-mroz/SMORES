@@ -157,6 +157,7 @@ def main() -> None:
                 "attached_index",
             ],
         )
+        writer.writeheader()
         for molecule in _get_molecules(catalysts, substituents):
             xyz_file = cli_args.output_directory / (
                 f"{molecule.reaction_name}_"
