@@ -26,12 +26,8 @@ Examples:
         import smores.psi4
 
         molecule = smores.Molecule.from_smiles("Br")
-        esp = smores.psi4.calculate_electrostatic_potential(molecule, "outdir")
-        esp_molecule = smores.EspMolecule(
-            atoms=molecule.atoms,
-            positions=molecule.positions,
-            electrostatic_potential=esp,
-        )
+        smores.psi4.calculate_electrostatic_potential(molecule, "outdir")
+        esp_molecule = smores.EspMolecule.from_cube_file("outdir/ESP.cube")
         params = esp_molecule.get_steric_parameters(dummy_index=0, \
 attached_index=1)
         print(params.L, params.B1, params.B5)

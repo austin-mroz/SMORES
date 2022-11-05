@@ -86,6 +86,12 @@ of the atoms.
 
 __ https://streusel.readthedocs.io
 
+.. tip::
+
+  The radii which are used can be modified by the user! See
+  the documentation of * :meth:`.Molecule.get_steric_parameters`
+  for more details.
+
 
 .. seealso::
 
@@ -114,18 +120,15 @@ potentials defined on a voxel grid
 .. testcode:: quickstart
 
   molecule = smores.EspMolecule.from_cube_file("my_molecule.cube")
-  params = molecule.get_steric_parameters()
+  params = molecule.get_steric_parameters(dummy_index=0, attached_index=1)
   print(params.L, params.B1, params.B5)
 
-.. tip::
-
-  There are more ways to initialize an :class:`.EspMolecule`! See the
-  documentation of the class for details.
 
 .. seealso::
 
   * :class:`.EspMolecule`
   * :meth:`.EspMolecule.get_steric_parameters`
+  * :mod:`smores.psi4`: For using Psi4 to make ``.cube`` files.
 
 
 

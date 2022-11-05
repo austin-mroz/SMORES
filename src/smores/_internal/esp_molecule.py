@@ -76,9 +76,21 @@ class EspMolecule:
         self.positions = np.array(positions)
         self._electrostatic_potential = electrostatic_potential
 
-    def get_steric_parameters(self) -> StericParameters:
+    def get_steric_parameters(
+        self,
+        dummy_index: int,
+        attached_index: int,
+    ) -> StericParameters:
         """
         Get the steric parameters from the electrostatic potential.
+
+        Parameters:
+
+            dummy_index:
+                The index of the dummy atom.
+
+            attached_index:
+                The index of the attached atom of the substituent.
 
         Returns:
             The parameters.
@@ -104,44 +116,3 @@ class EspMolecule:
         obj.positions = np.array(cube_data.positions)
         obj._electrostatic_potential = cube_data.grid
         return obj
-
-    @classmethod
-    def from_mol_file(
-        cls,
-        path: pathlib.Path | str,
-        electrostatic_potential: ElectrostaticPotentialGrid,
-    ) -> "EspMolecule":
-        """
-        Get a molecule from a ``.mol`` file.
-
-        Parameters:
-            path: The path to the file.
-        Returns:
-            The molecule.
-        """
-
-        path = pathlib.Path(path)
-        molecule_data = file_readers.read_mol_file(path)
-        obj = cls.__new__(cls)
-        obj.atoms = molecule_data.atoms
-        obj.positions = np.array(molecule_data.positions)
-        obj._electrostatic_potential = electrostatic_potential
-        return obj
-
-    @classmethod
-    def from_xyz_file(
-        cls,
-        path: pathlib.Path | str,
-        electrostatic_potential: ElectrostaticPotentialGrid,
-    ) -> "EspMolecule":
-        """
-        Get a molecule from a ``.xyz`` file.
-
-        Parameters:
-            path: The path to the file.
-        Returns:
-            The molecule.
-        """
-
-        path = pathlib.Path(path)
-        return cls()

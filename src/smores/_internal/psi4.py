@@ -16,7 +16,7 @@ def calculate_electrostatic_potential(
     resolution: tuple[int, int, int] = (51, 51, 51),
     num_threads: int | None = None,
     optimize: bool = False,
-) -> ElectrostaticPotentialGrid:
+) -> None:
     """
     Calculate the electrostatic potential.
 
@@ -38,9 +38,6 @@ def calculate_electrostatic_potential(
         optimize:
             Toggles the optimization of the molecular structure
             before the electrostatic potential is calculated.
-
-    Returns:
-
 
     """
 
@@ -76,7 +73,10 @@ def calculate_electrostatic_potential(
             psi4.optimize("PBE", molecule=psi4_mol)
 
         E, wfn = psi4.prop(
-            "PBE", molecule=psi4_mol, properties=["GRID_ESP"], return_wfn=True
+            "PBE",
+            molecule=psi4_mol,
+            properties=["GRID_ESP"],
+            return_wfn=True,
         )
         psi4.cubeprop(wfn)
 
