@@ -4,11 +4,13 @@ import typing
 from collections import abc
 from itertools import product
 
+import morfeus
 import numpy as np
 import numpy.typing as npt
 import psi4
 import rdkit.Chem.AllChem as rdkit
 
+from smores._internal.constants import streusel_radii
 from smores._internal.steric_parameters import StericParameters
 
 
@@ -73,9 +75,14 @@ class Molecule:
 
         """
 
+        if radii is None:
+            radii = np.array([streusel_radii[atom] for atom in atoms])
+        else:
+            radii = np.array(radii)
+
         self._atoms = tuple(atoms)
         self._positions = np.array(positions)
-        self._radii = np.array(radii)
+        self._radii = radii
 
     @classmethod
     def from_xyz_file(
@@ -106,7 +113,12 @@ class Molecule:
             atom.GetSymbol() for atom in molecule.GetAtoms()
         )
         instance._positions = molecule.GetConformer(0).GetPositions()
-        instance._radii = np.array(radii)
+        if radii is None:
+            instance._radii = np.array(
+                [streusel_radii[atom] for atom in instance._atoms]
+            )
+        else:
+            instance._radii = np.array(radii)
         return instance
 
     @classmethod
@@ -137,7 +149,12 @@ class Molecule:
             atom.GetSymbol() for atom in molecule.GetAtoms()
         )
         instance._positions = molecule.GetConformer(0).GetPositions()
-        instance._radii = np.array(radii)
+        if radii is None:
+            instance._radii = np.array(
+                [streusel_radii[atom] for atom in instance._atoms]
+            )
+        else:
+            instance._radii = np.array(radii)
         return instance
 
     @classmethod
@@ -175,6 +192,7 @@ rdkit.Chem.rdDistGeom.html#rdkit.Chem.rdDistGeom.ETKDGv3
         instance._atoms = tuple(
             atom.GetSymbol() for atom in molecule.GetAtoms()
         )
+
         if positions is None:
             params = rdkit.ETKDGv3()
             params.randomSeed = 4
@@ -182,6 +200,14 @@ rdkit.Chem.rdDistGeom.html#rdkit.Chem.rdDistGeom.ETKDGv3
             instance._positions = molecule.GetConformer(0).GetPositions()
         else:
             instance._positions = np.array(positions)
+
+        if radii is None:
+            instance._radii = np.array(
+                [streusel_radii[atom] for atom in instance._atoms]
+            )
+        else:
+            instance._radii = np.array(radii)
+
         return instance
 
     def get_steric_parameters(
@@ -208,7 +234,18 @@ rdkit.Chem.rdDistGeom.html#rdkit.Chem.rdDistGeom.ETKDGv3
 
         """
 
-        pass
+        sterimol = morfeus.Sterimol(
+            elements=self._atoms,
+            coordinates=self._positions,
+            dummy_index=dummy_index + 1,
+            attached_index=attached_index + 1,
+            radii=self._radii,
+        )
+        return StericParameters(
+            L=sterimol.L_value,
+            B1=sterimol.B_1_value,
+            B5=sterimol.B_5_value,
+        )
 
     def _generate_voxel_grid(
         self,

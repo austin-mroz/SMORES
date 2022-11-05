@@ -36,9 +36,9 @@ def test_smores_parameters_match_sterimol_if_same_radii_are_used(
         dummy_index=dummy_index,
         attached_index=attached_index,
     )
-    assert params.L == sterimol.L_value
-    assert params.B1 == sterimol.B_1_value
-    assert params.B5 == sterimol.B_5_value
+    assert params.L == pytest.approx(sterimol.L_value)
+    assert params.B1 == pytest.approx(sterimol.B_1_value)
+    assert params.B5 == pytest.approx(sterimol.B_5_value)
 
 
 @pytest.fixture(
@@ -76,13 +76,14 @@ def molecule_from_xyz_file(
     rdkit_molecule: rdkit.Mol,
 ) -> CaseData:
 
+    xyz_file = tmp_path / "molecule.xyz"
     radii = (1.0, 1.0)
-    rdkit.MolToXYZFile(rdkit_molecule, str(tmp_path / "molecule.xyz"))
+    rdkit.MolToXYZFile(rdkit_molecule, str(xyz_file))
     return CaseData(
         atoms=tuple(atom.GetSymbol() for atom in rdkit_molecule.GetAtoms()),
         positions=rdkit_molecule.GetConformer(0).GetPositions(),
         radii=radii,
-        molecule=smores.Molecule.from_xyz_file(tmp_path, radii),
+        molecule=smores.Molecule.from_xyz_file(xyz_file, radii),
     )
 
 
@@ -92,8 +93,9 @@ def molecule_from_mol_file(
     rdkit_molecule: rdkit.Mol,
 ) -> CaseData:
 
+    mol_file = tmp_path / "molecule.mol"
     radii = (1.0, 1.0)
-    rdkit.MolToMolFile(rdkit_molecule, str(tmp_path / "molecule.mol"))
+    rdkit.MolToMolFile(rdkit_molecule, str(mol_file))
     return CaseData(
         atoms=tuple(atom.GetSymbol() for atom in rdkit_molecule.GetAtoms()),
         positions=rdkit_molecule.GetConformer(0).GetPositions(),
@@ -108,6 +110,7 @@ def molecule_from_smiles(rdkit_molecule: rdkit.Mol) -> CaseData:
     return CaseData(
         atoms=tuple(atom.GetSymbol() for atom in rdkit_molecule.GetAtoms()),
         positions=rdkit_molecule.GetConformer(0).GetPositions(),
+        radii=radii,
         molecule=smores.Molecule.from_smiles(
             smiles=rdkit.MolToSmiles(rdkit_molecule),
             positions=rdkit_molecule.GetConformer(0).GetPositions(),

@@ -18,11 +18,21 @@ Welcome to SMORES!
 GiHub: https://github.com/austin-mroz/SMORES
 
 
-:mod:`smores` is a Python library which
+.. attention::
 
+  This introduction is under construction but will be
+  filled in by Austin + Lukas.
 
-It can lead to much better result than traditional
-steric metrics, because ... See the paper ...
+  Things to cover:
+
+  * What does smores do?
+  * Why would the user want to do this?
+  * What are steric metrics, why are they useful?
+  * What can you do with steric metrics?
+  * Why is using eletric field based stuff cool?
+  * Link to STREUSEL
+  * A cool graphic never hurt anyone
+
 
 Installation
 ------------
