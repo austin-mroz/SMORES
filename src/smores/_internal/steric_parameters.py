@@ -1,3 +1,4 @@
+import typing
 from dataclasses import dataclass
 
 
@@ -16,3 +17,8 @@ class StericParameters:
 
     #: The B\ :sub:`5` parameter.
     B5: float
+
+    def __iter__(self) -> typing.Iterator[float]:
+        yield self.L
+        yield self.B1
+        yield self.B5

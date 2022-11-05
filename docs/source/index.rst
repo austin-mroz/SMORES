@@ -55,29 +55,11 @@ You start with
 
   import smores
 
-and then you load a molecule, either from one of the supported
-file formats
+and then you load a molecule & calculate the steric parameters
 
 .. testcode:: quickstart
 
   molecule = smores.Molecule.from_xyz_file("my_molecule.xyz")
-
-or from SMILES
-
-.. testcode:: quickstart
-
-  molecule = smores.Molecule.from_smiles("CBr")
-
-or directly from atomic coordinates
-
-.. testcode:: quickstart
-
-  molecule = smores.Molecule(atoms=["He"], positions=[[0., 0., 0.]])
-
-You can get the SMORES steric parameters by running
-
-.. testcode:: quickstart
-
   params = molecule.get_steric_parameters(dummy_index=0, attached_index=1)
   print(params.L, params.B1, params.B5)
 
@@ -92,24 +74,37 @@ __ https://streusel.readthedocs.io
   the documentation of :meth:`.Molecule.get_steric_parameters`
   for more details.
 
-
 .. seealso::
 
   * :class:`.Molecule`: For additional documentation and examples.
   * :meth:`.Molecule.get_steric_parameters`: For configuration options.
 
-Loading with atomic numbers
----------------------------
+Integration with machine learning workflows
+-------------------------------------------
 
-Sometimes you have atomic numbers but not
-atomic elements, fortunately we have you covered
+It doesn't take a lot of code to get :mod:`smores` working with a great
+library like sklearn_
 
-.. testcode:: quickstart
+.. _sklearn: https://scikit-learn.org/stable/
 
-  molecule = smores.Molecule(
-      atoms=smores.atomic_numbers_to_elements([1, 35]),
-      positions=[[0., 0., 0.], [1.47, 0., 0.]],
-  )
+.. testcode:: ml-workflow
+
+  import smores
+  import sklearn
+  from glob import glob
+
+  molecules = [smores.Molecule.from_xyz_file(path) for path in glob("*.xyz")]
+
+  # An N x 3 array, where each row holds L, B1 and B2 of a given molecule.
+  params = np.array([list(mol.get_steric_parameters(0, 1)) for mol in molecules])
+
+  classifier = sklearn.tree.DecisionTreeClassifier()
+  classifier.fit(params, target_property)
+  classifier.predict(smores.Molecule.from_xyz_file("test.xyz"))
+
+
+We hope that's a useful jumping off point for some quick prototyping!
+
 
 Using electrostatic potentials
 ------------------------------
