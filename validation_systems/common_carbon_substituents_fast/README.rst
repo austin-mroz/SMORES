@@ -28,7 +28,7 @@ tested structures are generated using ``ETKDGv2`` rather than
 __ ../common_carbon_substituents
 
 To get more details about what each step does, or look at its
-configuratoin options, use the ``-h`` parameter, for example
+configuration options, use the ``-h`` parameter, for example
 
 .. code-block:: bash
 
