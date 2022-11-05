@@ -10,7 +10,6 @@ import typing
 import numpy as np
 import numpy.typing as npt
 
-from smores._internal import file_readers
 from smores._internal.esp_grid import ElectrostaticPotentialGrid
 from smores._internal.steric_parameters import StericParameters
 
