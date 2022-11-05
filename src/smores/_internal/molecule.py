@@ -56,7 +56,8 @@ class Molecule:
                 The elemental symbol of each atom of the molecule.
 
             positions (list[list[float]]):
-                The coordinates of each atom of the molecule.
+                The coordinates of each atom of the molecule,
+                provided as an N x 3 matrix.
 
             radii (list[float]):
                 The radius of each atom of the molecule. If
@@ -165,7 +166,8 @@ class Molecule:
                 The SMILES of the molecule.
 
             positions (list[list[float]]):
-                The coordinates of each atom of the moleclue.
+                The coordinates of each atom of the molecule
+                provided as an N x 3 matrix.
                 If ``None`` then the molecule will have its
                 coordinates calculated with ETKDG_.
 
