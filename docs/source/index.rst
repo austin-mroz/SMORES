@@ -124,3 +124,43 @@ potentials defined on a voxel grid
   * :class:`.EspMolecule`: For additional documentation and examples.
   * :meth:`.EspMolecule.get_steric_parameters`: For configuration options.
   * :mod:`smores.psi4`: For using Psi4 to make ``.cube`` files.
+
+Calculating electrostatic potentials
+------------------------------------
+
+.. attention::
+
+  Psi4_ is a big dependency and we therefore do not install it automatically.
+  If you wish to use the functions in :mod:`smores.psi4` you will have to install
+  Psi4_ yourself. We find
+
+  .. code-block:: bash
+
+    conda install -c psi4 psi4
+
+  tends to work for us, but we recommend you check out Psi4_'s official
+  documentation for up-to-date information.
+
+.. _psi4: https://psicode.org/
+
+
+.. testcode:: calculate-electrostatic-potential
+
+  import smores
+  import smores.psi4
+
+  smores.psi4.calculate_electrostatic_potential(
+      molecule=smores.Molecule.from_smiles("Br"),
+      output_directory="outdir",
+      grid_origin=(-3., -3., -3.),
+      grid_length=10.,
+      num_voxels_per_dimension=50,
+  )
+
+  esp_molecule = smores.EspMolecule.from_cube_file("outdir/ESP.cube")
+  params = esp_molecule.get_steric_parameters(dummy_index=0, attached_index=1)
+  print(params.L, params.B1, params.B5)
+
+.. seealso::
+
+   * :func:`.calculate_electrostatic_potential`: For configuration options.

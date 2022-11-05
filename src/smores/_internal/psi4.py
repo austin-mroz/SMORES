@@ -3,8 +3,11 @@ import itertools
 import os
 import pathlib
 
+import numpy as np
+import numpy.typing as npt
 import psi4
 
+from smores._internal.constants import atomic_mass
 from smores._internal.esp_molecule import EspMolecule
 from smores._internal.molecule import Molecule
 
@@ -76,8 +79,12 @@ def calculate_electrostatic_potential(
         )
         psi4.core.set_num_threads(num_threads)
 
+        center_of_mass = _get_center_of_mass(
+            elements=molecule.atoms,
+            coordinates=molecule.positions,
+        )
         psi4_mol = psi4.core.Molecule.from_arrays(
-            molecule.positions,
+            molecule.positions - center_of_mass,
             elem=molecule.atoms,
         )
         psi4.core.set_output_file(
@@ -123,6 +130,16 @@ def _generate_voxel_grid(
             for c in xyz:
                 file.write(str(c) + " ")
             file.write("\n")
+
+
+def _get_center_of_mass(
+    elements: tuple[str, ...],
+    coordinates: npt.NDArray[np.float32],
+) -> npt.NDArray[np.float32]:
+
+    atom_masses = np.array([atomic_mass[element] for element in elements])
+    scaled_coordinates = coordinates * atom_masses[:, np.newaxis]
+    return scaled_coordinates.sum(axis=0) / atom_masses.sum()
 
 
 @contextlib.contextmanager
