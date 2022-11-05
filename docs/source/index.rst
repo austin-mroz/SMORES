@@ -7,8 +7,18 @@ Welcome to SMORES!
 ==================
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+  :hidden:
+  :maxdepth: 2
+  :caption: API
+
+  Molecule <_autosummary/smores.molecule>
+  EspMolecule
+
+.. toctree::
+  :hidden:
+  :maxdepth: 2
+
+  modules
 
 
 GiHub: https://github.com/austin-mroz/SMORES
@@ -116,6 +126,8 @@ atomic elements, fortunately we have you covered
       atoms=smores.atomic_numbers_to_elements([1, 35]),
       positions=[[0., 0., 0.], [1.47, 0., 0.]],
   )
+
+
 
 
 Indices and tables

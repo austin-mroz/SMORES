@@ -5,3 +5,4 @@ method_tests/efield_generation/res_check
 **/?_output
 timer.dat
 docs/build
+docs/source/_autosummary
