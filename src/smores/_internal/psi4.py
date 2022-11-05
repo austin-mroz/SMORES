@@ -26,7 +26,7 @@ def calculate_electrostatic_potential(
         molecule:
             The molecule to optimize.
 
-        outupt_directory:
+        output_directory:
             The directory in which the calculations are run.
 
         grid_origin:

@@ -52,7 +52,7 @@ class EspMolecule:
     def __init__(
         self,
         atoms: typing.Iterable[str],
-        positions: npt.NDArray[np.float32],
+        positions: npt.ArrayLike,
         electrostatic_potential: ElectrostaticPotentialGrid,
     ) -> None:
         """
@@ -60,11 +60,12 @@ class EspMolecule:
 
         Parameters:
 
-            atoms:
+            atoms (list[str]):
                 The elemental symbol of each atom of the molecule.
 
-            positions:
-                The coordinates of each atom of the molecule.
+            positions (list[list[float]]):
+                The coordinates of each atom of the molecule,
+                provided as an N x 3 matrix.
 
             electrostatic_potential:
                 A 3-D voxel grid of the electrostatic potential
