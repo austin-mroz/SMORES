@@ -55,9 +55,9 @@ You can get the SMORES steric parameters by running
 
   params = molecule.get_steric_parameters()
   print(
-      params.l,
-      params.b1,
-      params.b5,
+      params.L,
+      params.B1,
+      params.B5,
   )
 
 Which will calculate the parameters using the STREUSEL__ radii
@@ -86,9 +86,9 @@ potentials defined on a voxel grid
 
   params = molecule.get_steric_parameters()
   print(
-      params.l,
-      params.b1,
-      params.b5,
+      params.L,
+      params.B1,
+      params.B5,
   )
 
 .. seealso::
