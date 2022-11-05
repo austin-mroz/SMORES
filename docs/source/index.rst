@@ -49,12 +49,6 @@ or directy from atomic coordinates
       positions=[[0., 0., 0.]],
   )
 
-
-.. seealso::
-
-  `Loading molecules`__ provides more examples on how you can easily
-  get your molecule loaded into :mod:`smores`.
-
 You can get the SMORES steric parameters by running
 
 .. testcode:: quickstart
