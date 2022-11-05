@@ -71,8 +71,8 @@ __ https://streusel.readthedocs.io
   * :class:`.Molecule`
   * :meth:`.Molecule.get_steric_parameters`
 
-More accurate paramters through electrostatic potentials
-........................................................
+More accurate parameters through electrostatic potentials
+.........................................................
 
 :mod:`smores` can also calculate the steric parameters using electrostatic
 potentials defined on a voxel grid
