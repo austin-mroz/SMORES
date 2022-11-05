@@ -12,7 +12,9 @@ from smores._internal.molecule import Molecule
 def calculate_electrostatic_potential(
     molecule: Molecule | EspMolecule,
     output_directory: pathlib.Path | str,
-    grid_dimensions: tuple[int, int, int] = (51, 51, 51),
+    grid_origin: tuple[float, float, float],
+    grid_length: float,
+    num_voxels_per_dimension: int,
     num_threads: int | None = None,
     optimize: bool = False,
 ) -> None:
@@ -27,7 +29,13 @@ def calculate_electrostatic_potential(
         outupt_directory:
             The directory in which the calculations are run.
 
-        grid_dimensions:
+        grid_origin:
+            The origin of the grid.
+
+        grid_length:
+            The length of the grid in each dimension in Angstrom.
+
+        num_voxels_per_dimension:
             The number of voxels in each dimension.
 
         num_threads:
@@ -50,7 +58,12 @@ def calculate_electrostatic_potential(
     output_directory = pathlib.Path(output_directory)
     output_directory.mkdir(parents=True, exist_ok=True)
 
-    _generate_voxel_grid(grid_dimensions, output_directory)
+    _generate_voxel_grid(
+        output_directory=output_directory,
+        grid_origin=grid_origin,
+        grid_length=grid_length,
+        num_voxels_per_dimension=num_voxels_per_dimension,
+    )
 
     with _current_working_directory(output_directory):
         psi4.set_options(
@@ -85,21 +98,26 @@ def calculate_electrostatic_potential(
 
 
 def _generate_voxel_grid(
-    grid_dimensions: tuple[int, int, int],
     output_directory: pathlib.Path,
+    grid_origin: tuple[float, float, float],
+    grid_length: float,
+    num_voxels_per_dimension: int,
 ) -> None:
 
-    x, y, z = grid_dimensions
-    # we want to make a box with one corner at (-5,5,5)A and one at
-    # (5,5,5)A with a resolution of 0.2 A
-    # this should be left to the user eventually
+    origin_x, origin_y, origin_z = grid_origin
+    voxel_size = grid_length / num_voxels_per_dimension
+
     grid_xyz_coords = []
-    for i, j, k in itertools.product(range(x), range(y), range(z)):
-        itrans = -5 + 0.2 * i
-        jtrans = -5 + 0.2 * j
-        ktrans = -5 + 0.2 * k
+    for i, j, k in itertools.product(
+        range(num_voxels_per_dimension),
+        range(num_voxels_per_dimension),
+        range(num_voxels_per_dimension),
+    ):
+        itrans = -origin_x + voxel_size * i
+        jtrans = -origin_y + voxel_size * j
+        ktrans = -origin_z + voxel_size * k
         grid_xyz_coords.append([itrans, jtrans, ktrans])
-    # write the grid to a .dat file
+
     with open(output_directory.joinpath("grid.dat"), "w") as file:
         for xyz in grid_xyz_coords:
             for c in xyz:
