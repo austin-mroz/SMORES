@@ -20,6 +20,13 @@ GiHub: https://github.com/austin-mroz/SMORES
 It can lead to much better result than traditional
 steric metrics, because ... See the paper ...
 
+Installation
+------------
+
+
+.. code-block:: bash
+
+  pip install smores
 
 
 Quickstart
@@ -71,8 +78,8 @@ __ https://streusel.readthedocs.io
   * :class:`.Molecule`
   * :meth:`.Molecule.get_steric_parameters`
 
-More accurate parameters through electrostatic potentials
-.........................................................
+Using electrostatic potentials
+------------------------------
 
 :mod:`smores` can also calculate the steric parameters using electrostatic
 potentials defined on a voxel grid
@@ -96,13 +103,19 @@ potentials defined on a voxel grid
   * :class:`.EspMolecule`
   * :meth:`.EspMolecule.get_steric_parameters`
 
-Installation
-------------
 
+Loading with atomic numbers
+---------------------------
 
-.. code-block:: bash
+Sometimes you have atomic numbers but not
+atomic elements, fortunately we have you covered
 
-  pip install smores
+.. testcode:: quickstart
+
+  molecule = smores.Molecule(
+      atoms=smores.atomic_numbers_to_elements([1, 35]),
+      positions=[[0., 0., 0.], [1.47, 0., 0.]],
+  )
 
 
 Indices and tables
