@@ -129,15 +129,3 @@ potentials defined on a voxel grid
   * :class:`.EspMolecule`
   * :meth:`.EspMolecule.get_steric_parameters`
   * :mod:`smores.psi4`: For using Psi4 to make ``.cube`` files.
-
-
-
-
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
