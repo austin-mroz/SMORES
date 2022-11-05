@@ -68,7 +68,7 @@ or from SMILES
 
   molecule = smores.Molecule.from_smiles("CBr")
 
-or directy from atomic coordinates
+or directly from atomic coordinates
 
 .. testcode:: quickstart
 
