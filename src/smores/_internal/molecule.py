@@ -1,15 +1,15 @@
-from __future__ import annotations
-
-import logging
 import os
 import pathlib
+import typing
 from itertools import product
 
 import numpy as np
+import numpy.typing as npt
 import psi4
-import rdkit.Chem.AllChem as AllChem
+import rdkit.Chem.AllChem as rdkit
 
-from . import constants, utilities
+from smores._internal import file_readers
+from smores._internal.steric_parameters import StericParameters
 
 
 class InvalidDirectoryError(Exception):
@@ -18,32 +18,72 @@ class InvalidDirectoryError(Exception):
 
 class Molecule:
     """
-    class to handle molecule objects for featurization
+    Calculates :class:`.StericParameters` from STREUSEL__ radii.
+
+
+    __ https://streusel.readthedocs.io
+
+    See also:
+
+        * :class:`.EspMolecule`
+
+    Examples:
+
+        .. testcode:: get-steric-parameters
+
+            import smores
+
+            molecule = smores.Molecule(
+                atoms=["H", "Br"],
+                positions=[[0., 0., 0.], [1.47, 0., 0.]],
+            )
+            params = molecule.get_steric_parameters()
+
+        .. testcode:: get-steric-parameters
+
+            molecule = smores.Molecule.from_smiles("Br")
+            params = molecule.get_steric_parameters()
+
     """
 
     def __init__(
         self,
-        smiles: str,
+        atoms: typing.Iterable[str],
+        positions: npt.NDArray[np.float32],
     ) -> None:
-        rdkit_mol = AllChem.AddHs(AllChem.MolFromSmiles(smiles))
-        self._elements = [atom.GetSymbol() for atom in rdkit_mol.GetAtoms()]
-        AllChem.EmbedMolecule(rdkit_mol)
-        rdkit_coordinates = (
-            rdkit_mol.GetConformer(0).GetPositions().astype(np.float32)
-        )
-        center_of_mass = _get_center_of_mass(self._elements, rdkit_coordinates)
-        self._coordinates = rdkit_coordinates - center_of_mass
+        """
+        Initialize a :class:`.Molecule`.
+
+        Parameters:
+
+            atoms:
+                The elemental symbol of each atom of the molecule.
+
+            positions:
+                The coordinates of each atom of the molecule.
+
+        """
+
+        self._atoms = tuple(atoms)
+        self._postions = np.array(positions)
 
     @classmethod
-    def init_from_xyz(
+    def from_xyz_file(
         cls,
         path: pathlib.Path | str,
-    ) -> Molecule:
+    ) -> "Molecule":
+        """
+        Get a molecule from a ``.xyz`` file.
 
-        if isinstance(path, str):
-            path = pathlib.Path(path)
+        Parameters:
+            path: The path to the file.
+        Returns:
+            The molecule.
 
-        # Create an instance without calling the __init__ method.
+        """
+
+        path = pathlib.Path(path)
+
         instance = cls.__new__(cls)
         xyz_data = utilities.read_xyz(path)
         instance._elements = xyz_data.elements
@@ -54,27 +94,77 @@ class Molecule:
         instance._coordinates = xyz_data.coordinates - center_of_mass
         return instance
 
-    def generate_xtb_starting_structure(
-        self,
-        output_directory: pathlib.Path | str,
-        xyz_file_name: str = "initial_structure",
-    ) -> None:
+    @classmethod
+    def from_mol_file(
+        cls,
+        path: pathlib.Path | str,
+        electrostatic_potential: ElectrostaticPotentialGrid,
+    ) -> "EspMolecule":
+        """
+        Get a molecule from a ``.mol`` file.
 
-        # create the output directory
-        if isinstance(output_directory, str):
-            output_directory = pathlib.Path(output_directory)
-        _create_directory(output_directory)
+        Parameters:
+            path: The path to the file.
+        Returns:
+            The molecule.
+        """
 
-        # write the xyz file with the updated coordinates
-        xyz_data = utilities.XyzData(
-            elements=self._elements,
-            coordinates=self._coordinates,
+        path = pathlib.Path(path)
+        molecule_data = file_readers.read_mol_file(path)
+        obj = cls.__new__(cls)
+        obj._atoms = molecule_data.atoms
+        obj._postions = np.array(molecule_data.positions)
+        return obj
+
+    @classmethod
+    def from_smiles(
+        cls,
+        smiles: str,
+        positions: npt.NDArray[np.float32] | None = None,
+    ) -> "Molecule":
+        """
+        Get a molecule from a SMILES string.
+
+        Parameters:
+
+            smiles:
+                The SMILES of the molecule.
+
+            positions:
+                The coordinates of each atom of the moleclue.
+                If ``None`` then the molecule will have its
+                coordinates calculated with ETKDG__.
+
+        __ https://www.rdkit.org/docs/source/rdkit.Chem.rdDistGeom.html#rdkit.Chem.rdDistGeom.ETKDGv3
+
+
+        """
+
+        instance = cls.__new__(cls)
+        molecule = rdkit.AddHs(rdkit.MolFromSmiles(smiles))
+        instance._atoms = tuple(
+            atom.GetSymbol() for atom in molecule.GetAtoms()
         )
-        xyz_path = output_directory.joinpath(f"{xyz_file_name}.xyz")
-        utilities.write_xyz(
-            xyz_path,
-            xyz_data,
-        )
+        if positions is None:
+            params = rdkit.ETKDGv3()
+            params.randomSeed = 4
+            rdkit.EmbedMolecule(molecule, params)
+            instance._positions = molecule.GetConformer(0).GetPositions()
+        else:
+            instance._positions = np.array(positions)
+
+    def get_steric_parameters(self) -> StericParameters:
+        """
+        Get the steric paramters from STREUSEL__ radii.
+
+        __ https://streusel.readthedocs.io
+
+        Returns:
+            The parameters.
+
+        """
+
+        pass
 
     def _generate_voxel_grid(
         self,
@@ -145,22 +235,3 @@ class Molecule:
         psi4.cubeprop(wfn)
 
         os.chdir(original_directory)
-
-
-def _create_directory(path: pathlib.Path) -> None:
-    if path.exists() and not path.is_dir():
-        raise InvalidDirectoryError(f"{path} is not a valid directory.")
-
-    if not path.exists():
-        path.mkdir(exist_ok=True, parents=True)
-
-
-def _get_center_of_mass(
-    elements: list[str],
-    coordinates: npt.NDArray[np.float32],
-) -> npt.NDArray[np.float32]:
-    atom_masses = np.array(
-        [constants.atomic_mass[element] for element in elements]
-    )
-    scaled_coordinates = coordinates * atom_masses[:, np.newaxis]
-    return scaled_coordinates.sum(axis=0) / atom_masses.sum()

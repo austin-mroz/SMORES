@@ -19,6 +19,10 @@ class EspMolecule:
     """
     Calculates :class:`.StericParameters` from electrostatic potentials.
 
+    See Also:
+
+        * :class:`.Molecule`
+
     Examples:
 
         .. testcode:: get-steric-parameters
@@ -27,7 +31,7 @@ class EspMolecule:
 
             molecule = smores.EspMolecule(
                 atoms=["H", "Br"],
-                positions=
+                positions=[[0., 0., 0.], [1.47, 0., 0.]]
                 electrostatic_potential=smores.ElectrostaticPotentialGrid(
                     grid=
                     voxel_size=
@@ -35,9 +39,6 @@ class EspMolecule:
             )
             params = molecule.get_steric_parameters()
 
-    See Also:
-
-        * :class:`.Molecule`
 
     """
 
