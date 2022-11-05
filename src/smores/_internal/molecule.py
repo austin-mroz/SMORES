@@ -36,7 +36,10 @@ class Molecule:
 
             import smores
             molecule = smores.Molecule.from_smiles("CBr")
-            params = molecule.get_steric_parameters({"C": 1.6})
+            params = molecule.get_steric_parameters(
+                dummy_index=0,
+                attached_index=1,
+            )
 
 
 
@@ -48,6 +51,7 @@ class Molecule:
         self,
         atoms: typing.Iterable[str],
         positions: npt.NDArray[np.float32],
+        radii: npt.NDArray[np.float32] | None = None,
     ) -> None:
         """
         Initialize a :class:`.Molecule`.
@@ -60,21 +64,37 @@ class Molecule:
             positions:
                 The coordinates of each atom of the molecule.
 
+            radii:
+                The radius of each atom of the molecule. If
+                ``None`` the STREUSEL_ radii will be used.
+
+        .. _STREUSEL: https://streusel.readthedocs.io
+
+
         """
 
         self._atoms = tuple(atoms)
         self._positions = np.array(positions)
+        self._radii = np.array(radii)
 
     @classmethod
     def from_xyz_file(
         cls,
         path: pathlib.Path | str,
+        radii: npt.NDArray[np.float32] | None = None,
     ) -> "Molecule":
         """
         Get a molecule from a ``.xyz`` file.
 
         Parameters:
-            path: The path to the file.
+
+            path:
+                The path to the file.
+
+            radii:
+                The radius of each atom of the molecule. If
+                ``None`` the STREUSEL_ radii will be used.
+
         Returns:
             The molecule.
 
@@ -86,18 +106,27 @@ class Molecule:
             atom.GetSymbol() for atom in molecule.GetAtoms()
         )
         instance._positions = molecule.GetConformer(0).GetPositions()
+        instance._radii = np.array(radii)
         return instance
 
     @classmethod
     def from_mol_file(
         cls,
         path: pathlib.Path | str,
+        radii: npt.NDArray[np.float32] | None = None,
     ) -> "Molecule":
         """
         Get a molecule from a ``.mol`` file.
 
         Parameters:
-            path: The path to the file.
+
+            path:
+                The path to the file.
+
+            radii:
+                The radius of each atom of the molecule. If
+                ``None`` the STREUSEL_ radii will be used.
+
         Returns:
             The molecule.
         """
@@ -108,6 +137,7 @@ class Molecule:
             atom.GetSymbol() for atom in molecule.GetAtoms()
         )
         instance._positions = molecule.GetConformer(0).GetPositions()
+        instance._radii = np.array(radii)
         return instance
 
     @classmethod
@@ -115,6 +145,7 @@ class Molecule:
         cls,
         smiles: str,
         positions: npt.NDArray[np.float32] | None = None,
+        radii: npt.NDArray[np.float32] | None = None,
     ) -> "Molecule":
         """
         Get a molecule from a SMILES string.
@@ -128,6 +159,10 @@ class Molecule:
                 The coordinates of each atom of the moleclue.
                 If ``None`` then the molecule will have its
                 coordinates calculated with ETKDG_.
+
+            radii:
+                The radius of each atom of the molecule. If
+                ``None`` the STREUSEL_ radii will be used.
 
         .. _ETKDG: https://www.rdkit.org/docs/source/\
 rdkit.Chem.rdDistGeom.html#rdkit.Chem.rdDistGeom.ETKDGv3
@@ -153,7 +188,6 @@ rdkit.Chem.rdDistGeom.html#rdkit.Chem.rdDistGeom.ETKDGv3
         self,
         dummy_index: int,
         attached_index: int,
-        radii: abc.Mapping[str, float] | None = None,
     ) -> StericParameters:
         """
         Get the steric paramters from STREUSEL_ radii.
@@ -166,11 +200,6 @@ rdkit.Chem.rdDistGeom.html#rdkit.Chem.rdDistGeom.ETKDGv3
 
             attached_index:
                 The index of the attached atom of the substituent.
-
-            radii:
-                The atomic radii to use when calculating the steric
-                parameters. If ``None`` then standard STREUSEL
-                atomic radii will be used.
 
         Returns:
             The parameters.

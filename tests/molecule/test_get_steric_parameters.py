@@ -15,6 +15,7 @@ import smores
 class CaseData:
     atoms: tuple[str, ...]
     positions: npt.NDArray[np.float32]
+    radii: tuple[float, ...]
     molecule: smores.Molecule
 
 
@@ -24,18 +25,16 @@ def test_smores_parameters_match_sterimol_if_same_radii_are_used(
 
     dummy_index = 0
     attached_index = 1
-    radii = {"H": 1.0, "Br": 1.0}
     sterimol = morfeus.Sterimol(
         elements=case_data.atoms,
         coordinates=case_data.positions,
         dummy_index=dummy_index + 1,
         attached_index=attached_index + 1,
-        radii=tuple(radii.values()),
+        radii=case_data.radii,
     )
     params = case_data.molecule.get_steric_parameters(
         dummy_index=dummy_index,
         attached_index=attached_index,
-        radii=radii,
     )
     assert params.L == sterimol.L_value
     assert params.B1 == sterimol.B_1_value
@@ -56,14 +55,17 @@ def case_data(request) -> CaseData:
 
 @pytest.fixture
 def default_init_molecule(rdkit_molecule: rdkit.Mol) -> CaseData:
+    radii = (1.0, 1.0)
     return CaseData(
         atoms=tuple(atom.GetSymbol() for atom in rdkit_molecule.GetAtoms()),
         positions=rdkit_molecule.GetConformer(0).GetPositions(),
+        radii=radii,
         molecule=smores.Molecule(
             atoms=tuple(
                 atom.GetSymbol() for atom in rdkit_molecule.GetAtoms()
             ),
             positions=rdkit_molecule.GetConformer(0).GetPositions(),
+            radii=radii,
         ),
     )
 
@@ -74,11 +76,13 @@ def molecule_from_xyz_file(
     rdkit_molecule: rdkit.Mol,
 ) -> CaseData:
 
+    radii = (1.0, 1.0)
     rdkit.MolToXYZFile(rdkit_molecule, str(tmp_path / "molecule.xyz"))
     return CaseData(
         atoms=tuple(atom.GetSymbol() for atom in rdkit_molecule.GetAtoms()),
         positions=rdkit_molecule.GetConformer(0).GetPositions(),
-        molecule=smores.Molecule.from_xyz_file(tmp_path),
+        radii=radii,
+        molecule=smores.Molecule.from_xyz_file(tmp_path, radii),
     )
 
 
@@ -88,28 +92,32 @@ def molecule_from_mol_file(
     rdkit_molecule: rdkit.Mol,
 ) -> CaseData:
 
+    radii = (1.0, 1.0)
     rdkit.MolToMolFile(rdkit_molecule, str(tmp_path / "molecule.mol"))
     return CaseData(
         atoms=tuple(atom.GetSymbol() for atom in rdkit_molecule.GetAtoms()),
         positions=rdkit_molecule.GetConformer(0).GetPositions(),
-        molecule=smores.Molecule.from_mol_file(tmp_path),
+        radii=radii,
+        molecule=smores.Molecule.from_mol_file(tmp_path, radii),
     )
 
 
 @pytest.fixture
 def molecule_from_smiles(rdkit_molecule: rdkit.Mol) -> CaseData:
+    radii = (1.0, 1.0)
     return CaseData(
         atoms=tuple(atom.GetSymbol() for atom in rdkit_molecule.GetAtoms()),
         positions=rdkit_molecule.GetConformer(0).GetPositions(),
         molecule=smores.Molecule.from_smiles(
             smiles=rdkit.MolToSmiles(rdkit_molecule),
             positions=rdkit_molecule.GetConformer(0).GetPositions(),
+            radii=radii,
         ),
     )
 
 
 @pytest.fixture
 def rdkit_molecule() -> rdkit.Mol:
-    molecule = rdkit.MolFromSmiles("Br")
+    molecule = rdkit.AddHs(rdkit.MolFromSmiles("Br"))
     rdkit.EmbedMolecule(molecule, rdkit.ETKDGv3())
     return molecule
