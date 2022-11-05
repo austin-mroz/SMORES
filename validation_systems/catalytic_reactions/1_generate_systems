@@ -35,7 +35,7 @@ def main() -> None:
         dummy_index=0,
         attached_index=1,
     )
-    br.molecule._core_ids = (0,)
+    br.molecule._core_ids = frozenset((0,))
 
     substituents = (
         br,
