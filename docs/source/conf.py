@@ -29,6 +29,8 @@ intersphinx_mapping = {
     "numpy": ("https://numpy.org/doc/stable/", None),
 }
 
+autodoc_member_order = "groupwise"
+
 templates_path = ["_templates"]
 exclude_patterns = []
 
