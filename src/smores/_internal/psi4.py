@@ -2,10 +2,7 @@ import contextlib
 import itertools
 import os
 import pathlib
-import typing
 
-import numpy as np
-import numpy.typing as npt
 import psi4
 
 from smores._internal.esp_grid import ElectrostaticPotentialGrid
@@ -67,17 +64,17 @@ def calculate_electrostatic_potential(
         psi4.core.set_num_threads(num_threads)
 
         psi4_mol = psi4.core.Molecule.from_arrays(
-            self._coordinates, elem=self._elements
+            molecule.positions,
+            elem=molecule.atoms,
         )
         psi4.core.set_output_file(
-            str(output_directory.joinpath("output.dat")), False
+            str(output_directory.joinpath("output.dat")),
+            False,
         )
-        self.output = output_directory.joinpath("output.dat")
 
         if optimize:
             psi4.optimize("PBE", molecule=psi4_mol)
 
-        print("calculating ESP")
         E, wfn = psi4.prop(
             "PBE", molecule=psi4_mol, properties=["GRID_ESP"], return_wfn=True
         )

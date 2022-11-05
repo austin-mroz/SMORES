@@ -44,6 +44,11 @@ class EspMolecule:
 
     """
 
+    #: The atoms of the molecule.
+    atoms: tuple[str, ...]
+    #: The N x 3 position matrix of the molecule.
+    positions: npt.NDArray[np.float32]
+
     def __init__(
         self,
         atoms: typing.Iterable[str],
@@ -67,8 +72,8 @@ class EspMolecule:
 
         """
 
-        self._atoms = tuple(atoms)
-        self._postions = np.array(positions)
+        self.atoms = tuple(atoms)
+        self.positions = np.array(positions)
         self._electrostatic_potential = electrostatic_potential
 
     def get_steric_parameters(self) -> StericParameters:
@@ -95,8 +100,8 @@ class EspMolecule:
         path = pathlib.Path(path)
         cube_data = file_readers.read_cube_file(path)
         obj = cls.__new__(cls)
-        obj._atoms = cube_data.atoms
-        obj._postions = np.array(cube_data.positions)
+        obj.atoms = cube_data.atoms
+        obj.positions = np.array(cube_data.positions)
         obj._electrostatic_potential = cube_data.grid
         return obj
 
@@ -118,8 +123,8 @@ class EspMolecule:
         path = pathlib.Path(path)
         molecule_data = file_readers.read_mol_file(path)
         obj = cls.__new__(cls)
-        obj._atoms = molecule_data.atoms
-        obj._postions = np.array(molecule_data.positions)
+        obj.atoms = molecule_data.atoms
+        obj.positions = np.array(molecule_data.positions)
         obj._electrostatic_potential = electrostatic_potential
         return obj
 

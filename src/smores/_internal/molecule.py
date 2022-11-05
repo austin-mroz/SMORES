@@ -1,21 +1,13 @@
-import os
 import pathlib
 import typing
-from collections import abc
-from itertools import product
 
 import morfeus
 import numpy as np
 import numpy.typing as npt
-import psi4
 import rdkit.Chem.AllChem as rdkit
 
 from smores._internal.constants import streusel_radii
 from smores._internal.steric_parameters import StericParameters
-
-
-class InvalidDirectoryError(Exception):
-    pass
 
 
 class Molecule:
@@ -44,7 +36,10 @@ class Molecule:
 
     """
 
-    _atoms: abc.Sequence[str]
+    #: The atoms of the molecule.
+    atoms: tuple[str, ...]
+    #: The N x 3 position matrix of the molecule.
+    positions: npt.NDArray[np.float32]
 
     def __init__(
         self,
@@ -77,8 +72,8 @@ class Molecule:
         else:
             radii = np.array(radii)
 
-        self._atoms = tuple(atoms)
-        self._positions = np.array(positions)
+        self.atoms = tuple(atoms)
+        self.positions = np.array(positions)
         self._radii = radii
 
     @classmethod
@@ -106,13 +101,13 @@ class Molecule:
 
         instance = cls.__new__(cls)
         molecule = rdkit.MolFromXYZFile(str(path))
-        instance._atoms = tuple(
+        instance.atoms = tuple(
             atom.GetSymbol() for atom in molecule.GetAtoms()
         )
-        instance._positions = molecule.GetConformer(0).GetPositions()
+        instance.positions = molecule.GetConformer(0).GetPositions()
         if radii is None:
             instance._radii = np.array(
-                [streusel_radii[atom] for atom in instance._atoms]
+                [streusel_radii[atom] for atom in instance.atoms]
             )
         else:
             instance._radii = np.array(radii)
@@ -142,13 +137,13 @@ class Molecule:
 
         instance = cls.__new__(cls)
         molecule = rdkit.MolFromMolFile(str(path), removeHs=False)
-        instance._atoms = tuple(
+        instance.atoms = tuple(
             atom.GetSymbol() for atom in molecule.GetAtoms()
         )
-        instance._positions = molecule.GetConformer(0).GetPositions()
+        instance.positions = molecule.GetConformer(0).GetPositions()
         if radii is None:
             instance._radii = np.array(
-                [streusel_radii[atom] for atom in instance._atoms]
+                [streusel_radii[atom] for atom in instance.atoms]
             )
         else:
             instance._radii = np.array(radii)
@@ -186,7 +181,7 @@ rdkit.Chem.rdDistGeom.html#rdkit.Chem.rdDistGeom.ETKDGv3
 
         instance = cls.__new__(cls)
         molecule = rdkit.AddHs(rdkit.MolFromSmiles(smiles))
-        instance._atoms = tuple(
+        instance.atoms = tuple(
             atom.GetSymbol() for atom in molecule.GetAtoms()
         )
 
@@ -194,13 +189,13 @@ rdkit.Chem.rdDistGeom.html#rdkit.Chem.rdDistGeom.ETKDGv3
             params = rdkit.ETKDGv3()
             params.randomSeed = 4
             rdkit.EmbedMolecule(molecule, params)
-            instance._positions = molecule.GetConformer(0).GetPositions()
+            instance.positions = molecule.GetConformer(0).GetPositions()
         else:
-            instance._positions = np.array(positions)
+            instance.positions = np.array(positions)
 
         if radii is None:
             instance._radii = np.array(
-                [streusel_radii[atom] for atom in instance._atoms]
+                [streusel_radii[atom] for atom in instance.atoms]
             )
         else:
             instance._radii = np.array(radii)
@@ -232,8 +227,8 @@ rdkit.Chem.rdDistGeom.html#rdkit.Chem.rdDistGeom.ETKDGv3
         """
 
         sterimol = morfeus.Sterimol(
-            elements=self._atoms,
-            coordinates=self._positions,
+            elements=self.atoms,
+            coordinates=self.positions,
             dummy_index=dummy_index + 1,
             attached_index=attached_index + 1,
             radii=self._radii,
