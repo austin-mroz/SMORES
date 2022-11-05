@@ -3,12 +3,15 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to SMORES' documentation!
-=================================
+Welcome to SMORES!
+==================
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
+
+
+GiHub: https://github.com/austin-mroz/SMORES
 
 
 :mod:`smores` is a Python library which
@@ -17,13 +20,6 @@ Welcome to SMORES' documentation!
 It can lead to much better result than traditional
 steric metrics, because ... See the paper ...
 
-Installation
-............
-
-
-.. code-block:: bash
-
-  pip install smores
 
 
 Quickstart
@@ -70,14 +66,16 @@ You can get the SMORES steric parameters by running
       params.b5,
   )
 
-Which will calculate the parameters using the STREUSEL radii
+Which will calculate the parameters using the STREUSEL__ radii
 of the atoms.
+
+__ https://streusel.readthedocs.io
 
 
 .. seealso::
 
-  :class:`.Molecule`
-  :meth:`.Molecule.get_steric_parameters`
+  * :class:`.Molecule`
+  * :meth:`.Molecule.get_steric_parameters`
 
 More accurate paramters through electrostatic potentials
 ........................................................
@@ -92,12 +90,25 @@ potentials defined on a voxel grid
 
 .. testcode:: quickstart
 
-  molecule =
+  params = molecule.get_steric_parameters()
+  print(
+      params.l,
+      params.b1,
+      params.b5,
+  )
 
 .. seealso::
 
-  :class:`.EspMolecule`
-  :meth:`.EspMolecule.get_steric_parameters`
+  * :class:`.EspMolecule`
+  * :meth:`.EspMolecule.get_steric_parameters`
+
+Installation
+------------
+
+
+.. code-block:: bash
+
+  pip install smores
 
 
 Indices and tables
