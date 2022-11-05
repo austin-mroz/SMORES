@@ -39,6 +39,10 @@ def calculate_electrostatic_potential(
             Toggles the optimization of the molecular structure
             before the electrostatic potential is calculated.
 
+    Examples:
+
+        See :mod:`smores.psi4`.
+
     """
 
     if num_threads is None:
