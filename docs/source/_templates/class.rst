@@ -6,7 +6,9 @@
    :members:
    :show-inheritance:
    :inherited-members:
+    {%- if name not in ['ElectrostaticPotentialGrid', 'StericParameters']  %}
    :special-members: __init__, __call__, __add__, __mul__
+    {%- endif -%}
 
    {% block methods %}
    {% if methods %}

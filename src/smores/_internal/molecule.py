@@ -9,8 +9,6 @@ import numpy.typing as npt
 import psi4
 import rdkit.Chem.AllChem as rdkit
 
-from smores._internal import file_readers
-from smores._internal.esp_grid import ElectrostaticPotentialGrid
 from smores._internal.steric_parameters import StericParameters
 
 
@@ -32,20 +30,15 @@ class Molecule:
 
     Examples:
 
-        .. testcode:: get-steric-parameters
+        Using custom atomic radii
+
+        .. testcode:: custom-atomic-radii
 
             import smores
+            molecule = smores.Molecule.from_smiles("CBr")
+            params = molecule.get_steric_parameters({"C": 1.6})
 
-            molecule = smores.Molecule(
-                atoms=["H", "Br"],
-                positions=[[0., 0., 0.], [1.47, 0., 0.]],
-            )
-            params = molecule.get_steric_parameters()
 
-        .. testcode:: get-steric-parameters
-
-            molecule = smores.Molecule.from_smiles("Br")
-            params = molecule.get_steric_parameters()
 
     """
 
@@ -156,14 +149,24 @@ rdkit.Chem.rdDistGeom.html#rdkit.Chem.rdDistGeom.ETKDGv3
             instance._positions = np.array(positions)
         return instance
 
-    def get_steric_parameters(self) -> StericParameters:
+    def get_steric_parameters(
+        self,
+        radii: abc.Mapping[str, float] | None = None,
+    ) -> StericParameters:
         """
         Get the steric paramters from STREUSEL_ radii.
 
-        .. _STREUSEL: https://streusel.readthedocs.io
+
+        Parameters:
+            radii:
+                The atomic radii to use when calculating the steric
+                parameters. If ``None`` then standard STREUSEL
+                atomic radii will be used.
 
         Returns:
             The parameters.
+
+        .. _STREUSEL: https://streusel.readthedocs.io
 
         """
 

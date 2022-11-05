@@ -51,6 +51,12 @@ file formats
 
   molecule = smores.Molecule.from_xyz_file("my_molecule.xyz")
 
+or from SMILES
+
+.. testcode:: quickstart
+
+  molecule = smores.Molecule.from_smiles("CBr")
+
 or directy from atomic coordinates
 
 .. testcode:: quickstart
