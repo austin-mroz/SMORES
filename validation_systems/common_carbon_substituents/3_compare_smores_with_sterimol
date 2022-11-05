@@ -39,24 +39,32 @@ def main() -> None:
         num_failures = 0
         for molecule in tuple(_get_molecules(args.input_file)):
             sterimol = _get_sterimol(molecule)
-            smores = _get_smores(molecule)
-            result = _get_result(smores, sterimol, args.success_tolerance)
+            smores_molecule = smores.Molecule.from_xyz_file(molecule.xyz_file)
+            smores_params = smores_molecule.get_steric_parameters(
+                dummy_index=molecule.dummy_index,
+                attached_index=molecule.attached_index,
+            )
+            result = _get_result(
+                smores=smores_params,
+                sterimol=sterimol,
+                success_tolerance=args.success_tolerance,
+            )
             output_lines = (
                 f"NAME: {molecule.name}",
                 (
-                    f"  SMORES L:  {smores.L_value:.3f}   "
+                    f"  SMORES L:  {smores_params.L:.3f}   "
                     f"STERIMOL L:  {sterimol.L_value:.3f}   "
-                    f"DIFF: {abs(smores.L_value - sterimol.L_value):.3f}"
+                    f"DIFF: {abs(smores_params.L - sterimol.L_value):.3f}"
                 ),
                 (
-                    f"  SMORES B1: {smores.B_1_value:.3f}   "
+                    f"  SMORES B1: {smores_params.B1:.3f}   "
                     f"STERIMOL B1: {sterimol.B_1_value:.3f}   "
-                    f"DIFF: {abs(smores.B_1_value - sterimol.B_1_value):.3f}"
+                    f"DIFF: {abs(smores_params.B1 - sterimol.B_1_value):.3f}"
                 ),
                 (
-                    f"  SMORES B5: {smores.B_5_value:.3f}   "
+                    f"  SMORES B5: {smores_params.B5:.3f}   "
                     f"STERIMOL B5: {sterimol.B_5_value:.3f}   "
-                    f"DIFF: {abs(smores.B_5_value - sterimol.B_5_value):.3f}"
+                    f"DIFF: {abs(smores_params.B5 - sterimol.B_5_value):.3f}"
                 ),
                 f"RESULT: {result.value}",
             )
@@ -73,11 +81,11 @@ def main() -> None:
                     "xyz_file": molecule.xyz_file,
                     "dummy_index": molecule.dummy_index,
                     "attached_index": molecule.attached_index,
-                    "smores_L": smores.L_value,
+                    "smores_L": smores_params.L,
                     "sterimol_L": sterimol.L_value,
-                    "smores_B1": smores.B_1_value,
+                    "smores_B1": smores_params.B1,
                     "sterimol_B1": sterimol.B_1_value,
-                    "smores_B5": smores.B_5_value,
+                    "smores_B5": smores_params.B5,
                     "sterimol_B5": sterimol.B_5_value,
                 },
             )
@@ -126,26 +134,15 @@ def _get_sterimol(molecule: Molecule) -> morfeus.Sterimol:
     )
 
 
-def _get_smores(molecule: Molecule) -> morfeus.Sterimol:
-    elements, coordinates = morfeus.read_xyz(molecule.xyz_file)
-    return morfeus.Sterimol(
-        elements=elements,
-        coordinates=coordinates,
-        dummy_index=molecule.dummy_index + 1,
-        attached_index=molecule.attached_index + 1,
-        radii=[smores.streusel_radii[element] for element in elements],
-    )
-
-
 def _get_result(
-    smores: morfeus.Sterimol,
+    smores: smores.StericParameters,
     sterimol: morfeus.Sterimol,
     success_tolerance: float,
 ) -> Result:
 
-    l_diff = abs(smores.L_value - sterimol.L_value)
-    b1_diff = abs(smores.B_1_value - sterimol.B_1_value)
-    b5_diff = abs(smores.B_5_value - sterimol.B_5_value)
+    l_diff = abs(smores.L - sterimol.L_value)
+    b1_diff = abs(smores.B1 - sterimol.B_1_value)
+    b5_diff = abs(smores.B5 - sterimol.B_5_value)
     if (
         l_diff < success_tolerance
         and b1_diff < success_tolerance
