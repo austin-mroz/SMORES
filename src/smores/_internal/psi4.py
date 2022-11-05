@@ -5,7 +5,6 @@ import pathlib
 
 import psi4
 
-from smores._internal.esp_grid import ElectrostaticPotentialGrid
 from smores._internal.esp_molecule import EspMolecule
 from smores._internal.molecule import Molecule
 
@@ -13,7 +12,7 @@ from smores._internal.molecule import Molecule
 def calculate_electrostatic_potential(
     molecule: Molecule | EspMolecule,
     output_directory: pathlib.Path | str,
-    resolution: tuple[int, int, int] = (51, 51, 51),
+    grid_dimensions: tuple[int, int, int] = (51, 51, 51),
     num_threads: int | None = None,
     optimize: bool = False,
 ) -> None:
@@ -28,7 +27,7 @@ def calculate_electrostatic_potential(
         outupt_directory:
             The directory in which the calculations are run.
 
-        resolution:
+        grid_dimensions:
             The number of voxels in each dimension.
 
         num_threads:
@@ -51,7 +50,7 @@ def calculate_electrostatic_potential(
     output_directory = pathlib.Path(output_directory)
     output_directory.mkdir(parents=True, exist_ok=True)
 
-    _generate_voxel_grid(resolution, output_directory)
+    _generate_voxel_grid(grid_dimensions, output_directory)
 
     with _current_working_directory(output_directory):
         psi4.set_options(
@@ -76,7 +75,7 @@ def calculate_electrostatic_potential(
         if optimize:
             psi4.optimize("PBE", molecule=psi4_mol)
 
-        E, wfn = psi4.prop(
+        _, wfn = psi4.prop(  # type: ignore
             "PBE",
             molecule=psi4_mol,
             properties=["GRID_ESP"],
@@ -86,11 +85,11 @@ def calculate_electrostatic_potential(
 
 
 def _generate_voxel_grid(
-    resolution: tuple[int, int, int],
+    grid_dimensions: tuple[int, int, int],
     output_directory: pathlib.Path,
 ) -> None:
 
-    x, y, z = resolution
+    x, y, z = grid_dimensions
     # we want to make a box with one corner at (-5,5,5)A and one at
     # (5,5,5)A with a resolution of 0.2 A
     # this should be left to the user eventually
