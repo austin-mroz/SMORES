@@ -12,8 +12,23 @@ import numpy as np
 import numpy.typing as npt
 
 from smores._internal import file_readers
-from smores._internal.esp_grid import ElectrostaticPotentialGrid
-from smores._internal.steric_parameters import StericParameters
+from smores._internal.esp_grid import ElectrosaticPotentialGrid
+from smores.steric_parameters import StericParameters
+
+
+@dataclass(frozen=True, slots=True)
+class ElectrosaticPotentialGrid:
+    """
+    A 3-D grid of voxels holding electrostatic potentials.
+
+    Attributes:
+        grid: The voxel grid.
+        voxl_size: The length of a single voxel in each dimension.
+
+    """
+
+    grid: npt.ArrayLike
+    voxel_size: tuple[float, float, float]
 
 
 class EspMolecule:
@@ -29,7 +44,7 @@ class EspMolecule:
             molecule = smores.EspMolecule(
                 atoms=["H", "Br"],
                 positions=
-                electrostatic_potential=smores.ElectrostaticPotentialGrid(
+                electrostatic_potential=smores.ElectrosaticPotentialGrid(
                     grid=
                     voxel_size=
                 ),
@@ -46,7 +61,7 @@ class EspMolecule:
         self,
         atoms: typing.Iterable[str],
         positions: npt.ArrayLike,
-        electrostatic_potential: ElectrostaticPotentialGrid,
+        electrostatic_potential: ElectrosaticPotentialGrid,
     ) -> None:
         """
         Initialize a :class:`.EspMolecule`.
@@ -102,7 +117,7 @@ class EspMolecule:
     def from_mol_file(
         cls,
         path: pathlib.Path | str,
-        electrostatic_potential: ElectrostaticPotentialGrid,
+        electrostatic_potential: ElectrosaticPotentialGrid,
     ) -> "EspMolecule":
         """
         Get a molecule from a ``.mol`` file.
@@ -125,7 +140,7 @@ class EspMolecule:
     def from_xyz_file(
         cls,
         path: pathlib.Path | str,
-        electrostatic_potential: ElectrostaticPotentialGrid,
+        electrostatic_potential: ElectrosaticPotentialGrid,
     ) -> "EspMolecule":
         """
         Get a molecule from a ``.xyz`` file.
