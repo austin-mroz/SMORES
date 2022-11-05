@@ -36,7 +36,7 @@ def test_smores_parameters_match_sterimol_if_same_radii_are_used(
         dummy_index=dummy_index,
         attached_index=attached_index,
     )
-    assert params.L == pytest.approx(sterimol.L_value)
+    assert params.L == pytest.approx(sterimol.L_value, abs=1e-4)
     assert params.B1 == pytest.approx(sterimol.B_1_value)
     assert params.B5 == pytest.approx(sterimol.B_5_value)
 
@@ -100,7 +100,7 @@ def molecule_from_mol_file(
         atoms=tuple(atom.GetSymbol() for atom in rdkit_molecule.GetAtoms()),
         positions=rdkit_molecule.GetConformer(0).GetPositions(),
         radii=radii,
-        molecule=smores.Molecule.from_mol_file(tmp_path, radii),
+        molecule=smores.Molecule.from_mol_file(mol_file, radii),
     )
 
 

@@ -144,7 +144,7 @@ class Molecule:
         """
 
         instance = cls.__new__(cls)
-        molecule = rdkit.MolFromMolFile(str(path))
+        molecule = rdkit.MolFromMolFile(str(path), removeHs=False)
         instance._atoms = tuple(
             atom.GetSymbol() for atom in molecule.GetAtoms()
         )
