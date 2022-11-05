@@ -18,8 +18,7 @@ This module provides utility functions for using Psi4.
 
 Examples:
 
-    Use the electrostatic potential, to calculate the SMORES
-    parameters
+    Use the electrostatic potential to calculate the SMORES parameters
 
     .. testcode:: calculate-electrostatic-potential
 
