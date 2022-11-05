@@ -1,6 +1,7 @@
 import os
 import pathlib
 import typing
+from collections import abc
 from itertools import product
 
 import numpy as np
@@ -9,6 +10,7 @@ import psi4
 import rdkit.Chem.AllChem as rdkit
 
 from smores._internal import file_readers
+from smores._internal.esp_grid import ElectrostaticPotentialGrid
 from smores._internal.steric_parameters import StericParameters
 
 
@@ -18,14 +20,15 @@ class InvalidDirectoryError(Exception):
 
 class Molecule:
     """
-    Calculates :class:`.StericParameters` from STREUSEL__ radii.
+    Calculates :class:`.StericParameters` from `STREUSEL`_ radii.
 
 
-    __ https://streusel.readthedocs.io
+    .. _STREUSEL: https://streusel.readthedocs.io
 
     See also:
 
-        * :class:`.EspMolecule`
+        * :class:`.EspMolecule`: For calculating steric parameters
+          from electrostatic potentials.
 
     Examples:
 
@@ -46,6 +49,8 @@ class Molecule:
 
     """
 
+    _atoms: abc.Sequence[str]
+
     def __init__(
         self,
         atoms: typing.Iterable[str],
@@ -65,7 +70,7 @@ class Molecule:
         """
 
         self._atoms = tuple(atoms)
-        self._postions = np.array(positions)
+        self._positions = np.array(positions)
 
     @classmethod
     def from_xyz_file(
@@ -82,24 +87,19 @@ class Molecule:
 
         """
 
-        path = pathlib.Path(path)
-
         instance = cls.__new__(cls)
-        xyz_data = utilities.read_xyz(path)
-        instance._elements = xyz_data.elements
-        center_of_mass = _get_center_of_mass(
-            instance._elements,
-            xyz_data.coordinates,
+        molecule = rdkit.MolFromXYZFile(str(path))
+        instance._atoms = tuple(
+            atom.GetSymbol() for atom in molecule.GetAtoms()
         )
-        instance._coordinates = xyz_data.coordinates - center_of_mass
+        instance._positions = molecule.GetConformer(0).GetPositions()
         return instance
 
     @classmethod
     def from_mol_file(
         cls,
         path: pathlib.Path | str,
-        electrostatic_potential: ElectrostaticPotentialGrid,
-    ) -> "EspMolecule":
+    ) -> "Molecule":
         """
         Get a molecule from a ``.mol`` file.
 
@@ -109,12 +109,13 @@ class Molecule:
             The molecule.
         """
 
-        path = pathlib.Path(path)
-        molecule_data = file_readers.read_mol_file(path)
-        obj = cls.__new__(cls)
-        obj._atoms = molecule_data.atoms
-        obj._postions = np.array(molecule_data.positions)
-        return obj
+        instance = cls.__new__(cls)
+        molecule = rdkit.MolFromMolFile(str(path))
+        instance._atoms = tuple(
+            atom.GetSymbol() for atom in molecule.GetAtoms()
+        )
+        instance._positions = molecule.GetConformer(0).GetPositions()
+        return instance
 
     @classmethod
     def from_smiles(
@@ -133,9 +134,10 @@ class Molecule:
             positions:
                 The coordinates of each atom of the moleclue.
                 If ``None`` then the molecule will have its
-                coordinates calculated with ETKDG__.
+                coordinates calculated with ETKDG_.
 
-        __ https://www.rdkit.org/docs/source/rdkit.Chem.rdDistGeom.html#rdkit.Chem.rdDistGeom.ETKDGv3
+        .. _ETKDG: https://www.rdkit.org/docs/source/\
+rdkit.Chem.rdDistGeom.html#rdkit.Chem.rdDistGeom.ETKDGv3
 
 
         """
@@ -152,12 +154,13 @@ class Molecule:
             instance._positions = molecule.GetConformer(0).GetPositions()
         else:
             instance._positions = np.array(positions)
+        return instance
 
     def get_steric_parameters(self) -> StericParameters:
         """
-        Get the steric paramters from STREUSEL__ radii.
+        Get the steric paramters from STREUSEL_ radii.
 
-        __ https://streusel.readthedocs.io
+        .. _STREUSEL: https://streusel.readthedocs.io
 
         Returns:
             The parameters.

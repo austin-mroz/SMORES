@@ -21,7 +21,10 @@ class EspMolecule:
 
     See Also:
 
-        * :class:`.Molecule`
+        * :class:`.Molecule`: For calculating steric parameters from
+          STREUSEL__ radii.
+
+    __ https://streusel.readthedocs.io
 
     Examples:
 
@@ -49,7 +52,7 @@ class EspMolecule:
         electrostatic_potential: ElectrostaticPotentialGrid,
     ) -> None:
         """
-        Initialize a :class:`.EspMolecule`.
+        Initialize an :class:`.EspMolecule`.
 
         Parameters:
 

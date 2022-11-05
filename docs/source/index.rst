@@ -65,11 +65,7 @@ You can get the SMORES steric parameters by running
 .. testcode:: quickstart
 
   params = molecule.get_steric_parameters()
-  print(
-      params.L,
-      params.B1,
-      params.B5,
-  )
+  print(params.L, params.B1, params.B5)
 
 Which will calculate the parameters using the STREUSEL__ radii
 of the atoms.
@@ -81,32 +77,6 @@ __ https://streusel.readthedocs.io
 
   * :class:`.Molecule`
   * :meth:`.Molecule.get_steric_parameters`
-
-Using electrostatic potentials
-------------------------------
-
-:mod:`smores` can also calculate the steric parameters using electrostatic
-potentials defined on a voxel grid
-
-.. testcode:: quickstart
-
-  molecule = smores.EspMolecule.from_cube_file("my_molecule.cube")
-
-
-.. testcode:: quickstart
-
-  params = molecule.get_steric_parameters()
-  print(
-      params.L,
-      params.B1,
-      params.B5,
-  )
-
-.. seealso::
-
-  * :class:`.EspMolecule`
-  * :meth:`.EspMolecule.get_steric_parameters`
-
 
 Loading with atomic numbers
 ---------------------------
@@ -120,6 +90,30 @@ atomic elements, fortunately we have you covered
       atoms=smores.atomic_numbers_to_elements([1, 35]),
       positions=[[0., 0., 0.], [1.47, 0., 0.]],
   )
+
+Using electrostatic potentials
+------------------------------
+
+:mod:`smores` can also calculate the steric parameters using electrostatic
+potentials defined on a voxel grid
+
+.. testcode:: quickstart
+
+  molecule = smores.EspMolecule.from_cube_file("my_molecule.cube")
+  params = molecule.get_steric_parameters()
+  print(params.L, params.B1, params.B5)
+
+.. tip::
+
+  There are more ways to initialize an :class:`.EspMolecule`! See the
+  documentation of the class for details.
+
+.. seealso::
+
+  * :class:`.EspMolecule`
+  * :meth:`.EspMolecule.get_steric_parameters`
+
+
 
 
 
