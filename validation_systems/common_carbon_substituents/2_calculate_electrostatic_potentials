@@ -7,6 +7,7 @@ import typing
 from dataclasses import dataclass
 
 import smores
+import smores.psi4
 
 _OUTPUT_CSV_COLUMNS = (
     "name",
@@ -31,9 +32,13 @@ def main() -> None:
         if not calculation_directory.exists():
 
             try:
-                molecule = smores.Molecule(molecule_input.smiles)
-                molecule.calculate_electrostatic_potential(
-                    calculation_directory,
+                molecule = smores.Molecule.from_smiles(molecule_input.smiles)
+                smores.psi4.calculate_electrostatic_potential(
+                    molecule=molecule,
+                    output_directory=calculation_directory,
+                    grid_origin=(-5, -5, -5),
+                    grid_length=10.0,
+                    num_voxels_per_dimension=50,
                     optimize=True,
                 )
                 _append_to_csv(
