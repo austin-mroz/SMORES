@@ -33,7 +33,7 @@
 
    .. autosummary::
       :toctree:
-      :template: custom-class-template.rst
+      :template: class.rst
       :nosignatures:
    {% for item in classes %}
       {{ item }}

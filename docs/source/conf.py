@@ -18,9 +18,15 @@ extensions = [
     "sphinx.ext.doctest",
     "sphinx.ext.napoleon",
     "sphinx.ext.autosummary",
+    "sphinx.ext.intersphinx",
 ]
 
-autosummary_generate = True
+autosummary_imported_members = True
+
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3", None),
+    "numpy": ("https://numpy.org/doc/stable/", None),
+}
 
 templates_path = ["_templates"]
 exclude_patterns = []

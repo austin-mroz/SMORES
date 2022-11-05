@@ -1,17 +1,15 @@
 from __future__ import annotations
 
+import logging
 import os
 import pathlib
 from itertools import product
-import logging
 
 import numpy as np
-import numpy.typing as npt
 import psi4
 import rdkit.Chem.AllChem as AllChem
 
-from . import utilities
-from . import constants
+from . import constants, utilities
 
 
 class InvalidDirectoryError(Exception):
@@ -36,7 +34,6 @@ class Molecule:
         center_of_mass = _get_center_of_mass(self._elements, rdkit_coordinates)
         self._coordinates = rdkit_coordinates - center_of_mass
 
-
     @classmethod
     def init_from_xyz(
         cls,
@@ -57,11 +54,10 @@ class Molecule:
         instance._coordinates = xyz_data.coordinates - center_of_mass
         return instance
 
-
     def generate_xtb_starting_structure(
-            self,
-            output_directory: pathlib.Path | str,
-            xyz_file_name: str = "initial_structure",
+        self,
+        output_directory: pathlib.Path | str,
+        xyz_file_name: str = "initial_structure",
     ) -> None:
 
         # create the output directory
@@ -71,15 +67,14 @@ class Molecule:
 
         # write the xyz file with the updated coordinates
         xyz_data = utilities.XyzData(
-                elements=self._elements,
-                coordinates=self._coordinates,
+            elements=self._elements,
+            coordinates=self._coordinates,
         )
         xyz_path = output_directory.joinpath(f"{xyz_file_name}.xyz")
         utilities.write_xyz(
-                xyz_path,
-                xyz_data,
+            xyz_path,
+            xyz_data,
         )
-
 
     def _generate_voxel_grid(
         self,
@@ -105,7 +100,6 @@ class Molecule:
                 for c in xyz:
                     file.write(str(c) + " ")
                 file.write("\n")
-
 
     def calculate_electrostatic_potential(
         self,

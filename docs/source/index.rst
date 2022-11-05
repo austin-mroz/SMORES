@@ -11,15 +11,9 @@ Welcome to SMORES!
   :maxdepth: 2
   :caption: API
 
-  Molecule <_autosummary/smores.molecule>
-  EspMolecule
-
-.. toctree::
-  :hidden:
-  :maxdepth: 2
-
-  modules
-
+  Molecule <_autosummary/smores.Molecule>
+  EspMolecule <_autosummary/smores.EspMolecule>
+  Modules <modules>
 
 GiHub: https://github.com/austin-mroz/SMORES
 

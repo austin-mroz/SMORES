@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+import numpy as np
 import numpy.typing as npt
 
 
@@ -8,11 +9,9 @@ class ElectrostaticPotentialGrid:
     """
     A 3-D grid of voxels holding electrostatic potentials.
 
-    Attributes:
-        grid: The voxel grid.
-        voxl_size: The length of a single voxel in each dimension.
-
     """
 
-    grid: npt.ArrayLike
+    #: The voxel grid, represented as a 3-D array.
+    grid: npt.NDArray[np.float32]
+    #: The length of a single voxel along the x, y and z dimensions.
     voxel_size: tuple[float, float, float]
