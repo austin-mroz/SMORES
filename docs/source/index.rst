@@ -13,6 +13,7 @@ Welcome to SMORES!
 
   Molecule <_autosummary/smores.Molecule>
   EspMolecule <_autosummary/smores.EspMolecule>
+  Psi4 <_autosummary/smores.psi4>
   Modules <modules>
 
 GiHub: https://github.com/austin-mroz/SMORES
@@ -71,16 +72,13 @@ or directy from atomic coordinates
 
 .. testcode:: quickstart
 
-  molecule = smores.Molecule(
-      atoms=["He"],
-      positions=[[0., 0., 0.]],
-  )
+  molecule = smores.Molecule(atoms=["He"], positions=[[0., 0., 0.]])
 
 You can get the SMORES steric parameters by running
 
 .. testcode:: quickstart
 
-  params = molecule.get_steric_parameters()
+  params = molecule.get_steric_parameters(dummy_index=0, attached_index=1)
   print(params.L, params.B1, params.B5)
 
 Which will calculate the parameters using the STREUSEL__ radii

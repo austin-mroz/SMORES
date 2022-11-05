@@ -20,10 +20,7 @@ class InvalidDirectoryError(Exception):
 
 class Molecule:
     """
-    Calculates :class:`.StericParameters` from `STREUSEL`_ radii.
-
-
-    .. _STREUSEL: https://streusel.readthedocs.io
+    Calculates :class:`.StericParameters` from STREUSEL radii.
 
     See also:
 

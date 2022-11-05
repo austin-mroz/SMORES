@@ -7,4 +7,5 @@ __all__ = [
     "EspMolecule",
     "Molecule",
     "ElectrostaticPotentialGrid",
+    "StericParameters",
 ]

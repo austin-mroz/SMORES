@@ -1,17 +1,100 @@
+import contextlib
+import itertools
+import os
+import pathlib
+import typing
+
+import numpy as np
+import numpy.typing as npt
+import psi4
+
+from smores._internal.esp_grid import ElectrostaticPotentialGrid
+from smores._internal.esp_molecule import EspMolecule
+from smores._internal.molecule import Molecule
+
+
+def calculate_electrostatic_potential(
+    molecule: Molecule | EspMolecule,
+    output_directory: pathlib.Path | str,
+    resolution: tuple[int, int, int] = (51, 51, 51),
+    num_threads: int | None = None,
+    optimize: bool = False,
+) -> ElectrostaticPotentialGrid:
+    """
+    Calculate the electrostatic potential.
+
+    Parameters:
+
+        molecule:
+            The molecule to optimize.
+
+        outupt_directory:
+            The directory in which the calculations are run.
+
+        resolution:
+            The number of voxels in each dimension.
+
+        num_threads:
+            The number of threads to use in parallel calculations.
+            If ``None``, :func:`os.cpu_count` is used.
+
+        optimize:
+            Toggles the optimization of the molecular structure
+            before the electrostatic potential is calculated.
+
+    Returns:
+
+
+    """
+
+    if num_threads is None:
+        num_threads = os.cpu_count()
+
+    output_directory = pathlib.Path(output_directory)
+    output_directory.mkdir(parents=True, exist_ok=True)
+
+    _generate_voxel_grid(resolution, output_directory)
+
+    with _current_working_directory(output_directory):
+        psi4.set_options(
+            {
+                "basis": "aug-cc-pVDZ",
+                "CUBEPROP_TASKS": ["ESP"],
+                "CUBEPROP_FILEPATH": str(output_directory),
+                "reference": "uhf",
+            }
+        )
+        psi4.core.set_num_threads(num_threads)
+
+        psi4_mol = psi4.core.Molecule.from_arrays(
+            self._coordinates, elem=self._elements
+        )
+        psi4.core.set_output_file(
+            str(output_directory.joinpath("output.dat")), False
+        )
+        self.output = output_directory.joinpath("output.dat")
+
+        if optimize:
+            psi4.optimize("PBE", molecule=psi4_mol)
+
+        print("calculating ESP")
+        E, wfn = psi4.prop(
+            "PBE", molecule=psi4_mol, properties=["GRID_ESP"], return_wfn=True
+        )
+        psi4.cubeprop(wfn)
+
+
 def _generate_voxel_grid(
-    self,
-    resolution: int,
+    resolution: tuple[int, int, int],
     output_directory: pathlib.Path,
 ) -> None:
+
+    x, y, z = resolution
     # we want to make a box with one corner at (-5,5,5)A and one at
     # (5,5,5)A with a resolution of 0.2 A
     # this should be left to the user eventually
     grid_xyz_coords = []
-    for i, j, k in product(
-        range(resolution),
-        range(resolution),
-        range(resolution),
-    ):
+    for i, j, k in itertools.product(range(x), range(y), range(z)):
         itrans = -5 + 0.2 * i
         jtrans = -5 + 0.2 * j
         ktrans = -5 + 0.2 * k
@@ -24,47 +107,11 @@ def _generate_voxel_grid(
             file.write("\n")
 
 
-def calculate_electrostatic_potential(
-    self,
-    output_directory: pathlib.Path | str,
-    resolution: int = 51,
-    num_threads: int = 14,
-    optimize: bool = False,
-) -> None:
-
-    output_directory = pathlib.Path(output_directory)
-    _create_directory(output_directory)
-
-    self._generate_voxel_grid(resolution, output_directory)
+@contextlib.contextmanager
+def _current_working_directory(directory: pathlib.Path):
     original_directory = os.getcwd()  # aka OGD
-    os.chdir(output_directory)
-
-    psi4.set_options(
-        {
-            "basis": "aug-cc-pVDZ",
-            "CUBEPROP_TASKS": ["ESP"],
-            "CUBEPROP_FILEPATH": str(output_directory),
-            "reference": "uhf",
-        }
-    )
-    psi4.core.set_num_threads(num_threads)
-
-    psi4_mol = psi4.core.Molecule.from_arrays(
-        self._coordinates, elem=self._elements
-    )
-    psi4.core.set_output_file(
-        str(output_directory.joinpath("output.dat")), False
-    )
-    self.output = output_directory.joinpath("output.dat")
-
-    if optimize:
-        print("optimizing!")
-        psi4.optimize("PBE", molecule=psi4_mol)
-
-    print("calculating ESP")
-    E, wfn = psi4.prop(
-        "PBE", molecule=psi4_mol, properties=["GRID_ESP"], return_wfn=True
-    )
-    psi4.cubeprop(wfn)
-
-    os.chdir(original_directory)
+    try:
+        os.chdir(directory)
+        yield
+    finally:
+        os.chdir(original_directory)
