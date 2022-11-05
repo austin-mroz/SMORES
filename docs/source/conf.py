@@ -30,6 +30,8 @@ intersphinx_mapping = {
 }
 
 autodoc_member_order = "groupwise"
+autodoc_typehints = "description"
+autoclass_content = "both"
 
 templates_path = ["_templates"]
 exclude_patterns = []

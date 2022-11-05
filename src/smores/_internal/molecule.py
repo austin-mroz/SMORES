@@ -44,21 +44,21 @@ class Molecule:
     def __init__(
         self,
         atoms: typing.Iterable[str],
-        positions: npt.NDArray[np.float32],
-        radii: npt.NDArray[np.float32] | None = None,
+        positions: npt.ArrayLike,
+        radii: npt.ArrayLike | None = None,
     ) -> None:
         """
         Initialize a :class:`.Molecule`.
 
         Parameters:
 
-            atoms:
+            atoms (list[str]):
                 The elemental symbol of each atom of the molecule.
 
-            positions:
+            positions (list[list[float]]):
                 The coordinates of each atom of the molecule.
 
-            radii:
+            radii (list[float]):
                 The radius of each atom of the molecule. If
                 ``None`` the STREUSEL_ radii will be used.
 
@@ -80,7 +80,7 @@ class Molecule:
     def from_xyz_file(
         cls,
         path: pathlib.Path | str,
-        radii: npt.NDArray[np.float32] | None = None,
+        radii: npt.ArrayLike | None = None,
     ) -> "Molecule":
         """
         Get a molecule from a ``.xyz`` file.
@@ -90,7 +90,7 @@ class Molecule:
             path:
                 The path to the file.
 
-            radii:
+            radii (list[float]):
                 The radius of each atom of the molecule. If
                 ``None`` the STREUSEL_ radii will be used.
 
@@ -117,7 +117,7 @@ class Molecule:
     def from_mol_file(
         cls,
         path: pathlib.Path | str,
-        radii: npt.NDArray[np.float32] | None = None,
+        radii: npt.ArrayLike | None = None,
     ) -> "Molecule":
         """
         Get a molecule from a ``.mol`` file.
@@ -127,7 +127,7 @@ class Molecule:
             path:
                 The path to the file.
 
-            radii:
+            radii (list[float]):
                 The radius of each atom of the molecule. If
                 ``None`` the STREUSEL_ radii will be used.
 
@@ -153,8 +153,8 @@ class Molecule:
     def from_smiles(
         cls,
         smiles: str,
-        positions: npt.NDArray[np.float32] | None = None,
-        radii: npt.NDArray[np.float32] | None = None,
+        positions: npt.ArrayLike | None = None,
+        radii: npt.ArrayLike | None = None,
     ) -> "Molecule":
         """
         Get a molecule from a SMILES string.
@@ -164,12 +164,12 @@ class Molecule:
             smiles:
                 The SMILES of the molecule.
 
-            positions:
+            positions (list[list[float]]):
                 The coordinates of each atom of the moleclue.
                 If ``None`` then the molecule will have its
                 coordinates calculated with ETKDG_.
 
-            radii:
+            radii (list[float]):
                 The radius of each atom of the molecule. If
                 ``None`` the STREUSEL_ radii will be used.
 
