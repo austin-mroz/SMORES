@@ -6,3 +6,4 @@ method_tests/efield_generation/res_check
 timer.dat
 docs/build
 docs/source/_autosummary
+.coverage
