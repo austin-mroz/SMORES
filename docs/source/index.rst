@@ -89,14 +89,14 @@ __ https://streusel.readthedocs.io
 .. tip::
 
   The radii which are used can be modified by the user! See
-  the documentation of * :meth:`.Molecule.get_steric_parameters`
+  the documentation of :meth:`.Molecule.get_steric_parameters`
   for more details.
 
 
 .. seealso::
 
-  * :class:`.Molecule`
-  * :meth:`.Molecule.get_steric_parameters`
+  * :class:`.Molecule`: For additional documentation and examples.
+  * :meth:`.Molecule.get_steric_parameters`: For configuration options.
 
 Loading with atomic numbers
 ---------------------------
@@ -126,6 +126,6 @@ potentials defined on a voxel grid
 
 .. seealso::
 
-  * :class:`.EspMolecule`
-  * :meth:`.EspMolecule.get_steric_parameters`
+  * :class:`.EspMolecule`: For additional documentation and examples.
+  * :meth:`.EspMolecule.get_steric_parameters`: For configuration options.
   * :mod:`smores.psi4`: For using Psi4 to make ``.cube`` files.
