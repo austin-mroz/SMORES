@@ -151,6 +151,8 @@ rdkit.Chem.rdDistGeom.html#rdkit.Chem.rdDistGeom.ETKDGv3
 
     def get_steric_parameters(
         self,
+        dummy_index: int,
+        attached_index: int,
         radii: abc.Mapping[str, float] | None = None,
     ) -> StericParameters:
         """
@@ -158,6 +160,13 @@ rdkit.Chem.rdDistGeom.html#rdkit.Chem.rdDistGeom.ETKDGv3
 
 
         Parameters:
+
+            dummy_index:
+                The index of the dummy atom.
+
+            attached_index:
+                The index of the attached atom of the substituent.
+
             radii:
                 The atomic radii to use when calculating the steric
                 parameters. If ``None`` then standard STREUSEL
