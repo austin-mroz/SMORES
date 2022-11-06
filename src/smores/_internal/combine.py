@@ -19,6 +19,7 @@ def rdkit_from_smiles(smiles: str) -> rdkit.Mol:
 
     molecule = rdkit.AddHs(rdkit.MolFromSmiles(smiles))
     _optimize(molecule)
+    rdkit.Kekulize(molecule)
     return molecule
 
 

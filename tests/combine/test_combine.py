@@ -4,9 +4,18 @@ import rdkit.Chem.AllChem as rdkit
 import smores
 
 
+@pytest.mark.parametrize(
+    ("core_smiles", "substituent_smiles", "expected_product_smiles"),
+    (
+        ("CC[Sn]Br", "CC[Ge]Br", "CC[Sn][Ge]CC"),
+        ("Br[Sn]CC", "Br[Ge]CC", "CC[Sn][Ge]CC"),
+        ("CC[Sn](Br)CC", "CC[Ge](Br)CC", "CC[Sn](CC)[Ge](CC)CC"),
+    ),
+)
 def test_combine(
     core_smiles: str,
     substituent_smiles: str,
+    expected_product_smiles: str,
 ) -> None:
 
     core = smores.rdkit_from_smiles(core_smiles)
@@ -15,61 +24,27 @@ def test_combine(
     expected_dummy_index = next(
         atom.GetIdx()
         for atom in combo.product.GetAtoms()
-        if atom.GetSymbol() == "Si"
+        if atom.GetSymbol() == "Sn"
     )
     expected_attached_index = next(
         atom.GetIdx()
         for atom in combo.product.GetAtoms()
         if atom.GetSymbol() == "Ge"
     )
-    assert core is combo.core
-    assert substituent is combo.substituent
+    assert combo.core is core
+    assert combo.substituent is substituent
 
-    expected_product_smiles = _get_expected_product_smiles(
-        core_smiles, substituent_smiles
-    )
-    assert expected_product_smiles == rdkit.MolToSmiles(
-        combo.product,
+    rdkit.SanitizeMol(combo.product)
+    expected_product_smiles = _to_canonical_smiles(expected_product_smiles)
+    product_smiles = rdkit.MolToSmiles(
+        rdkit.RemoveHs(combo.product),
         canonical=True,
     )
 
-    assert expected_dummy_index == combo.dummy_index
-    assert expected_attached_index == combo.attached_index
+    assert product_smiles == expected_product_smiles
+    assert combo.dummy_index == expected_dummy_index
+    assert combo.attached_index == expected_attached_index
 
 
-def _get_expected_product_smiles(
-    core_smiles: str,
-    substituent_smiles: str,
-) -> str:
-
-    product_smiles = core_smiles.replace(
-        "Br",
-        substituent_smiles.replace("Br", "").replace("()", ""),
-    )
-    return rdkit.MolToSmiles(
-        rdkit.MolFromSmiles(product_smiles),
-        canonical=True,
-    )
-
-
-@pytest.fixture(
-    params=(
-        "CCC[Si]Br",
-        "Br[Si]CCC",
-        "CCC[Si](Br)CCC",
-        # "c1cccc[si]1Br"
-    ),
-)
-def core_smiles(request) -> str:
-    return request.param
-
-
-@pytest.fixture(
-    params=(
-        "CCC[Ge]Br",
-        "Br[Ge]CCC",
-        "CCC[Ge](Br)CCC",
-    ),
-)
-def substituent_smiles(request) -> str:
-    return request.param
+def _to_canonical_smiles(smiles: str) -> str:
+    return rdkit.MolToSmiles(rdkit.MolFromSmiles(smiles), canonical=True)
