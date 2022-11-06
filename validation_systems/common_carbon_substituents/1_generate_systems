@@ -36,6 +36,8 @@ def main() -> None:
             csv_file,
             fieldnames=[
                 "name",
+                "core",
+                "substituent",
                 "smiles",
                 "dummy_index",
                 "attached_index",
@@ -50,6 +52,8 @@ def main() -> None:
             writer.writerow(
                 {
                     "name": name,
+                    "core": cores[combo.core],
+                    "substituent": substituents[combo.substituent],
                     "smiles": rdkit.MolToSmiles(
                         rdkit.RemoveHs(combo.product),
                         canonical=True,
