@@ -2,24 +2,25 @@ import contextlib
 import itertools
 import os
 import pathlib
+import typing
 
 import numpy as np
 import numpy.typing as npt
 import psi4
+import rdkit.Chem.AllChem as rdkit
 
 from smores._internal.constants import atomic_mass
-from smores._internal.esp_molecule import EspMolecule
-from smores._internal.molecule import Molecule
 
 
 def calculate_electrostatic_potential(
-    molecule: Molecule | EspMolecule,
+    molecule: rdkit.Mol,
     output_directory: pathlib.Path | str,
     grid_origin: tuple[float, float, float],
     grid_length: float,
     num_voxels_per_dimension: int,
     num_threads: int | None = None,
     optimize: bool = False,
+    conformer_id: int = 0,
 ) -> None:
     """
     Calculate the electrostatic potential.
@@ -27,7 +28,8 @@ def calculate_electrostatic_potential(
     Parameters:
 
         molecule:
-            The molecule to optimize.
+            The molecule to optimize. Must have at
+            least one conformer.
 
         output_directory:
             The directory in which the calculations are run.
@@ -48,6 +50,9 @@ def calculate_electrostatic_potential(
         optimize:
             Toggles the optimization of the molecular structure
             before the electrostatic potential is calculated.
+
+        conformer_id:
+            The conformer of `molecule` to use.
 
     Examples:
 
@@ -79,13 +84,15 @@ def calculate_electrostatic_potential(
         )
         psi4.core.set_num_threads(num_threads)
 
+        elements = [atom.GetSymbol() for atom in molecule.GetAtoms()]
+        coordinates = molecule.GetConformer(conformer_id).GetPositions()
         center_of_mass = _get_center_of_mass(
-            elements=molecule.atoms,
-            coordinates=molecule.positions,
+            elements=elements,
+            coordinates=coordinates,
         )
         psi4_mol = psi4.core.Molecule.from_arrays(
-            molecule.positions - center_of_mass,
-            elem=molecule.atoms,
+            coordinates - center_of_mass,
+            elem=elements,
         )
         psi4.core.set_output_file(
             str(output_directory.joinpath("output.dat")),
@@ -133,7 +140,7 @@ def _generate_voxel_grid(
 
 
 def _get_center_of_mass(
-    elements: tuple[str, ...],
+    elements: typing.Iterable[str],
     coordinates: npt.NDArray[np.float32],
 ) -> npt.NDArray[np.float32]:
 

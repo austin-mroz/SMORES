@@ -32,9 +32,9 @@ class Molecule:
     """
 
     #: The atoms of the molecule.
-    atoms: tuple[str, ...]
+    _atoms: tuple[str, ...]
     #: The N x 3 position matrix of the molecule.
-    positions: npt.NDArray[np.float32]
+    _positions: npt.NDArray[np.float32]
 
     def __init__(
         self,
@@ -68,8 +68,8 @@ class Molecule:
         else:
             radii = np.array(radii)
 
-        self.atoms = tuple(atoms)
-        self.positions = np.array(positions)
+        self._atoms = tuple(atoms)
+        self._positions = np.array(positions)
         self._radii = radii
 
     @classmethod
@@ -97,13 +97,13 @@ class Molecule:
 
         instance = cls.__new__(cls)
         molecule = rdkit.MolFromXYZFile(str(path))
-        instance.atoms = tuple(
+        instance._atoms = tuple(
             atom.GetSymbol() for atom in molecule.GetAtoms()
         )
-        instance.positions = molecule.GetConformer(0).GetPositions()
+        instance._positions = molecule.GetConformer(0).GetPositions()
         if radii is None:
             instance._radii = np.array(
-                [streusel_radii[atom] for atom in instance.atoms]
+                [streusel_radii[atom] for atom in instance._atoms]
             )
         else:
             instance._radii = np.array(radii)
@@ -133,13 +133,13 @@ class Molecule:
 
         instance = cls.__new__(cls)
         molecule = rdkit.MolFromMolFile(str(path), removeHs=False)
-        instance.atoms = tuple(
+        instance._atoms = tuple(
             atom.GetSymbol() for atom in molecule.GetAtoms()
         )
-        instance.positions = molecule.GetConformer(0).GetPositions()
+        instance._positions = molecule.GetConformer(0).GetPositions()
         if radii is None:
             instance._radii = np.array(
-                [streusel_radii[atom] for atom in instance.atoms]
+                [streusel_radii[atom] for atom in instance._atoms]
             )
         else:
             instance._radii = np.array(radii)
@@ -180,7 +180,7 @@ rdkit.Chem.rdDistGeom.html#rdkit.Chem.rdDistGeom.ETKDGv3
 
         instance = cls.__new__(cls)
         molecule = rdkit.AddHs(rdkit.MolFromSmiles(smiles))
-        instance.atoms = tuple(
+        instance._atoms = tuple(
             atom.GetSymbol() for atom in molecule.GetAtoms()
         )
 
@@ -188,13 +188,13 @@ rdkit.Chem.rdDistGeom.html#rdkit.Chem.rdDistGeom.ETKDGv3
             params = rdkit.ETKDGv3()
             params.randomSeed = 4
             rdkit.EmbedMolecule(molecule, params)
-            instance.positions = molecule.GetConformer(0).GetPositions()
+            instance._positions = molecule.GetConformer(0).GetPositions()
         else:
-            instance.positions = np.array(positions)
+            instance._positions = np.array(positions)
 
         if radii is None:
             instance._radii = np.array(
-                [streusel_radii[atom] for atom in instance.atoms]
+                [streusel_radii[atom] for atom in instance._atoms]
             )
         else:
             instance._radii = np.array(radii)
@@ -231,14 +231,16 @@ rdkit.Chem.rdDistGeom.html#rdkit.Chem.rdDistGeom.ETKDGv3
         """
 
         instance = cls.__new__(cls)
-        instance.atoms = tuple(
+        instance._atoms = tuple(
             atom.GetSymbol() for atom in molecule.GetAtoms()
         )
-        instance.positions = molecule.GetConformer(conformer_id).GetPositions()
+        instance._positions = molecule.GetConformer(
+            conformer_id
+        ).GetPositions()
 
         if radii is None:
             instance._radii = np.array(
-                [streusel_radii[atom] for atom in instance.atoms]
+                [streusel_radii[atom] for atom in instance._atoms]
             )
         else:
             instance._radii = np.array(radii)
@@ -270,8 +272,8 @@ rdkit.Chem.rdDistGeom.html#rdkit.Chem.rdDistGeom.ETKDGv3
         """
 
         sterimol = morfeus.Sterimol(
-            elements=self.atoms,
-            coordinates=self.positions,
+            elements=self._atoms,
+            coordinates=self._positions,
             dummy_index=dummy_index + 1,
             attached_index=attached_index + 1,
             radii=self._radii,
