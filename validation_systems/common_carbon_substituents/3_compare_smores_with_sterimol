@@ -124,7 +124,7 @@ def _get_command_line_arguments() -> argparse.Namespace:
     )
     parser.add_argument(
         "-o",
-        "--output_direcotry",
+        "--output_directory",
         type=pathlib.Path,
         default=pathlib.Path.cwd() / "3_output",
     )
