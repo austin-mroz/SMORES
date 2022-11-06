@@ -64,6 +64,14 @@ def default_init_molecule(rdkit_molecule: rdkit.Mol) -> CaseData:
             atoms=tuple(
                 atom.GetSymbol() for atom in rdkit_molecule.GetAtoms()
             ),
+            bonds=[
+                smores.Bond(
+                    atom1=bond.GetBeginAtomIdx(),
+                    atom2=bond.GetEndAtomIdx(),
+                    order=bond.GetBondTypeAsDouble(),
+                )
+                for bond in rdkit_molecule.GetBonds()
+            ],
             positions=rdkit_molecule.GetConformer(0).GetPositions(),
             radii=radii,
         ),

@@ -1,5 +1,4 @@
-from ._internal.bond import Bond
-from ._internal.combine import Combination, combine
+from ._internal.combine import Combination, combine, rdkit_from_smiles
 from ._internal.esp_grid import ElectrostaticPotentialGrid
 from ._internal.esp_molecule import EspMolecule
 from ._internal.molecule import Molecule
@@ -12,5 +11,5 @@ __all__ = [
     "StericParameters",
     "Combination",
     "combine",
-    "Bond",
+    "rdkit_from_smiles",
 ]

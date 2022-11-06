@@ -5,23 +5,35 @@ from dataclasses import dataclass
 import rdkit.Chem.AllChem as rdkit
 import stk
 
-from smores._internal.bond import Bond
-from smores._internal.esp_molecule import EspMolecule
-from smores._internal.molecule import Molecule
+
+def rdkit_from_smiles(smiles: str) -> rdkit.Mol:
+    """
+    Get an embeded :mod:`rdkit` molecule from SMILES.
+
+    Parameters:
+        smiles: The SMILES of the molecule.
+    Returns:
+        The :mod:`rdkit` molecule.
+
+    """
+
+    molecule = rdkit.AddHs(rdkit.MolFromSmiles(smiles))
+    _optimize(molecule)
+    return molecule
 
 
 @dataclass
 class Combination:
-    core: Molecule | EspMolecule
-    substituent: Molecule | EspMolecule
-    product: Molecule
+    core: rdkit.Mol
+    substituent: rdkit.Mol
+    product: rdkit.Mol
     dummy_index: int
     attached_index: int
 
 
 def combine(
-    cores: typing.Iterable[Molecule | EspMolecule],
-    substituents: typing.Iterable[Molecule | EspMolecule],
+    cores: typing.Iterable[rdkit.Mol],
+    substituents: typing.Iterable[rdkit.Mol],
     dummy_atom: str = "Br",
     optimize: bool = True,
 ) -> typing.Iterator[Combination]:
@@ -38,21 +50,9 @@ def combine(
         )
         steric_atoms = _get_steric_atoms(construct, core_bb)
 
-        product = Molecule(
-            atoms=(str(atom) for atom in construct.get_atoms()),
-            bonds=(
-                Bond(
-                    atom1=bond.get_atom1().get_id(),
-                    atom2=bond.get_atom2().get_id(),
-                    order=bond.get_order(),
-                )
-                for bond in construct.get_bonds()
-            ),
-            positions=construct.get_position_matrix(),
-        )
-
+        product = construct.to_rdkit_mol()
         if optimize:
-            product = _optimize(product)
+            _optimize(product)
 
         yield Combination(
             core=core,
@@ -64,7 +64,7 @@ def combine(
 
 
 def _get_building_block(
-    molecule: Molecule | EspMolecule,
+    molecule: rdkit.Mol,
     dummy_atom: str,
 ) -> stk.BuildingBlock:
 
@@ -73,20 +73,10 @@ def _get_building_block(
         "Br": stk.BromoFactory(),
         "I": stk.IodoFactory(),
     }
-    atoms = tuple(
-        vars(stk)[atom](id) for id, atom in enumerate(molecule.atoms)
-    )
-    return stk.BuildingBlock.init(
-        atoms=atoms,
-        bonds=tuple(
-            stk.Bond(
-                atom1=atoms[bond.atom1],
-                atom2=atoms[bond.atom2],
-                order=bond.order,
-            )
-            for bond in molecule.bonds
-        ),
-        position_matrix=molecule.positions,
+    rdkit.SanitizeMol(molecule)
+    rdkit.Kekulize(molecule)
+    return stk.BuildingBlock.init_from_rdkit_mol(
+        molecule=molecule,
         functional_groups=[factories[dummy_atom]],
     )
 
@@ -127,10 +117,7 @@ def _get_steric_atoms(
     )
 
 
-def _optimize(molecule: Molecule) -> Molecule:
-
-    rdkit_molecule = molecule.to_rdkit()
+def _optimize(molecule: rdkit.Mol) -> None:
     etkdg = rdkit.ETKDGv3()
     etkdg.randomSeed = 4
-    conformer_id = rdkit.EmbedMolecule(rdkit_molecule, etkdg)
-    return Molecule.from_rdkit(rdkit_molecule, conformer_id)
+    rdkit.EmbedMolecule(molecule, etkdg)

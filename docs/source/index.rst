@@ -107,6 +107,28 @@ library like sklearn_
 
 We hope that's a useful jumping off point for some quick prototyping!
 
+Plays nice with :mod:`rdkit`
+----------------------------
+
+:mod:`smores` molecules can easily be created from RDKit_ molecules
+
+.. testcode::
+
+  import smores
+  import rdkit.Chem as rdkit
+
+  rdkit_molecule = rdkit.MolFromSmiles("CBr")
+  smores = smores.Molecule.from_rdkit(rdkit_molecule)
+
+
+.. _RDKit: https://www.rdkit.org/docs/index.html
+
+
+.. seealso::
+
+   * :meth:`.Molecule.from_rdkit`: For addtional configuration options.
+   * :meth:`.EspMolecule.from_rdkit`: For addtional configuration options.
+
 Quick comparison of substituents
 --------------------------------
 
@@ -117,21 +139,24 @@ you do this quick
 .. testcode:: substituent-comparison
 
   import smores
+  import rdkit.Chem as rdkit
 
   cores = [
-      smores.Molecule.from_smiles("c1ccccc1Br"),
+      smores.rdkit_from_smiles("c1ccccc1Br"),
   ]
   substituents = [
-    smores.Molecule.from_smiles("BrCCC"),
-    smores.Molecule.from_smiles("BrCC(C)(C)C"),
+    smores.rdkit_from_smiles("BrCCC"),
+    smores.rdkit_from_smiles("BrCC(C)(C)C"),
   ]
   for combo in smores.combine(cores, subsituents):
-      params = combo.product.get_steric_parameters(
+      molecule = smores.Molecule.from_rdkit(combo.product)
+      params = molecule.get_steric_parameters(
           dummy_index=combo.dummy_index,
           attached_index=combo.attached_index,
       )
       print(
-          f"Combination of {combo.core} and {combo.substituent} "
+          f"Combination of {rdkit.MolToSmiles(combo.core)} and "
+          f"{rdkit.MolToSmiles(combo.substituent)} "
           f"has SMORES parameters of {params}."
       )
 
@@ -143,32 +168,7 @@ and attachment atoms are, which can be a bit of a burden otherwise.
 .. seealso::
 
    * :func:`.combine`: For additional examples and configuration options.
-
-
-Plays nice with :mod:`rdkit`
-----------------------------
-
-:mod:`smores` molecules can easily be converted to and from
-RDKit_ molecules
-
-.. testcode::
-
-  import smores
-
-  molecule = smores.Molecule.from_smiles("CBr")
-  rdkit_molecule = molecule.to_rdkit()
-  from_rdkit = smores.Molecule.from_rdkit(rdkit_molecule)
-
-
-.. _RDKit: https://www.rdkit.org/docs/index.html
-
-
-.. seealso::
-
-   * :meth:`.Molecule.from_rdkit`: For addtional configuration options.
-   * :meth:`.Molecule.to_rdkit`: For addtional configuration options.
-   * :meth:`.EspMolecule.from_rdkit`: For addtional configuration options.
-   * :meth:`.EspMolecule.to_rdkit`: For addtional configuration options.
+   * :func:`.rdkit_from_smiles`: For additional configuration options.
 
 
 Using electrostatic potentials

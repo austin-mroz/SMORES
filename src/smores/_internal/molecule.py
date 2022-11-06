@@ -6,7 +6,6 @@ import numpy as np
 import numpy.typing as npt
 import rdkit.Chem.AllChem as rdkit
 
-from smores._internal.bond import Bond
 from smores._internal.constants import streusel_radii
 from smores._internal.steric_parameters import StericParameters
 
@@ -34,15 +33,12 @@ class Molecule:
 
     #: The atoms of the molecule.
     atoms: tuple[str, ...]
-    #: The bonds of the molecule.
-    bonds: tuple[Bond, ...]
     #: The N x 3 position matrix of the molecule.
     positions: npt.NDArray[np.float32]
 
     def __init__(
         self,
         atoms: typing.Iterable[str],
-        bonds: typing.Iterable[Bond],
         positions: npt.ArrayLike,
         radii: npt.ArrayLike | None = None,
     ) -> None:
@@ -53,15 +49,6 @@ class Molecule:
 
             atoms (list[str]):
                 The elemental symbol of each atom of the molecule.
-
-            bonds (list[Bond]):
-                The bonds of the molecule.
-
-                .. tip::
-
-                    Chances are that if you are not going to use
-                    :func:`.combine` you can just use an empty list
-                    here -- assuming that makes your life easier!
 
             positions (list[list[float]]):
                 The coordinates of each atom of the molecule,
@@ -82,7 +69,6 @@ class Molecule:
             radii = np.array(radii)
 
         self.atoms = tuple(atoms)
-        self.bonds = tuple(bonds)
         self.positions = np.array(positions)
         self._radii = radii
 
@@ -248,7 +234,6 @@ rdkit.Chem.rdDistGeom.html#rdkit.Chem.rdDistGeom.ETKDGv3
         instance.atoms = tuple(
             atom.GetSymbol() for atom in molecule.GetAtoms()
         )
-
         instance.positions = molecule.GetConformer(conformer_id).GetPositions()
 
         if radii is None:
@@ -259,35 +244,6 @@ rdkit.Chem.rdDistGeom.html#rdkit.Chem.rdDistGeom.ETKDGv3
             instance._radii = np.array(radii)
 
         return instance
-
-    def to_rdkit(self) -> rdkit.Mol:
-        """
-        Convert to an :mod:`rdkit` molecule.
-
-        Returns:
-            The :mod:`rdkit` molecule.
-
-        """
-
-        molecule = rdkit.EditableMol(rdkit.Mol())
-        for atom in self.atoms:
-            rdkit_atom = rdkit.Atom(atom)
-            molecule.AddAtom(rdkit_atom)
-
-        for bond in self.bonds:
-            molecule.AddBond(
-                beginAtomIdx=bond.atom1,
-                endAtomIdx=bond.atom2,
-                order=bond.order,
-            )
-
-        molecule = molecule.GetMol()
-        rdkit_conf = rdkit.Conformer(len(self.atoms))
-        for atom_id, atom_coord in enumerate(self.positions):
-            rdkit_conf.SetAtomPosition(atom_id, atom_coord)
-            molecule.GetAtomWithIdx(atom_id).SetNoImplicit(True)
-        molecule.AddConformer(rdkit_conf)
-        return molecule
 
     def get_steric_parameters(
         self,
