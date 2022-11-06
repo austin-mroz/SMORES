@@ -6,11 +6,15 @@ import sys
 import typing
 from dataclasses import dataclass
 
+import rdkit.Chem as rdkit
+
 import smores
 import smores.psi4
 
 _OUTPUT_CSV_COLUMNS = (
     "name",
+    "core",
+    "substituent",
     "smiles",
     "xyz_file",
     "dummy_index",
@@ -31,9 +35,7 @@ def main() -> None:
         calculation_directory = args.output_directory / molecule_input.name
         if not calculation_directory.exists():
             try:
-                molecule = smores.Molecule.from_xyz_file(
-                    path=molecule_input.xyz_file,
-                )
+                molecule = rdkit.MolFromXYZFile(molecule_input.xyz_file)
                 smores.psi4.calculate_electrostatic_potential(
                     molecule=molecule,
                     output_directory=calculation_directory,
@@ -45,6 +47,8 @@ def main() -> None:
                 _append_to_csv(
                     path=csv_output,
                     name=molecule_input.name,
+                    core=molecule_input.core,
+                    substituent=molecule_input.substituent,
                     smiles=molecule_input.smiles,
                     xyz_file=calculation_directory / "geom.xyz",
                     dummy_index=molecule_input.dummy_index,
@@ -61,6 +65,8 @@ def main() -> None:
 @dataclass(frozen=True, slots=True)
 class Molecule:
     name: str
+    core: str
+    substituent: str
     smiles: str
     dummy_index: int
     attached_index: int
@@ -73,6 +79,8 @@ def _read_molecules(path: pathlib.Path) -> typing.Iterator[Molecule]:
         for row in reader:
             yield Molecule(
                 name=row["name"],
+                core=row["core"],
+                substituent=row["substituent"],
                 smiles=row["smiles"],
                 dummy_index=int(row["dummy_index"]),
                 attached_index=int(row["attached_index"]),
@@ -92,6 +100,8 @@ def _write_csv_header(path: pathlib.Path) -> None:
 def _append_to_csv(
     path: pathlib.Path,
     name: str,
+    core: str,
+    substituent: str,
     smiles: str,
     xyz_file: pathlib.Path,
     dummy_index: int,
@@ -106,6 +116,8 @@ def _append_to_csv(
         writer.writerow(
             {
                 "name": name,
+                "core": core,
+                "substituent": substituent,
                 "smiles": smiles,
                 "xyz_file": xyz_file.resolve(),
                 "dummy_index": dummy_index,
@@ -122,8 +134,8 @@ def _get_command_line_arguments() -> argparse.Namespace:
         "-i",
         "--input_file",
         help=(
-            'A csv file with columns: "name", "smiles", '
-            '"dummy_index", "attached_index", "xyz_file".'
+            'A csv file with columns: "name", "core", "substituent", '
+            '"smiles", "dummy_index", "attached_index", "xyz_file".'
         ),
         type=pathlib.Path,
         default=pathlib.Path.cwd() / "1_output" / "xyz_files.csv",

@@ -215,7 +215,7 @@ Calculating electrostatic potentials
   import smores.psi4
 
   smores.psi4.calculate_electrostatic_potential(
-      molecule=smores.Molecule.from_smiles("Br"),
+      molecule=smores.rdkit_from_smiles("Br"),
       output_directory="outdir",
       grid_origin=(-3., -3., -3.),
       grid_length=10.,

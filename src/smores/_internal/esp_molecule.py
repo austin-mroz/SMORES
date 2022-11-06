@@ -45,38 +45,33 @@ class EspMolecule:
 
     """
 
-    #: The atoms of the molecule.
-    atoms: tuple[str, ...]
-    #: The N x 3 position matrix of the molecule.
-    positions: npt.NDArray[np.float32]
+    # def __init__(
+    #     self,
+    #     atoms: typing.Iterable[str],
+    #     positions: npt.ArrayLike,
+    #     electrostatic_potential: ElectrostaticPotentialGrid,
+    # ) -> None:
+    #     """
+    #     Initialize an :class:`.EspMolecule`.
 
-    def __init__(
-        self,
-        atoms: typing.Iterable[str],
-        positions: npt.ArrayLike,
-        electrostatic_potential: ElectrostaticPotentialGrid,
-    ) -> None:
-        """
-        Initialize an :class:`.EspMolecule`.
+    #     Parameters:
 
-        Parameters:
+    #         atoms (list[str]):
+    #             The elemental symbol of each atom of the molecule.
 
-            atoms (list[str]):
-                The elemental symbol of each atom of the molecule.
+    #         positions (list[list[float]]):
+    #             The coordinates of each atom of the molecule,
+    #             provided as an N x 3 matrix.
 
-            positions (list[list[float]]):
-                The coordinates of each atom of the molecule,
-                provided as an N x 3 matrix.
+    #         electrostatic_potential:
+    #             A 3-D voxel grid of the electrostatic potential
+    #             used for calculating the steric parameters.
 
-            electrostatic_potential:
-                A 3-D voxel grid of the electrostatic potential
-                used for calculating the steric parameters.
+    #     """
 
-        """
-
-        self.atoms = tuple(atoms)
-        self.positions = np.array(positions)
-        self._electrostatic_potential = electrostatic_potential
+    #     self.atoms = tuple(atoms)
+    #     self.positions = np.array(positions)
+    #     self._electrostatic_potential = electrostatic_potential
 
     def get_steric_parameters(
         self,
@@ -98,7 +93,10 @@ class EspMolecule:
             The parameters.
         """
 
-        pass
+        dbstep.Dbstep.dbstep(
+            atom1=dummy_index,
+            atom2=attached_index,
+        )
 
     @classmethod
     def from_cube_file(cls, path: pathlib.Path | str) -> "EspMolecule":
@@ -111,10 +109,6 @@ class EspMolecule:
             The molecule.
         """
 
-        path = pathlib.Path(path)
-        cube_data = file_readers.read_cube_file(path)
-        obj = cls.__new__(cls)
-        obj.atoms = cube_data.atoms
-        obj.positions = np.array(cube_data.positions)
-        obj._electrostatic_potential = cube_data.grid
-        return obj
+        instance = cls.__new__(cls)
+        instance._cube_file = pathlib.Path(path).resolve()
+        return instance
