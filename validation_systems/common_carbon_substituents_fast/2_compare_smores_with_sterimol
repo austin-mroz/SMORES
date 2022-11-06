@@ -1,1 +1,0 @@
-python ../common_carbon_substituents/3_compare_smores_with_sterimol -i 1_output/xyz_files.csv -o 2_output/parameter_validation.csv "$@"
