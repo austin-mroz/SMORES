@@ -30,9 +30,10 @@ def main() -> None:
     for molecule_input in molecules:
         calculation_directory = args.output_directory / molecule_input.name
         if not calculation_directory.exists():
-
             try:
-                molecule = smores.Molecule.from_smiles(molecule_input.smiles)
+                molecule = smores.Molecule.from_xyz_file(
+                    path=molecule_input.xyz_file,
+                )
                 smores.psi4.calculate_electrostatic_potential(
                     molecule=molecule,
                     output_directory=calculation_directory,
@@ -63,6 +64,7 @@ class Molecule:
     smiles: str
     dummy_index: int
     attached_index: int
+    xyz_file: pathlib.Path
 
 
 def _read_molecules(path: pathlib.Path) -> typing.Iterator[Molecule]:
@@ -74,6 +76,7 @@ def _read_molecules(path: pathlib.Path) -> typing.Iterator[Molecule]:
                 smiles=row["smiles"],
                 dummy_index=int(row["dummy_index"]),
                 attached_index=int(row["attached_index"]),
+                xyz_file=pathlib.Path(row["xyz_file"]),
             )
 
 
@@ -107,7 +110,7 @@ def _append_to_csv(
                 "xyz_file": xyz_file.resolve(),
                 "dummy_index": dummy_index,
                 "attached_index": attached_index,
-            }
+            },
         )
 
 
@@ -120,10 +123,10 @@ def _get_command_line_arguments() -> argparse.Namespace:
         "--input_file",
         help=(
             'A csv file with columns: "name", "smiles", '
-            '"dummy_index", "attached_index".'
+            '"dummy_index", "attached_index", "xyz_file".'
         ),
         type=pathlib.Path,
-        default=pathlib.Path.cwd() / "1_output" / "smiles.csv",
+        default=pathlib.Path.cwd() / "1_output" / "xyz_files.csv",
     )
     parser.add_argument(
         "-o",
