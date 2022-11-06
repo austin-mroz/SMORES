@@ -2,6 +2,7 @@ import itertools
 import typing
 from dataclasses import dataclass
 
+import rdkit.Chem.AllChem as rdkit
 import stk
 
 from smores._internal.bond import Bond
@@ -25,45 +26,9 @@ def combine(
     optimize: bool = True,
 ) -> typing.Iterator[Combination]:
 
-    factories = {
-        "F": stk.FluoroFactory(),
-        "Br": stk.BromoFactory(),
-        "I": stk.IodoFactory(),
-    }
-
     for core, substituent in itertools.product(cores, substituents):
-        core_atoms = tuple(
-            vars(stk)[atom](id) for id, atom in enumerate(core.atoms)
-        )
-        core_bb = stk.BuildingBlock.init(
-            atoms=core_atoms,
-            bonds=tuple(
-                stk.Bond(
-                    atom1=core_atoms[bond.atom1],
-                    atom2=core_atoms[bond.atom2],
-                    order=bond.order,
-                )
-                for bond in core.bonds
-            ),
-            position_matrix=core.positions,
-            functional_groups=[factories[dummy_atom]],
-        )
-        substituent_atoms = tuple(
-            vars(stk)[atom](id) for id, atom in enumerate(core.atoms)
-        )
-        subsituent_bb = stk.BuildingBlock.init(
-            atoms=substituent_atoms,
-            bonds=tuple(
-                stk.Bond(
-                    atom1=core_atoms[bond.atom1],
-                    atom2=core_atoms[bond.atom2],
-                    order=bond.order,
-                )
-                for bond in core.bonds
-            ),
-            position_matrix=core.positions,
-            functional_groups=[factories[dummy_atom]],
-        )
+        core_bb = _get_building_block(core, dummy_atom)
+        subsituent_bb = _get_building_block(substituent, dummy_atom)
         construct = stk.ConstructedMolecule(
             topology_graph=stk.polymer.Linear(
                 building_blocks=(core_bb, subsituent_bb),
@@ -71,26 +36,7 @@ def combine(
                 num_repeating_units=1,
             ),
         )
-        added_bond = next(
-            bond_info.get_bond()
-            for bond_info in construct.get_bond_infos()
-            if bond_info.get_building_block() is None
-        )
-        added_bond_atoms = (
-            added_bond.get_atom1().get_id(),
-            added_bond.get_atom2().get_id(),
-        )
-        core_atom = next(
-            atom_info.get_atom()
-            for atom_info in construct.get_atom_infos()
-            if atom_info.get_building_block() is core_bb
-            and atom_info.get_atom().get_id() in added_bond_atoms
-        )
-        substituent_atom = (
-            added_bond.get_atom1()
-            if core_atom.get_id() == added_bond.get_atom2().get_id()
-            else added_bond.get_atom2()
-        )
+        steric_atoms = _get_steric_atoms(construct, core_bb)
 
         product = Molecule(
             atoms=(str(atom) for atom in construct.get_atoms()),
@@ -105,10 +51,86 @@ def combine(
             positions=construct.get_position_matrix(),
         )
 
+        if optimize:
+            product = _optimize(product)
+
         yield Combination(
             core=core,
             substituent=substituent,
             product=product,
-            dummy_index=core_atom.get_id(),
-            attached_index=substituent_atom.get_id(),
+            dummy_index=steric_atoms.core_atom,
+            attached_index=steric_atoms.substituent_atom,
         )
+
+
+def _get_building_block(
+    molecule: Molecule | EspMolecule,
+    dummy_atom: str,
+) -> stk.BuildingBlock:
+
+    factories = {
+        "F": stk.FluoroFactory(),
+        "Br": stk.BromoFactory(),
+        "I": stk.IodoFactory(),
+    }
+    atoms = tuple(
+        vars(stk)[atom](id) for id, atom in enumerate(molecule.atoms)
+    )
+    return stk.BuildingBlock.init(
+        atoms=atoms,
+        bonds=tuple(
+            stk.Bond(
+                atom1=atoms[bond.atom1],
+                atom2=atoms[bond.atom2],
+                order=bond.order,
+            )
+            for bond in molecule.bonds
+        ),
+        position_matrix=molecule.positions,
+        functional_groups=[factories[dummy_atom]],
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class _StericAtoms:
+    core_atom: int
+    substituent_atom: int
+
+
+def _get_steric_atoms(
+    construct: stk.ConstructedMolecule,
+    core: stk.BuildingBlock,
+) -> _StericAtoms:
+    added_bond = next(
+        bond_info.get_bond()
+        for bond_info in construct.get_bond_infos()
+        if bond_info.get_building_block() is None
+    )
+    added_bond_atoms = (
+        added_bond.get_atom1().get_id(),
+        added_bond.get_atom2().get_id(),
+    )
+    core_atom = next(
+        atom_info.get_atom()
+        for atom_info in construct.get_atom_infos()
+        if atom_info.get_building_block() is core
+        and atom_info.get_atom().get_id() in added_bond_atoms
+    )
+    substituent_atom = (
+        added_bond.get_atom1()
+        if core_atom.get_id() == added_bond.get_atom2().get_id()
+        else added_bond.get_atom2()
+    )
+    return _StericAtoms(
+        core_atom=core_atom.get_id(),
+        substituent_atom=substituent_atom.get_id(),
+    )
+
+
+def _optimize(molecule: Molecule) -> Molecule:
+
+    rdkit_molecule = molecule.to_rdkit()
+    etkdg = rdkit.ETKDGv3()
+    etkdg.randomSeed = 4
+    conformer_id = rdkit.EmbedMolecule(rdkit_molecule, etkdg)
+    return Molecule.from_rdkit(rdkit_molecule, conformer_id)

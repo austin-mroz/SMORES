@@ -34,6 +34,7 @@ GitHub: https://github.com/austin-mroz/SMORES
   * Why is using eletric field based stuff cool?
   * Link to STREUSEL
   * A cool graphic never hurt anyone
+  * Talk about morfeus
 
 
 Installation
@@ -142,6 +143,32 @@ and attachment atoms are, which can be a bit of a burden otherwise.
 .. seealso::
 
    * :func:`.combine`: For additional examples and configuration options.
+
+
+Plays nice with :mod:`rdkit`
+----------------------------
+
+:mod:`smores` molecules can easily be converted to and from
+RDKit_ molecules
+
+.. testcode::
+
+  import smores
+
+  molecule = smores.Molecule.from_smiles("CBr")
+  rdkit_molecule = molecule.to_rdkit()
+  from_rdkit = smores.Molecule.from_rdkit(rdkit_molecule)
+
+
+.. _RDKit: https://www.rdkit.org/docs/index.html
+
+
+.. seealso::
+
+   * :meth:`.Molecule.from_rdkit`: For addtional configuration options.
+   * :meth:`.Molecule.to_rdkit`: For addtional configuration options.
+   * :meth:`.EspMolecule.from_rdkit`: For addtional configuration options.
+   * :meth:`.EspMolecule.to_rdkit`: For addtional configuration options.
 
 
 Using electrostatic potentials

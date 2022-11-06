@@ -28,12 +28,7 @@ class Molecule:
 
             import smores
             molecule = smores.Molecule.from_smiles("CBr")
-            params = molecule.get_steric_parameters(
-                dummy_index=0,
-                attached_index=1,
-            )
-
-
+            params = molecule.get_steric_parameters(0, 1)
 
     """
 
@@ -47,6 +42,7 @@ class Molecule:
     def __init__(
         self,
         atoms: typing.Iterable[str],
+        bonds: typing.Iterable[Bond],
         positions: npt.ArrayLike,
         radii: npt.ArrayLike | None = None,
     ) -> None:
@@ -57,6 +53,15 @@ class Molecule:
 
             atoms (list[str]):
                 The elemental symbol of each atom of the molecule.
+
+            bonds (list[Bond]):
+                The bonds of the molecule.
+
+                .. tip::
+
+                    Chances are that if you are not going to use
+                    :func:`.combine` you can just use an empty list
+                    here -- assuming that makes your life easier!
 
             positions (list[list[float]]):
                 The coordinates of each atom of the molecule,
@@ -77,6 +82,7 @@ class Molecule:
             radii = np.array(radii)
 
         self.atoms = tuple(atoms)
+        self.bonds = tuple(bonds)
         self.positions = np.array(positions)
         self._radii = radii
 
@@ -178,9 +184,11 @@ class Molecule:
                 The radius of each atom of the molecule. If
                 ``None`` the STREUSEL_ radii will be used.
 
+        Returns:
+            The molecule.
+
         .. _ETKDG: https://www.rdkit.org/docs/source/\
 rdkit.Chem.rdDistGeom.html#rdkit.Chem.rdDistGeom.ETKDGv3
-
 
         """
 
@@ -206,6 +214,80 @@ rdkit.Chem.rdDistGeom.html#rdkit.Chem.rdDistGeom.ETKDGv3
             instance._radii = np.array(radii)
 
         return instance
+
+    @classmethod
+    def from_rdkit(
+        cls,
+        molecule: rdkit.Mol,
+        radii: npt.ArrayLike | None = None,
+        conformer_id=0,
+    ) -> "Molecule":
+        """
+        Get a molecule from an :mod:`rdkit` molecule.
+
+        Parameters:
+
+            molecule:
+                The :mod:`rdkit` molecule. It must have at least
+                one conformer.
+
+            radii (list[float]):
+                The radius of each atom of the molecule. If
+                ``None`` the STREUSEL_ radii will be used.
+
+            conformer_id:
+                The id of the conformer to use.
+
+        Returns:
+            The :mod:`smores` molecule.
+
+
+        """
+
+        instance = cls.__new__(cls)
+        instance.atoms = tuple(
+            atom.GetSymbol() for atom in molecule.GetAtoms()
+        )
+
+        instance.positions = molecule.GetConformer(conformer_id).GetPositions()
+
+        if radii is None:
+            instance._radii = np.array(
+                [streusel_radii[atom] for atom in instance.atoms]
+            )
+        else:
+            instance._radii = np.array(radii)
+
+        return instance
+
+    def to_rdkit(self) -> rdkit.Mol:
+        """
+        Convert to an :mod:`rdkit` molecule.
+
+        Returns:
+            The :mod:`rdkit` molecule.
+
+        """
+
+        molecule = rdkit.EditableMol(rdkit.Mol())
+        for atom in self.atoms:
+            rdkit_atom = rdkit.Atom(atom)
+            molecule.AddAtom(rdkit_atom)
+
+        for bond in self.bonds:
+            molecule.AddBond(
+                beginAtomIdx=bond.atom1,
+                endAtomIdx=bond.atom2,
+                order=bond.order,
+            )
+
+        molecule = molecule.GetMol()
+        rdkit_conf = rdkit.Conformer(len(self.atoms))
+        for atom_id, atom_coord in enumerate(self.positions):
+            rdkit_conf.SetAtomPosition(atom_id, atom_coord)
+            molecule.GetAtomWithIdx(atom_id).SetNoImplicit(True)
+        molecule.AddConformer(rdkit_conf)
+        return molecule
 
     def get_steric_parameters(
         self,
