@@ -13,10 +13,11 @@ Welcome to SMORES!
 
   Molecule <_autosummary/smores.Molecule>
   EspMolecule <_autosummary/smores.EspMolecule>
+  combine <_autosummary/smores.combine>
   Psi4 <_autosummary/smores.psi4>
   Modules <modules>
 
-GiHub: https://github.com/austin-mroz/SMORES
+GitHub: https://github.com/austin-mroz/SMORES
 
 
 .. attention::
@@ -104,6 +105,43 @@ library like sklearn_
 
 
 We hope that's a useful jumping off point for some quick prototyping!
+
+Quick comparison of substituents
+--------------------------------
+
+A very common workflow is to try different subsituents on a molecule
+and compare their steric parameters, so we wrote some code that lets
+you do this quick
+
+.. testcode:: substituent-comparison
+
+  import smores
+
+  cores = [
+      smores.Molecule.from_smiles("c1ccccc1Br"),
+  ]
+  substituents = [
+    smores.Molecule.from_smiles("BrCCC"),
+    smores.Molecule.from_smiles("BrCC(C)(C)C"),
+  ]
+  for combo in smores.combine(cores, subsituents):
+      params = combo.product.get_steric_parameters(
+          dummy_index=combo.dummy_index,
+          attached_index=combo.attached_index,
+      )
+      print(
+          f"Combination of {combo.core} and {combo.substituent} "
+          f"has SMORES parameters of {params}."
+      )
+
+
+Note that this code allows you to easily identify what the dummy
+and attachment atoms are, which can be a bit of a burden otherwise.
+
+
+.. seealso::
+
+   * :func:`.combine`: For additional examples and configuration options.
 
 
 Using electrostatic potentials

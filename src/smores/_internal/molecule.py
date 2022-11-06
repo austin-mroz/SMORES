@@ -6,6 +6,7 @@ import numpy as np
 import numpy.typing as npt
 import rdkit.Chem.AllChem as rdkit
 
+from smores._internal.bond import Bond
 from smores._internal.constants import streusel_radii
 from smores._internal.steric_parameters import StericParameters
 
@@ -38,6 +39,8 @@ class Molecule:
 
     #: The atoms of the molecule.
     atoms: tuple[str, ...]
+    #: The bonds of the molecule.
+    bonds: tuple[Bond, ...]
     #: The N x 3 position matrix of the molecule.
     positions: npt.NDArray[np.float32]
 
