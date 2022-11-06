@@ -35,7 +35,7 @@ def main() -> None:
         calculation_directory = args.output_directory / molecule_input.name
         if not calculation_directory.exists():
             try:
-                molecule = rdkit.MolFromXYZFile(molecule_input.xyz_file)
+                molecule = rdkit.MolFromXYZFile(str(molecule_input.xyz_file))
                 smores.psi4.calculate_electrostatic_potential(
                     molecule=molecule,
                     output_directory=calculation_directory,
