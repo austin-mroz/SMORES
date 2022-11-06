@@ -1,7 +1,6 @@
 #!python
 import argparse
 import csv
-import enum
 import pathlib
 import typing
 from dataclasses import dataclass
@@ -16,86 +15,64 @@ _OUTPUT_CSV_COLUMNS = (
     "xyz_file",
     "dummy_index",
     "attached_index",
-    "smores_L",
-    "sterimol_L",
-    "smores_B1",
-    "sterimol_B1",
-    "smores_B5",
-    "sterimol_B5",
+    "radii_type",
+    "L",
+    "B1",
+    "B5",
 )
 
 
 def main() -> None:
     args = _get_command_line_arguments()
-    args.output_file.parent.mkdir(parents=True, exist_ok=True)
+    args.output_directory.mkdir(parents=True, exist_ok=True)
 
-    if not args.output_file.exists():
-        _write_csv_header(args.output_file)
-
-    with open(args.output_file, "a") as csv_file:
+    radii_types = ("alvarez", "bondi", "crc", "rahm", "pyykko", "truhlar")
+    with open(
+        args.output_directory / "steric_parameters.csv", "w"
+    ) as csv_file:
         writer = csv.DictWriter(csv_file, fieldnames=_OUTPUT_CSV_COLUMNS)
+        writer.writeheader()
 
-        num_successes = 0
-        num_failures = 0
-        for molecule in tuple(_get_molecules(args.input_file)):
-            sterimol = _get_sterimol(molecule)
-            smores_molecule = smores.Molecule.from_xyz_file(molecule.xyz_file)
+        for row in tuple(_get_rows(args.input_file)):
+
+            smores_molecule = smores.Molecule.from_xyz_file(row.xyz_file)
             smores_params = smores_molecule.get_steric_parameters(
-                dummy_index=molecule.dummy_index,
-                attached_index=molecule.attached_index,
+                dummy_index=row.dummy_index,
+                attached_index=row.attached_index,
             )
-            result = _get_result(
-                smores=smores_params,
-                sterimol=sterimol,
-                success_tolerance=args.success_tolerance,
-            )
-            output_lines = (
-                f"NAME: {molecule.name}",
-                (
-                    f"  SMORES L:  {smores_params.L:.3f}   "
-                    f"STERIMOL L:  {sterimol.L_value:.3f}   "
-                    f"DIFF: {abs(smores_params.L - sterimol.L_value):.3f}"
-                ),
-                (
-                    f"  SMORES B1: {smores_params.B1:.3f}   "
-                    f"STERIMOL B1: {sterimol.B_1_value:.3f}   "
-                    f"DIFF: {abs(smores_params.B1 - sterimol.B_1_value):.3f}"
-                ),
-                (
-                    f"  SMORES B5: {smores_params.B5:.3f}   "
-                    f"STERIMOL B5: {sterimol.B_5_value:.3f}   "
-                    f"DIFF: {abs(smores_params.B5 - sterimol.B_5_value):.3f}"
-                ),
-                f"RESULT: {result.value}",
-            )
-            print("\n".join(output_lines), end="\n\n")
-            if result == Result.SUCCESS:
-                num_successes += 1
-            else:
-                num_failures += 1
-
             writer.writerow(
                 {
-                    "name": molecule.name,
-                    "smiles": molecule.smiles,
-                    "xyz_file": molecule.xyz_file,
-                    "dummy_index": molecule.dummy_index,
-                    "attached_index": molecule.attached_index,
-                    "smores_L": smores_params.L,
-                    "sterimol_L": sterimol.L_value,
-                    "smores_B1": smores_params.B1,
-                    "sterimol_B1": sterimol.B_1_value,
-                    "smores_B5": smores_params.B5,
-                    "sterimol_B5": sterimol.B_5_value,
-                },
+                    "name": row.name,
+                    "smiles": row.smiles,
+                    "xyz_file": row.xyz_file,
+                    "dummy_index": row.dummy_index,
+                    "attached_index": row.attached_index,
+                    "radii_type": "streusel",
+                    "L": smores_params.L,
+                    "B1": smores_params.B1,
+                    "B5": smores_params.B5,
+                }
             )
 
-        print(f"TOTAL SUCCESSES: {num_successes}")
-        print(f"TOTAL FAILURES: {num_failures}")
+            for radii_type in radii_types:
+                sterimol = _get_sterimol(row, radii_type)
+                writer.writerow(
+                    {
+                        "name": row.name,
+                        "smiles": row.smiles,
+                        "xyz_file": row.xyz_file,
+                        "dummy_index": row.dummy_index,
+                        "attached_index": row.attached_index,
+                        "radii_type": radii_type,
+                        "L": sterimol.L_value,
+                        "B1": sterimol.B_1_value,
+                        "B5": sterimol.B_5_value,
+                    },
+                )
 
 
 @dataclass(frozen=True, slots=True)
-class Molecule:
+class CsvRow:
     name: str
     smiles: str
     xyz_file: pathlib.Path
@@ -103,14 +80,14 @@ class Molecule:
     attached_index: int
 
 
-def _get_molecules(
+def _get_rows(
     path: pathlib.Path,
-) -> typing.Iterator[Molecule]:
+) -> typing.Iterator[CsvRow]:
 
     with open(path) as csv_file:
         reader = csv.DictReader(csv_file)
         for row in reader:
-            yield Molecule(
+            yield CsvRow(
                 name=row["name"],
                 smiles=row["smiles"],
                 xyz_file=pathlib.Path(row["xyz_file"]),
@@ -119,47 +96,15 @@ def _get_molecules(
             )
 
 
-class Result(enum.Enum):
-    SUCCESS = "SUCCESS"
-    FAILURE = "FAILURE"
-
-
-def _get_sterimol(molecule: Molecule) -> morfeus.Sterimol:
+def _get_sterimol(molecule: CsvRow, radii_type: str) -> morfeus.Sterimol:
     elements, coordinates = morfeus.read_xyz(molecule.xyz_file)
     return morfeus.Sterimol(
         elements=elements,
         coordinates=coordinates,
         dummy_index=molecule.dummy_index + 1,
         attached_index=molecule.attached_index + 1,
+        radii_type=radii_type,
     )
-
-
-def _get_result(
-    smores: smores.StericParameters,
-    sterimol: morfeus.Sterimol,
-    success_tolerance: float,
-) -> Result:
-
-    l_diff = abs(smores.L - sterimol.L_value)
-    b1_diff = abs(smores.B1 - sterimol.B_1_value)
-    b5_diff = abs(smores.B5 - sterimol.B_5_value)
-    if (
-        l_diff < success_tolerance
-        and b1_diff < success_tolerance
-        and b5_diff < success_tolerance
-    ):
-        return Result.SUCCESS
-    else:
-        return Result.FAILURE
-
-
-def _write_csv_header(path: pathlib.Path) -> None:
-    with open(path, "w") as csv_file:
-        writer = csv.DictWriter(
-            csv_file,
-            fieldnames=_OUTPUT_CSV_COLUMNS,
-        )
-        writer.writeheader()
 
 
 def _get_command_line_arguments() -> argparse.Namespace:
@@ -179,18 +124,9 @@ def _get_command_line_arguments() -> argparse.Namespace:
     )
     parser.add_argument(
         "-o",
-        "--output_file",
+        "--output_direcotry",
         type=pathlib.Path,
-        default=pathlib.Path.cwd() / "3_output" / "parameter_validation.csv",
-    )
-    parser.add_argument(
-        "--success_tolerance",
-        help=(
-            "The maximum allowed difference between SMORES and sterimol "
-            "parameters for the validation to be considere a success."
-        ),
-        type=float,
-        default=0.001,
+        default=pathlib.Path.cwd() / "3_output",
     )
     return parser.parse_args()
 
