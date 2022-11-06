@@ -3,7 +3,6 @@
 import argparse
 import pathlib
 
-import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 
@@ -28,7 +27,7 @@ def main() -> None:
         )
         _plot_parameter_by_radius(
             df=core_df,
-            parameter="B2",
+            parameter="B5",
             figure_path=args.output_directory / f"{core}_B5.png",
         )
 
@@ -41,7 +40,7 @@ def _plot_parameter_by_radius(
     plot = sns.stripplot(
         data=df,
         x="radii_type",
-        y="L",
+        y=parameter,
         hue="substituent",
     )
     sns.move_legend(

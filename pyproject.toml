@@ -27,5 +27,5 @@ profile = "black"
 no_implicit_optional = true
 
 [[tool.mypy.overrides]]
-module = ["rdkit.*", "psi4.*"]
+module = ["rdkit.*", "psi4.*", "pandas.*", "seaborn.*"]
 ignore_missing_imports = true
