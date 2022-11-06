@@ -47,9 +47,9 @@ def _plot_parameter_by_radius(
         plot,
         "upper left",
         bbox_to_anchor=(1.0, 1.0),
-        title="radii_type",
+        title="substituent",
     )
-    plot.get_figure().savefig(figure_path)
+    plot.get_figure().savefig(figure_path, bbox_inches="tight")
     plot.get_figure().clf()
 
 
@@ -75,7 +75,8 @@ def _plot_morfeus_sterimol_xyz_performance(
         title="radii_type",
     )
     plot.get_figure().savefig(
-        output_directory / "morfeus_sterimol_xyz_performance.png"
+        output_directory / "morfeus_sterimol_xyz_performance.png",
+        bbox_inches="tight",
     )
     plot.get_figure().clf()
 
