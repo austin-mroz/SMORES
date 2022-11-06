@@ -1,13 +1,7 @@
-"""
-EspMolecule
-===========
-
-"""
-
 import pathlib
 import typing
 
-import dbstep
+import dbstep.Dbstep as db
 import numpy as np
 import numpy.typing as npt
 
@@ -93,7 +87,7 @@ class EspMolecule:
             The parameters.
         """
 
-        dbstep.Dbstep.dbstep(
+        db.dbstep(
             atom1=dummy_index,
             atom2=attached_index,
         )
