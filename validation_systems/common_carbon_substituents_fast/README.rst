@@ -11,8 +11,8 @@ configuration options, for example
 .. code-block:: bash
 
   ./1_generate_systems
-  ./2_generate_structures
-  ./3_compare_smores_with_sterimol
+  ./2_calculate_steric_parameters
+  ./3_plot_steric_parameters
 
 Each step produces an output folder which holds the input for
 the following step. You can re-run individual steps,
@@ -22,8 +22,8 @@ to the script.
 
 The difference between this validation and
 common_carbon_substituents__ is that the XYZ coordiantes of the
-tested structures are generated using ``ETKDGv2`` rather than
-``psi4``, making this validation significantly faster.
+tested structures are generated using ``ETKDG`` rather than
+``Psi4``, making this validation significantly faster.
 
 __ ../common_carbon_substituents
 
@@ -34,17 +34,9 @@ configuration options, use the ``-h`` parameter, for example
 
   ./1_generate_systems -h
 
-The output of the final step will produce output of the following
-form::
-
-  NAME: C_H
-    SMORES L: ...   STERIMOL L: ...   Diff: ...
-    SMORES B1: ...  STERIMOL B1: ...  Diff: ...
-    SMORES B5: ...  STERIMOL B5: ...  Diff: ...
-    RESULT: SUCCESS
-
-  Total successful validations: X
-  Total failed validations: Y
+The output of the final step will produce a bunch of nice graphs
+for you to explore, which compare the calculated steric parameters
+between different types of atomic radii and substituents.
 
 Since each step produces a folder holding its output, you will end up
 with the folders

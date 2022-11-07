@@ -12,7 +12,8 @@ configuration options, for example
 
   ./1_generate_systems
   ./2_calculate_electrostatic_potentials
-  ./3_compare_smores_with_sterimol
+  ./3_calculate_steric_parameters
+  ./4_plot_steric_parameters
 
 Each step produces an output folder which holds the input for
 the following step. You can re-run individual steps,
@@ -21,9 +22,9 @@ or the necessary input files are provided though options to the
 script.
 
 The difference between this validation and
-common_carbon_substituents_fast__ is that the XYZ coordiantes of the
-tested structures are generated using ``psi4`` rather than
-``ETKDGv2``, making this validation significantly slower.
+common_carbon_substituents_fast__ is that the XYZ coordinates of the
+tested structures are generated using ``Psi4`` rather than
+``ETKDG``, making this validation significantly slower.
 
 __ ../common_carbon_substituents_fast
 
@@ -34,17 +35,9 @@ configuration options, use the ``-h`` parameter, for example
 
   ./1_generate_systems -h
 
-The output of the final step will produce output of the following
-form::
-
-  NAME: C_H
-    SMORES L: ...   STERIMOL L: ...   Diff: ...
-    SMORES B1: ...  STERIMOL B1: ...  Diff: ...
-    SMORES B5: ...  STERIMOL B5: ...  Diff: ...
-    RESULT: SUCCESS
-
-  Total successful validations: X
-  Total failed validations: Y
+The output of the final step will produce a bunch of nice graphs
+for you to explore, which compare the calculated steric parameters
+between different types of atomic radii and substituents.
 
 Since each step produces a folder holding its output, you will end up
 with the folders
@@ -52,6 +45,7 @@ with the folders
 * ``1_output``
 * ``2_output``
 * ``3_output``
+* ``4_output``
 
 if you run all your steps successfully.
 
