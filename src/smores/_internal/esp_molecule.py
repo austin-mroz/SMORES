@@ -97,7 +97,13 @@ class EspMolecule:
 
         with tempfile.TemporaryDirectory() as tmp_dir:
             cube_file = pathlib.Path(tmp_dir) / "esp.cube"
-            write_cube()
+            write_cube(
+                path=cube_file,
+                voxels=self._electrostatic_potential.grid,
+                positions=self._positions,
+                elements=self._atoms,
+                voxel_dimensions=self._electrostatic_potential.voxel_size,
+            )
 
             params = db.dbstep(
                 str(cube_file),
