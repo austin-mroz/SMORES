@@ -1,0 +1,71 @@
+#!python
+
+import argparse
+import pathlib
+
+import ase.io.cube
+import numpy as np
+import numpy.typing as npt
+import scipy.ndimage
+from write_cube import write_cube
+
+
+def main() -> None:
+    args = _get_command_line_arguments()
+
+    voxels, atoms = ase.io.cube.read_cube_data(str(args.cube_file))
+
+    # vectors = np.linalg.norm(atoms.cell, axis=1)
+    # resolution = vectors / voxels.shape
+
+    # with open(args.cube_file, "r") as cube:
+    #     lines = cube.readlines()
+
+    write_cube(
+        filepath=str(args.output_file),
+        vox_grid=_get_surface(voxels),
+        coords=atoms.get_positions() / ase.units.Bohr,
+        elements=atoms.get_chemical_symbols(),
+        # origin=np.array([float(i) for i in lines[2].split()[1:-1]]),
+        # res=resolution,
+        origin=np.array([-37.794523, -37.794523, -37.794523]),
+        res=np.array([0.377945, 0.377945, 0.377945]),
+    )
+
+
+def _get_surface(voxels: npt.NDArray[np.float32]) -> npt.NDArray[np.float32]:
+    cv = 0.0004
+    is_vacuum = voxels < cv
+    is_non_vacuum = np.logical_not(is_vacuum)
+
+    weights = np.zeros((3, 3, 3))
+    weights[1, 1, 2] = 1
+    weights[1, 1, 0] = 1
+    weights[:, :, 1] = [
+        [0, 1, 0],
+        [1, 0, 1],
+        [0, 1, 0],
+    ]
+
+    convolution_result = scipy.ndimage.convolve(
+        input=is_vacuum.view(np.int8),
+        weights=weights,
+        mode="wrap",
+    )
+    np.multiply(
+        convolution_result,
+        is_non_vacuum.view(np.int8),
+        out=convolution_result,
+    )
+    return (convolution_result > 0).view(np.int8)
+
+
+def _get_command_line_arguments() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("cube_file", type=pathlib.Path)
+    parser.add_argument("output_file", type=pathlib.Path)
+    return parser.parse_args()
+
+
+if __name__ == "__main__":
+    main()

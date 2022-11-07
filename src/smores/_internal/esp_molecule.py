@@ -1,12 +1,17 @@
 import pathlib
+import tempfile
 import typing
 
+import ase
+import ase.io.cube
 import dbstep.Dbstep as db
 import numpy as np
 import numpy.typing as npt
+import streusel.gaussian_cube
 
-from smores._internal.esp_grid import ElectrostaticPotentialGrid
+from smores._intenral.esp_grid import ElectrostaticPotentialGrid
 from smores._internal.steric_parameters import StericParameters
+from smores._internal.write_cube import write_cube
 
 
 class EspMolecule:
@@ -39,33 +44,33 @@ class EspMolecule:
 
     """
 
-    # def __init__(
-    #     self,
-    #     atoms: typing.Iterable[str],
-    #     positions: npt.ArrayLike,
-    #     electrostatic_potential: ElectrostaticPotentialGrid,
-    # ) -> None:
-    #     """
-    #     Initialize an :class:`.EspMolecule`.
+    def __init__(
+        self,
+        atoms: typing.Iterable[str],
+        positions: npt.ArrayLike,
+        electrostatic_potential: ElectrostaticPotentialGrid,
+    ) -> None:
+        """
+        Initialize an :class:`.EspMolecule`.
 
-    #     Parameters:
+        Parameters:
 
-    #         atoms (list[str]):
-    #             The elemental symbol of each atom of the molecule.
+            atoms (list[str]):
+                The elemental symbol of each atom of the molecule.
 
-    #         positions (list[list[float]]):
-    #             The coordinates of each atom of the molecule,
-    #             provided as an N x 3 matrix.
+            positions (list[list[float]]):
+                The coordinates of each atom of the molecule,
+                provided as an N x 3 matrix.
 
-    #         electrostatic_potential:
-    #             A 3-D voxel grid of the electrostatic potential
-    #             used for calculating the steric parameters.
+            electrostatic_potential:
+                The electrostatic potential used for calculating
+                the steric parameters.
 
-    #     """
+        """
 
-    #     self.atoms = tuple(atoms)
-    #     self.positions = np.array(positions)
-    #     self._electrostatic_potential = electrostatic_potential
+        self._atoms = tuple(atoms)
+        self._positions = np.array(positions)
+        self._electrostatic_potential = electrostatic_potential
 
     def get_steric_parameters(
         self,
@@ -85,11 +90,28 @@ class EspMolecule:
 
         Returns:
             The parameters.
+
         """
 
-        db.dbstep(
-            atom1=dummy_index,
-            atom2=attached_index,
+        streusel.gaussian_cube.Molecule(self._cube_file)
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            cube_file = pathlib.Path(tmp_dir) / "esp.cube"
+            write_cube()
+
+            params = db.dbstep(
+                str(cube_file),
+                atom1=dummy_index,
+                atom2=attached_index,
+                surface="density",
+                sterimol=True,
+                quiet=True,
+            )
+
+        return StericParameters(
+            L=params.L,
+            B1=params.Bmin,
+            B5=params.Bmax,
         )
 
     @classmethod
@@ -104,5 +126,7 @@ class EspMolecule:
         """
 
         instance = cls.__new__(cls)
-        instance._cube_file = pathlib.Path(path).resolve()
+        grid, atoms = ase.io.cube.read_cube_data(str(path))
+        instance._atoms = atoms.get_atomic_numbers()
+        instance._positions = atoms.positions / ase.units.Bohr
         return instance
