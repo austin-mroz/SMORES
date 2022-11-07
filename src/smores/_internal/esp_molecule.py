@@ -119,35 +119,16 @@ class EspMolecule:
         """
 
         with tempfile.TemporaryDirectory() as tmp_dir:
-            electrostatic_potential_file = pathlib.Path(tmp_dir) / "esp.cube"
-            write_cube(
-                path=electrostatic_potential_file,
-                voxels=self._electrostatic_potential.voxels,
-                positions=self._positions,
-                elements=self._atoms,
-                voxel_origin=self._electrostatic_potential.voxel_origin,
-                voxel_dimensions=self._electrostatic_potential.voxel_size,
-            )
-            streusel_molecule = streusel.gaussian_cube.Molecule(
-                electrostatic_potential_file,
-            )
-            streusel_molecule.get_efield()
-            streusel_molecule.sample_efield()
-            electric_field_surface = np.zeros(
-                self._electrostatic_potential.voxels.shape
-            )
-            electric_field_surface[streusel_molecule.surface_ijk] = 1
-
             electric_field_surface_file = (
                 pathlib.Path(tmp_dir) / "ef_surface.cube"
             )
             write_cube(
                 path=electric_field_surface_file,
-                voxels=electric_field_surface,
+                voxels=self._electric_field_surface.voxels,
                 positions=self._positions,
                 elements=self._atoms,
-                voxel_origin=self._electrostatic_potential.voxel_origin,
-                voxel_dimensions=self._electrostatic_potential.voxel_size,
+                voxel_origin=self._electric_field_surface.voxel_origin,
+                voxel_dimensions=self._electric_field_surface.voxel_size,
             )
 
             params = db.dbstep(
