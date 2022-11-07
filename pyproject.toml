@@ -21,6 +21,7 @@ dev = [
   "pytest",
   "pytest-lazy-fixture",
   "sphinx",
+  "furo",
 ]
 
 
