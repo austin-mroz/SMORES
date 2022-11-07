@@ -15,24 +15,24 @@ def main() -> None:
     _plot_morfeus_sterimol_xyz_performance(df, args.output_directory)
 
     for core, core_df in df.groupby("core"):
-        _plot_parameter_by_radius(
+        _plot_sterimol_parameter_by_radii_type(
             df=core_df,
             parameter="L",
             figure_path=args.output_directory / f"{core}_L.png",
         )
-        _plot_parameter_by_radius(
+        _plot_sterimol_parameter_by_radii_type(
             df=core_df,
             parameter="B1",
             figure_path=args.output_directory / f"{core}_B1.png",
         )
-        _plot_parameter_by_radius(
+        _plot_sterimol_parameter_by_radii_type(
             df=core_df,
             parameter="B5",
             figure_path=args.output_directory / f"{core}_B5.png",
         )
 
 
-def _plot_parameter_by_radius(
+def _plot_sterimol_parameter_by_radii_type(
     df: pd.DataFrame,
     parameter: str,
     figure_path: pathlib.Path,
