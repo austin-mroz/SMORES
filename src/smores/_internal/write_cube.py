@@ -9,7 +9,7 @@ def write_cube(
     voxels: npt.NDArray,
     positions: npt.NDArray,
     elements: typing.Sequence[str],
-    origin: npt.NDArray,
+    voxel_origin: npt.NDArray,
     voxel_dimensions: npt.NDArray,
 ) -> None:
     """
@@ -30,17 +30,19 @@ def write_cube(
             For each element of the molecule, its
             elemental symbol.
 
+        voxel_origin:
+            Origin of the voxels.
+
         voxel_dimensions:
             The length of a single voxel in the x, y and
             z dimensions.
 
     """
 
-    origin_x, origin_y, origin_z = origin
+    origin_x, origin_y, origin_z = voxel_origin
     voxel_x_length, voxel_y_length, voxel_z_length = voxel_dimensions
     num_voxels_x, num_voxels_y, num_voxels_z = voxels.shape
     with open(path, "w") as cube:
-        # write header stuff
         lines = [
             " title",
             " title2",

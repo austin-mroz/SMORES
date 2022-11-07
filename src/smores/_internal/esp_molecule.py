@@ -9,8 +9,8 @@ import numpy as np
 import numpy.typing as npt
 import streusel.gaussian_cube
 
-from smores._internal.esp_grid import ElectrostaticPotentialGrid
 from smores._internal.steric_parameters import StericParameters
+from smores._internal.voxel_grid import VoxelGrid
 from smores._internal.write_cube import write_cube
 
 
@@ -48,7 +48,7 @@ class EspMolecule:
         self,
         atoms: typing.Iterable[str],
         positions: npt.ArrayLike,
-        electrostatic_potential: ElectrostaticPotentialGrid,
+        electrostatic_potential: VoxelGrid,
     ) -> None:
         """
         Initialize an :class:`.EspMolecule`.
@@ -70,7 +70,32 @@ class EspMolecule:
 
         self._atoms = tuple(atoms)
         self._positions = np.array(positions)
-        self._electrostatic_potential = electrostatic_potential
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            electrostatic_potential_file = pathlib.Path(tmp_dir) / "esp.cube"
+            write_cube(
+                path=electrostatic_potential_file,
+                voxels=electrostatic_potential.voxels,
+                positions=self._positions,
+                elements=self._atoms,
+                voxel_origin=electrostatic_potential.voxel_origin,
+                voxel_dimensions=electrostatic_potential.voxel_size,
+            )
+            streusel_molecule = streusel.gaussian_cube.Molecule(
+                electrostatic_potential_file,
+            )
+            streusel_molecule.get_efield()
+            streusel_molecule.sample_efield()
+            electric_field_surface = np.zeros(
+                electrostatic_potential.voxels.shape
+            )
+            electric_field_surface[streusel_molecule.surface_ijk] = 1
+
+        self._electric_field_surface = VoxelGrid(
+            voxels=electric_field_surface,
+            voxel_size=electrostatic_potential.voxel_size,
+            voxel_origin=electrostatic_potential.voxel_origin,
+        )
 
     def get_steric_parameters(
         self,
@@ -93,20 +118,40 @@ class EspMolecule:
 
         """
 
-        streusel.gaussian_cube.Molecule(self._cube_file)
-
         with tempfile.TemporaryDirectory() as tmp_dir:
-            cube_file = pathlib.Path(tmp_dir) / "esp.cube"
+            electrostatic_potential_file = pathlib.Path(tmp_dir) / "esp.cube"
             write_cube(
-                path=cube_file,
-                voxels=self._electrostatic_potential.grid,
+                path=electrostatic_potential_file,
+                voxels=self._electrostatic_potential.voxels,
                 positions=self._positions,
                 elements=self._atoms,
+                voxel_origin=self._electrostatic_potential.voxel_origin,
+                voxel_dimensions=self._electrostatic_potential.voxel_size,
+            )
+            streusel_molecule = streusel.gaussian_cube.Molecule(
+                electrostatic_potential_file,
+            )
+            streusel_molecule.get_efield()
+            streusel_molecule.sample_efield()
+            electric_field_surface = np.zeros(
+                self._electrostatic_potential.voxels.shape
+            )
+            electric_field_surface[streusel_molecule.surface_ijk] = 1
+
+            electric_field_surface_file = (
+                pathlib.Path(tmp_dir) / "ef_surface.cube"
+            )
+            write_cube(
+                path=electric_field_surface_file,
+                voxels=electric_field_surface,
+                positions=self._positions,
+                elements=self._atoms,
+                voxel_origin=self._electrostatic_potential.voxel_origin,
                 voxel_dimensions=self._electrostatic_potential.voxel_size,
             )
 
             params = db.dbstep(
-                str(cube_file),
+                str(electric_field_surface_file),
                 atom1=dummy_index,
                 atom2=attached_index,
                 surface="density",

@@ -35,13 +35,13 @@ class Combination:
 def combine(
     cores: typing.Iterable[rdkit.Mol],
     substituents: typing.Iterable[rdkit.Mol],
-    dummy_atom: str = "Br",
+    join_atom: str = "Br",
     optimize: bool = True,
 ) -> typing.Iterator[Combination]:
 
     for core, substituent in itertools.product(cores, substituents):
-        core_bb = _get_building_block(core, dummy_atom)
-        subsituent_bb = _get_building_block(substituent, dummy_atom)
+        core_bb = _get_building_block(core, join_atom)
+        subsituent_bb = _get_building_block(substituent, join_atom)
         construct = stk.ConstructedMolecule(
             topology_graph=stk.polymer.Linear(
                 building_blocks=(core_bb, subsituent_bb),
@@ -66,7 +66,7 @@ def combine(
 
 def _get_building_block(
     molecule: rdkit.Mol,
-    dummy_atom: str,
+    join_atom: str,
 ) -> stk.BuildingBlock:
 
     factories = {
@@ -78,7 +78,7 @@ def _get_building_block(
     rdkit.Kekulize(molecule)
     return stk.BuildingBlock.init_from_rdkit_mol(
         molecule=molecule,
-        functional_groups=[factories[dummy_atom]],
+        functional_groups=[factories[join_atom]],
     )
 
 
