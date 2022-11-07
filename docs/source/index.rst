@@ -124,11 +124,24 @@ Plays nice with :mod:`rdkit`
   import smores
   import rdkit.Chem as rdkit
 
-  rdkit_molecule = rdkit.MolFromSmiles("CBr")
-  smores = smores.Molecule.from_rdkit(rdkit_molecule)
+  rdkit_molecule = rdkit.AddHs(rdkit.MolFromSmiles("CBr"))
+  rdkit.EmbedMolecule(rdkit_molecule)  # Generate a 3-D structure.
 
+  smores_molecule = smores.Molecule.from_rdkit(rdkit_molecule)
+
+
+and we provide a handy function for creating rdkit
+molecules from SMILES
+
+.. testcode::
+
+   rdkit_molecule = smores.rdkit_from_smiles("CC")
+
+which takes care of adding hydrogen atoms and generating a 3-D structure
+for you, unlike RDKit_'s own `rdkit.MolFromSmiles`_ function.
 
 .. _RDKit: https://www.rdkit.org/docs/index.html
+.. _`rdkit.MolFromSmiles`: https://www.rdkit.org/docs/source/rdkit.Chem.rdmolfiles.html#rdkit.Chem.rdmolfiles.MolFromSmiles
 
 
 .. seealso::
