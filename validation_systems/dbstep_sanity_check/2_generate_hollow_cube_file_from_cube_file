@@ -23,7 +23,7 @@ def main() -> None:
         path=args.output_file,
         voxels=_get_surface(voxels),
         positions=atoms.get_positions() / ase.units.Bohr,
-        elements=atoms.get_chemical_symbols(),
+        elements=atoms.get_atomic_numbers(),
         voxel_origin=voxel_grid_params.origin,
         voxel_dimensions=voxel_grid_params.voxel_dimensions,
     )
