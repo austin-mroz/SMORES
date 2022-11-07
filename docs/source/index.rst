@@ -59,11 +59,16 @@ You start with
 
 and then you load a molecule & calculate the steric parameters
 
+
 .. testcode:: quickstart
 
-  molecule = smores.Molecule.from_xyz_file("my_molecule.xyz")
-  params = molecule.get_steric_parameters(dummy_index=0, attached_index=1)
-  print(params.L, params.B1, params.B5)
+  molecule = smores.Molecule.from_smiles("CC")
+  molecule.get_steric_parameters(dummy_index=0, attached_index=1)
+
+.. testoutput::
+
+  StericParameters(L=3.57164113574581, B1=1.9730970556668774, B5=2.320611610648539)
+
 
 Which will calculate the parameters using the STREUSEL__ radii
 of the atoms.
@@ -79,6 +84,8 @@ __ https://streusel.readthedocs.io
 .. seealso::
 
   * :class:`.Molecule`: For additional documentation and examples.
+  * :meth:`.Molecule.from_xyz_file`: For loading molecules from ``.xyz`` files.
+    Other file types are supported too!
   * :meth:`.Molecule.get_steric_parameters`: For configuration options.
 
 Integration with machine learning workflows
