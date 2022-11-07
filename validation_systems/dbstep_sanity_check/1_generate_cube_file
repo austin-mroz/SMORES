@@ -27,6 +27,8 @@ def _get_command_line_arguments() -> argparse.Namespace:
         "-o",
         "--output_directory",
         type=pathlib.Path,
+        default=pathlib.Path.cwd() / "1_output",
+        help="The directory into which the output files are written.",
     )
     return parser.parse_args()
 

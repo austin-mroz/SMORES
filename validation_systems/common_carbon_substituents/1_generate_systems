@@ -76,7 +76,7 @@ def _get_command_line_arguments() -> argparse.Namespace:
         "--output_directory",
         default=pathlib.Path.cwd() / "1_output",
         type=pathlib.Path,
-        help="The csv file into which the generated structures are written.",
+        help="The directory into which the output files are written.",
     )
     return parser.parse_args()
 
