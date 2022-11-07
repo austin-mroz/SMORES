@@ -57,7 +57,7 @@ You start with
 
   import smores
 
-and then you load a molecule & calculate the steric parameters
+and then you load a molecule and calculate the steric parameters
 
 
 .. testcode:: quickstart
