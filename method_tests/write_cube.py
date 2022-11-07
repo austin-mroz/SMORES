@@ -1,16 +1,26 @@
-import itertools
+import pathlib
 
 import numpy as np
+import numpy.typing as npt
 
 
 def write_cube(
-    path: str,
-    voxels: np.ndarray,
+    path: pathlib.Path,
+    voxels: npt.ArrayLike,
     positions: np.ndarray,
     elements: list[str],
     origin: np.ndarray,
     res: np.ndarray,
 ) -> None:
+    """
+    Write a ``.cube`` file.
+
+    Paramters:
+
+        path:
+
+    """
+
     origin_x, origin_y, origin_z = origin
     res_x, res_y, res_z = res
     nvox_x, nvox_y, nvox_z = voxels.shape
@@ -19,14 +29,18 @@ def write_cube(
         lines = [
             " title",
             " title2",
-            f"{len(elements): >5} {origin_x: >11.6f} {origin_y: >11.6f} {origin_z: >11.6f}",
+            (
+                f"{len(elements): >5} {origin_x: >11.6f} {origin_y: >11.6f} "
+                f"{origin_z: >11.6f}"
+            ),
             f"{nvox_x: >5} {res_x: >11.6f} {0.: >11.6f} {0.: >11.6f}",
             f"{nvox_y: >5} {0.: >11.6f} {res_y: >11.6f} {0.: >11.6f}",
             f"{nvox_z: >5} {0.: >11.6f} {0.: >11.6f} {res_z: >11.6f}",
         ]
         for element, [x, y, z] in zip(elements, positions):
             lines.append(
-                f"{element: >5} {0.: >11.6f} {x: >11.6f} {y: >11.6f} {z: >11.6f}"
+                f"{element: >5} {0.: >11.6f} {x: >11.6f} "
+                f"{y: >11.6f} {z: >11.6f}"
             )
 
         # write voxel grid to cube file from tensor

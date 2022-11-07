@@ -9,7 +9,7 @@ import numpy as np
 import numpy.typing as npt
 import streusel.gaussian_cube
 
-from smores._intenral.esp_grid import ElectrostaticPotentialGrid
+from smores._internal.esp_grid import ElectrostaticPotentialGrid
 from smores._internal.steric_parameters import StericParameters
 from smores._internal.write_cube import write_cube
 

@@ -1,10 +1,27 @@
 [project]
 name = "smores"
 dynamic = ["version"]
-dependencies = ['tqdm', 'numpy', 'pandas', 'rdkit', 'stk']
+dependencies = [
+  'numpy',
+  'pandas',
+  'rdkit',
+  'stk',
+  "ase",
+  "dbstep",
+  "streusel",
+  "morfeus-ml",
+]
 
 [project.optional-dependencies]
-dev = ['black', 'flake8', 'mypy', 'isort']
+dev = [
+  "black",
+  "flake8",
+  "mypy",
+  "isort",
+  "pytest",
+  "pytest-lazy-fixture",
+  "sphinx",
+]
 
 
 [build-system]
@@ -15,6 +32,9 @@ build-backend = "setuptools.build_meta"
 smores = ["py.typed"]
 
 [tool.setuptools_.scm]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
 
 [tool.black]
 line-length = 79
