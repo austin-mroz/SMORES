@@ -1,0 +1,6 @@
+catalytic_reaction_name,catalyst_name,catalytic_smiles
+nhk_allylation,oxazoline-proline,CC(C)[C@H](NC(=O)C1CCCN1C(=O)OBr)C3=N[C@H](Cc2ccccc2)CO3
+nhk_propargylation,quinoline-proline,O=C(NCc2cc(Br)c1ccccc1n2)C3CCCN3C(=O)O[Lu]
+desymmetrization,reactant,Oc2ccc(C(Br)c1ccc(O)cc1)cc2
+desymmetrization,product,CC(=O)Oc2ccc(C(Br)c1ccc(O)cc1)cc2
+nhk_allylation,oxazolin-proline-library,O=C(CC1CCCN1C(=O)O[Lu])N[C@H](Br)C2=NCCO2
