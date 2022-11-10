@@ -88,5 +88,5 @@ The first 2 steps of the 3 step worklow are complete.
 2. STREUSEL has been integrated with SMORES -- this reuqires additional validation steps (for the optimized
 binning method).
 3. SMORES sterimol paramters must yet be integrated with MOR 
-
+4. be cool4. be cool4. be cool4. be cool
 
