@@ -83,6 +83,7 @@ def _optimize_structures(
                     grid_length=10.0,
                     num_voxels_per_dimension=50,
                     optimize=True,
+                    num_threads=14,
                 )
                 _append_to_csv(
                     path=csv_path,
@@ -134,7 +135,7 @@ def _append_to_csv(
 
 
 def _read_molecules(input_file: pathlib.Path) -> typing.Iterator[Molecule]:
-    with open(input_file, "w") as csv_file:
+    with open(input_file) as csv_file:
         reader = csv.DictReader(csv_file)
         for row in reader:
             yield Molecule(
