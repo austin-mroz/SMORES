@@ -28,7 +28,10 @@ def main() -> None:
 
 def _get_command_line_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="",
+        description=(
+            "Run dbstep on a regular cube file as well as one where only "
+            "the surface voxels are non-zero."
+        ),
     )
     parser.add_argument(
         "--cube_file",

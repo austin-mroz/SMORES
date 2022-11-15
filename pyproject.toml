@@ -56,5 +56,6 @@ module = [
   "dbstep.*",
   "ase.*",
   "streusel.*",
+  "matplotlib.*",
 ]
 ignore_missing_imports = true
