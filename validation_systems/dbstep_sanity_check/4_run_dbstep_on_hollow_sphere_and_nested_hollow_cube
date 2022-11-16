@@ -32,8 +32,8 @@ def main() -> None:
         write_cube,
         positions=np.array(
             [
-                [-1.0, 0.0, 0.0],
-                [1.0, 0.0, 0.0],
+                [2.5, 2.5, 2.5],
+                [3.2, 3.2, 3.2],
             ],
         ),
         elements=["1", "1"],
