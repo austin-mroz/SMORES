@@ -11,7 +11,7 @@ from dataclasses import dataclass
 import rdkit.Chem as rdkit
 
 import smores
-import smores.psi4
+import smores.xtb
 
 _OUTPUT_CSV_COLUMNS = (
     "reaction_name",
@@ -76,14 +76,10 @@ def _optimize_structures(
             calculation_directory.mkdir(parents=True)
             try:
                 molecule = rdkit.MolFromXYZFile(str(molecule_input.xyz_file))
-                smores.psi4.calculate_electrostatic_potential(
+                smores.xtb.optimize_geometry(
                     molecule=molecule,
                     output_directory=calculation_directory,
-                    grid_origin=(-5, -5, -5),
-                    grid_length=10.0,
-                    num_voxels_per_dimension=50,
-                    optimize=True,
-                    num_threads=14,
+                    level="extreme",
                 )
                 _append_to_csv(
                     path=csv_path,
@@ -92,7 +88,7 @@ def _optimize_structures(
                     core=molecule_input.core,
                     substituent=molecule_input.substituent,
                     smiles=molecule_input.smiles,
-                    xyz_file=calculation_directory / "geom.xyz",
+                    xyz_file=calculation_directory / "xtbopt.xyz",
                     dummy_index=molecule_input.dummy_index,
                     attached_index=molecule_input.attached_index,
                 )
