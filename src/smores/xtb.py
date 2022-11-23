@@ -5,8 +5,8 @@ This module provides utility functions for using xtb...
 """
 
 
-from smores._internal.xtb import calculate_electrostatic_potential
+from smores._internal.xtb import optimize_geometry 
 
 __all__ = [
-        "calculate_electrostatic_potential",
+        "optimize_geometry",
 ]
