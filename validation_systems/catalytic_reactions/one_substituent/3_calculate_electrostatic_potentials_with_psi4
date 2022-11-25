@@ -83,7 +83,7 @@ def _calculate_electrostatic_potentials(
                     grid_length=10.0,
                     num_voxels_per_dimension=50,
                     optimize=False,
-                    num_threads=14,
+                    num_threads=20,
                 )
                 _append_to_csv(
                     path=csv_path,
