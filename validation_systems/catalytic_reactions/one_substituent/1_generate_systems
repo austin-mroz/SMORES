@@ -93,6 +93,7 @@ def _write_structures(
             rdkit.MolToXYZFile(combo.product, str(xyz_file))
             writer.writerow(
                 {
+                    "reaction_name": reaction_name,
                     "name": name,
                     "core": cores[combo.core],
                     "substituent": substituents[combo.substituent],
