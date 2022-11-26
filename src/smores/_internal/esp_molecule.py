@@ -97,6 +97,36 @@ class EspMolecule:
             voxel_origin=electrostatic_potential.voxel_origin,
         )
 
+
+    @classmethod
+    def from_xyz_and_cube_files(
+            cls,
+            xyz_path: pathlib.Path | str,
+            cube_path: pathlib.Path | str,
+    ) -> "EspMolecule":
+        """
+        Get an ESP molecule from a ``xyz`` and ``cube`` file.
+
+        Parameters:
+
+            xyz_path:
+                The path to the xyz file.
+
+            cube_path:
+                The path to the cube file.
+
+        Returns:
+            The ESP molecule.
+        """
+
+        instance = cls.__new__(cls)
+        molecule = rdkit.MolFromXYZFile(str(xyz_path))
+        instance._atoms = tuple(
+                atom.GetSymbol() for atom in molecule.GetAtoms()
+        )
+        instance.positions = molecule.GetConformer(0).GetPositions()
+        
+
     def get_steric_parameters(
         self,
         dummy_index: int,
