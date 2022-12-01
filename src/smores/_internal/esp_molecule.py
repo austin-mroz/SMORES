@@ -162,5 +162,19 @@ class EspMolecule:
         grid, atoms = ase.io.cube.read_cube_data(str(path))
         instance._atoms = atoms.get_atomic_numbers()
         instance._positions = atoms.positions / ase.units.Bohr
-        instance._potential_grid = grid
+
+        streusel_molecule = streusel.gaussian_cube.Molecule(str(path))
+
+        instance._electric_field_surface = VoxelGrid(
+                voxels=_get_electric_field_surface(streusel_molecule),
+                voxel_size=streusel_molecule.res,
+                voxel_origin=streusel_molecule.origin,
+        )
+
         return instance
+
+
+def _get_electric_field_surface(streusel_molecule: streusel.gaussian_cube.Molecule) -> npt.NDArray:
+    streusel_molecule.get_efield()
+    streusel_molecule.sample_efield()
+    return streusel_molecule.surface_mask
