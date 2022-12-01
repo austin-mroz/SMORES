@@ -1,8 +1,8 @@
 import pathlib
 import typing
 
-import morfeus
 import dbstep.Dbstep as db
+import morfeus
 import numpy as np
 import numpy.typing as npt
 import rdkit.Chem.AllChem as rdkit
@@ -248,7 +248,7 @@ rdkit.Chem.rdDistGeom.html#rdkit.Chem.rdDistGeom.ETKDGv3
 
         return instance
 
-    def get_steric_parameters_using_radii(
+    def get_steric_parameters(
         self,
         dummy_index: int,
         attached_index: int,
@@ -283,42 +283,4 @@ rdkit.Chem.rdDistGeom.html#rdkit.Chem.rdDistGeom.ETKDGv3
             L=sterimol.L_value,
             B1=sterimol.B_1_value,
             B5=sterimol.B_5_value,
-        )
-
-    def get_steric_parameters_using_cube_file(
-            self,
-            dummy_index: int,
-            attached_index: int,
-            cube_file: str | pathlib.Path,
-    ) -> StericParameters:
-        """
-        Get the steric parameters from STREUSEL_ cube file.
-        
-        Parameters:
-        
-            dummy_index:
-                The index of the dummy atom.
-
-            attached_index:
-                The index of the attached atom of the substituent.
-
-        Returns:
-            The steric parameters.
-
-        .. _STREUSEL: https://streusel.readthedocs.io
-        
-        """
-
-        sterimol = db.dbstep(
-                str(cube_file),
-                atom1=dummy_index,
-                atom2=attached_index,
-                sterimol=True,
-                surface="density",
-        )
-
-        return StericParameters(
-                L=sterimol.L,
-                B1=sterimol.Bmin,
-                B5=sterimol.Bmax,
         )
