@@ -11,7 +11,8 @@ def _get_command_line_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("sterimol_parameters")
     parser.add_argument("experimental_results")
-
+    parser.add_argument('--from_radii', action='store_true')
+    parser.add_argument('--from_cube', action='store_true')
     return parser.parse_args()
 
 
