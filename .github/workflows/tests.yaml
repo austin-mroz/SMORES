@@ -28,6 +28,6 @@ jobs:
       - name: Run mypy
         run: |
           . /deps/venv/bin/activate
+          pip install --no-deps -e .
           mypy --exclude validation .
-          test
           mypy --explicit-package-bases validation
