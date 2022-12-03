@@ -16,14 +16,16 @@ fix:
 # check the code for errors
 check:
   #!/usr/bin/env bash
-  set -v
 
   error=0
   trap error=1 ERR
 
-  black --check .
-  isort --check .
-  pytest
+  echo
+  ( set -x; black --check . )
+  echo
+  ( set -x; isort --check . )
+  echo
+  ( set -x; pytest )
 
   test $error = 0
 
