@@ -78,7 +78,7 @@ jobs:
         run: |
           . /deps/venv/bin/activate
           pip install --no-deps -e .
-      - name: Run pyest
+      - name: Run pytest
         run: |
           . /deps/venv/bin/activate
           pytest

@@ -14,7 +14,9 @@ jobs:
       - name: Git checkout
         uses: actions/checkout@v2
       - name: Install smores
-        run: echo TODO
+        run: |
+          . /deps/venv/bin/activate
+          pip install --no-deps -e .
       - name: Build smores
         run: python -m build
       - name: Publish smores
