@@ -17,9 +17,9 @@ Validation
 ==========
 
 If you wish run and reproduce the validation procedure for SMORES
-see the validation_systems__ directory.
+see the validation__ directory.
 
-__ validation_systems
+__ validation
 
 Acknowledgements
 ================
