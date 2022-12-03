@@ -18,3 +18,15 @@ jobs:
         run: |
           . /deps/venv/bin/activate
           flake8 .
+  mypy:
+    runs-on: ubuntu-22.04
+    container:
+      image: ghcr.io/lukasturcani/smores-testing-environment:latest
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v2
+      - name: Run mypy
+        run: |
+          . /deps/venv/bin/activate
+          mypy --exclude validation .
+          mypy --explicit-bases validation
