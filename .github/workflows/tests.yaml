@@ -29,4 +29,5 @@ jobs:
         run: |
           . /deps/venv/bin/activate
           mypy --exclude validation .
+          test
           mypy --explicit-package-bases validation
