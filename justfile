@@ -37,5 +37,5 @@ check:
 
 # build the docker testing environment
 build-testing-environment:
-  cp pyproject.toml docker_testing_environment
+  pip-compile -o docker_testing_environment/requirements.txt --extra dev pyproject.toml
   docker image build -t smores-testing-environment:latest docker_testing_environment
