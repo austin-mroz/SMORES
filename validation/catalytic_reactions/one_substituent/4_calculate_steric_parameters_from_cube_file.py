@@ -35,10 +35,12 @@ def main() -> None:
         writer.writeheader()
 
         for catalyst_input_file in args.input_file:
-            
+
             for row in tuple(_get_rows(catalyst_input_file)):
 
-                smores_esp_molecule = smores.EspMolecule.from_cube_file(row.xyz_file.parent / "ESP.cube")
+                smores_esp_molecule = smores.EspMolecule.from_cube_file(
+                    row.xyz_file.parent / "ESP.cube"
+                )
                 smores_params = smores_esp_molecule.get_steric_parameters(
                     dummy_index=row.dummy_index,
                     attached_index=row.attached_index,
@@ -113,7 +115,9 @@ def _get_command_line_arguments() -> argparse.Namespace:
             '"smiles", "xyz_file", "dummy_index" and "attached_index".'
         ),
         type=pathlib.Path,
-        default=pathlib.Path.cwd().joinpath("3_output").glob("*/xyz_files.csv"),
+        default=pathlib.Path.cwd()
+        .joinpath("3_output")
+        .glob("*/xyz_files.csv"),
         nargs="+",
     )
     parser.add_argument(

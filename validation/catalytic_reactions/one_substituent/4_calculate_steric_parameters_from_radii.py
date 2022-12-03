@@ -132,7 +132,9 @@ def _get_command_line_arguments() -> argparse.Namespace:
             '"smiles", "xyz_file", "dummy_index" and "attached_index".'
         ),
         type=pathlib.Path,
-        default=pathlib.Path.cwd().joinpath("2_output").glob("*/xyz_files.csv"),
+        default=pathlib.Path.cwd()
+        .joinpath("2_output")
+        .glob("*/xyz_files.csv"),
         nargs="+",
     )
     parser.add_argument(
