@@ -20,8 +20,8 @@ jobs:
           cp pyproject.toml docker_testing_environment
 
           docker image build
-          -t ghcr.io/austin-mroz/smores-testing-environment:latest
+          -t ghcr.io/lukasturcani/smores-testing-environment:latest
           ./docker_testing_environment
 
       - name: Publish image
-        run: docker push ghcr.io/austin-mroz/smores-testing-environment:latest
+        run: docker push ghcr.io/lukasturcani/smores-testing-environment:latest
