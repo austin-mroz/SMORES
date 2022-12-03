@@ -1,7 +1,6 @@
 import pathlib
 import typing
 
-import dbstep.Dbstep as db
 import morfeus
 import numpy as np
 import numpy.typing as npt
@@ -207,7 +206,7 @@ rdkit.Chem.rdDistGeom.html#rdkit.Chem.rdDistGeom.ETKDGv3
         cls,
         molecule: rdkit.Mol,
         radii: npt.ArrayLike | None = None,
-        conformer_id=0,
+        conformer_id: int = 0,
     ) -> "Molecule":
         """
         Get a molecule from an :mod:`rdkit` molecule.

@@ -1,6 +1,5 @@
 """
-This module provides utility functions for using xtb...
-
+This module provides utility functions for using xtb.
 
 """
 

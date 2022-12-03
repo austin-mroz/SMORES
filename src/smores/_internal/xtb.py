@@ -1,10 +1,9 @@
-import contextlib
-import os
 import pathlib
 import subprocess
-import typing
 
 import rdkit.Chem.AllChem as rdkit
+
+from smores._internal.utilities import current_working_directory
 
 
 def optimize_geometry(
@@ -21,7 +20,7 @@ def optimize_geometry(
     xyz_path = str(output_directory / "geom.xyz")
     rdkit.MolToXYZFile(molecule, xyz_path)
 
-    with _current_working_directory(output_directory):
+    with current_working_directory(output_directory):
         subprocess.run(
             [
                 "xtb",
@@ -33,13 +32,3 @@ def optimize_geometry(
         )
 
     return rdkit.MolFromXYZFile(str(output_directory / "xtbopt.xyz"))
-
-
-@contextlib.contextmanager
-def _current_working_directory(directory: pathlib.Path):
-    original_directory = os.getcwd()
-    try:
-        os.chdir(directory)
-        yield
-    finally:
-        os.chdir(original_directory)

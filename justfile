@@ -25,6 +25,8 @@ check:
   echo
   ( set -x; isort --check . )
   echo
+  ( set -x; flake8 . )
+  echo
   ( set -x; mypy --exclude validation . )
   echo
   ( set -x; mypy --explicit-package-bases validation )

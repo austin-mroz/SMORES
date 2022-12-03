@@ -158,7 +158,8 @@ def _get_command_line_arguments() -> argparse.Namespace:
         "-i",
         "--input_file",
         help=(
-            'A csv file with columns: "reaction_name", "name", "core", "substituent", '
+            'A csv file with columns: "reaction_name", "name", "core", '
+            '"substituent", '
             '"smiles", "dummy_index", "attached_index", "xyz_file".'
         ),
         type=pathlib.Path,

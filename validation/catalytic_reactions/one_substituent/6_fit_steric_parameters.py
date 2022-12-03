@@ -5,8 +5,6 @@ import pathlib
 import typing
 from dataclasses import dataclass
 
-import statsmodels.api as sm
-
 _OUTPUT_CSV_COLUMNS = (
     "name",
     "core",
@@ -54,16 +52,17 @@ def main() -> None:
     args = _get_command_line_arguments()
     args.output_directory.mkdir(parents=True, exist_ok=True)
 
-    sterimol_parameters = tuple(_get_rows(args.sterimol_parameters))
-    experimental_results = tuple(_get_rows(args.experimental_results))
+
+#     sterimol_parameters = tuple(_get_rows(args.sterimol_parameters))
+#     experimental_results = tuple(_get_rows(args.experimental_results))
 
 
-def _fit_sterimol_parameters(
-    sterimol_parameters: typing.Iterator[CsvRow],
-    experimental_results: typing.Iterator[CsvRow],
-    catalysis_reaction: str,
-) -> typing.Iterator[SterimolFit]:
-    pass
+# def _fit_sterimol_parameters(
+#     sterimol_parameters: typing.Iterator[CsvRow],
+#     experimental_results: typing.Iterator[CsvRow],
+#     catalysis_reaction: str,
+# ) -> typing.Iterator[SterimolFit]:
+#     pass
 
 
 def _get_rows(

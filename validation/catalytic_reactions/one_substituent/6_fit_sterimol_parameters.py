@@ -1,8 +1,7 @@
 #!python
 import argparse
-import pathlib
+import typing
 
-import numpy as np
 import pandas as pd
 import seaborn as sns
 import statsmodels.api as sm
@@ -72,7 +71,7 @@ def _get_sterimol_parameter_values(
     return parameters
 
 
-def get_stats(X: pd.DataFrame, y: pd.DataFrame) -> None:
+def get_stats(X: pd.DataFrame, y: pd.DataFrame) -> typing.Any:
     results = sm.OLS(y, X).fit()
     print(results.summary())
     return results
