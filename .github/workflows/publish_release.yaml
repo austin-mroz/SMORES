@@ -1,0 +1,25 @@
+name: Publish release
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+.[0-9]+'
+jobs:
+  publish-release:
+    runs-on: ubuntu-22.04
+    container:
+      image: ghcr.io/lukasturcani/smores-testing-environment:latest
+    env:
+      VERSION: ${{ github.ref_name }}
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v2
+      - name: Install smores
+        run: echo TODO
+      - name: Build smores
+        run: python -m build
+      - name: Publish smores
+        run:
+          twine upload
+            -u ${{ secrets.PYPI_USERNAME }}
+            -p ${{ secrets.PYPI_PASSWORD }}
+            dist/*
