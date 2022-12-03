@@ -53,4 +53,4 @@ Requirements
 The ``conda`` envionrment file which has all the dependencies needed
 to run the validation steps can be found here__.
 
-__ ../../smores.yml
+__ ../smores.yml
