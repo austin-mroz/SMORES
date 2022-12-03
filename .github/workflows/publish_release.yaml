@@ -18,10 +18,14 @@ jobs:
           . /deps/venv/bin/activate
           pip install --no-deps -e .
       - name: Build smores
-        run: python -m build
+        run: |
+          . /deps/venv/bin/activate
+          python -m build
       - name: Publish smores
-        run:
+        run: >
+          . /deps/venv/bin/activate
+
           twine upload
-            -u ${{ secrets.PYPI_USERNAME }}
-            -p ${{ secrets.PYPI_PASSWORD }}
-            dist/*
+          -u ${{ secrets.PYPI_USERNAME }}
+          -p ${{ secrets.PYPI_PASSWORD }}
+          dist/*
