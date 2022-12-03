@@ -25,10 +25,15 @@ jobs:
     steps:
       - name: Git checkout
         uses: actions/checkout@v2
-      - name: Run mypy
+      - name: Install smores
         run: |
           . /deps/venv/bin/activate
           pip install --no-deps -e .
+      - name: Run mypy 1
+        run: |
+          . /deps/venv/bin/activate
           mypy --exclude validation .
-          test
+      - name: Run mypy 2
+        run: |
+          . /deps/venv/bin/activate
           mypy --explicit-package-bases validation
