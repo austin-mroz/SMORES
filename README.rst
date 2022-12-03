@@ -1,6 +1,6 @@
-:authors: - Austin Mroz
+:Authors: - Austin Mroz
           - Lukas Turcani
-:documentation: https://smores.readthedocs.io
+:Documentation: https://smores.readthedocs.io
 
 Overview
 ========
