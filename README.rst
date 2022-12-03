@@ -23,5 +23,7 @@ __ validation_systems
 
 Acknowledgements
 ================
-This work is a collaboration by P.L.A.C.E.H.O.L.D.E.R.
+This work is a collaboration by stokeware__
 A.M.M. developed this while part of the Jelfs Group at Imperial College London
+
+__ https://github.com/stokewhere
