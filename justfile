@@ -25,6 +25,10 @@ check:
   echo
   ( set -x; isort --check . )
   echo
+  ( set -x; mypy --exclude validation . )
+  echo
+  ( set -x; mypy --explicit-package-bases validation )
+  echo
   ( set -x; pytest )
 
   test $error = 0

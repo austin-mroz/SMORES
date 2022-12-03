@@ -20,6 +20,7 @@ dev = [
   "isort",
   "pytest",
   "pytest-lazy-fixture",
+  "types-pytest-lazy-fixture",
   "sphinx",
   "furo",
 ]
@@ -46,6 +47,9 @@ profile = "black"
 
 [tool.mypy]
 no_implicit_optional = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
 
 [[tool.mypy.overrides]]
 module = [
@@ -57,5 +61,6 @@ module = [
   "ase.*",
   "streusel.*",
   "matplotlib.*",
+  "setuptools.*",
 ]
 ignore_missing_imports = true
