@@ -23,6 +23,8 @@ dev = [
   "types-pytest-lazy-fixture",
   "sphinx",
   "furo",
+  "twine",
+  "build",
 ]
 
 
