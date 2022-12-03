@@ -15,4 +15,4 @@ jobs:
       - name: Git checkout
         uses: actions/checkout@v2
       - name: Lint with flake8
-        run: . /code/venv/bin/activate && flake8 .
+        run: . /deps/venv/bin/activate && flake8 .
