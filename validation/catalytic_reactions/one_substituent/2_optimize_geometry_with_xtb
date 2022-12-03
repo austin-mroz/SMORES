@@ -1,11 +1,11 @@
 #!python
 
 import argparse
-from collections import abc
 import csv
 import pathlib
 import sys
 import typing
+from collections import abc
 from dataclasses import dataclass
 
 import rdkit.Chem as rdkit

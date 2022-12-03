@@ -1,14 +1,16 @@
 #!python
 
-import pandas as pd
 import argparse
-import smores
-from itertools import product
-import pathlib
-import stk
-import rdkit
-import re
 import logging
+import pathlib
+import re
+from itertools import product
+
+import pandas as pd
+import rdkit
+import stk
+
+import smores
 
 
 def _get_command_line_arguments() -> argparse.Namespace:

@@ -1,11 +1,11 @@
 #!python
 import argparse
 import csv
-from dataclasses import dataclass
 import pathlib
-import statsmodels.api as sm
 import typing
+from dataclasses import dataclass
 
+import statsmodels.api as sm
 
 _OUTPUT_CSV_COLUMNS = (
         "name",

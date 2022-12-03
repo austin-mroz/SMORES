@@ -1,8 +1,9 @@
 #!python
 import argparse
+import pathlib
+
 import numpy as np
 import pandas as pd
-import pathlib
 import seaborn as sns
 import statsmodels.api as sm
 

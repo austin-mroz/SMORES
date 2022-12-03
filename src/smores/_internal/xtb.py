@@ -1,15 +1,16 @@
 import contextlib
-import pathlib
 import os
-import typing
-import rdkit.Chem.AllChem as rdkit
+import pathlib
 import subprocess
+import typing
+
+import rdkit.Chem.AllChem as rdkit
 
 
 def optimize_geometry(
-        molecule: rdkit.Mol,
-        output_directory: pathlib.Path | str,
-        level: str = "extreme",
+    molecule: rdkit.Mol,
+    output_directory: pathlib.Path | str,
+    level: str = "extreme",
 ) -> pathlib.Path:
     """
     Optimize the geometry of a molecule.
@@ -19,7 +20,7 @@ def optimize_geometry(
     output_directory.mkdir(parents=True, exist_ok=True)
     xyz_path = str(output_directory / "geom.xyz")
     rdkit.MolToXYZFile(molecule, xyz_path)
-    
+
     with _current_working_directory(output_directory):
         subprocess.run(
             [

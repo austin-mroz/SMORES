@@ -97,7 +97,6 @@ class EspMolecule:
             voxel_origin=electrostatic_potential.voxel_origin,
         )
 
-
     def get_steric_parameters(
         self,
         dummy_index: int,
@@ -166,15 +165,17 @@ class EspMolecule:
         streusel_molecule = streusel.gaussian_cube.Molecule(str(path))
 
         instance._electric_field_surface = VoxelGrid(
-                voxels=_get_electric_field_surface(streusel_molecule),
-                voxel_size=streusel_molecule.res,
-                voxel_origin=streusel_molecule.origin,
+            voxels=_get_electric_field_surface(streusel_molecule),
+            voxel_size=streusel_molecule.res,
+            voxel_origin=streusel_molecule.origin,
         )
 
         return instance
 
 
-def _get_electric_field_surface(streusel_molecule: streusel.gaussian_cube.Molecule) -> npt.NDArray:
+def _get_electric_field_surface(
+    streusel_molecule: streusel.gaussian_cube.Molecule,
+) -> npt.NDArray:
     streusel_molecule.get_efield()
     streusel_molecule.sample_efield()
     return streusel_molecule.surface_mask
