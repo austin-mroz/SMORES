@@ -1,14 +1,14 @@
 :authors: - Austin Mroz
           - Lukas Turcani
+:documentation: https://smores.readthedocs.io
 
 Overview
 ========
+
 ``SMORES`` enables calculation of electric-field-based steric
 parameters. This package is an expansion of the utility of the STREUSEL__
 size metric and enables the calculation of electric-field-based
 wSterimol__ parameters from ``.xyz`` files.
-
-A detailed project plan can be found in `plan.md`
 
 __ https://github.com/austin-mroz/STREUSEL
 __ https://github.com/bobbypaton/wSterimol
