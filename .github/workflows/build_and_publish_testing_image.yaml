@@ -17,7 +17,12 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build image
         run: >
-          cp pyproject.toml docker_testing_environment
+          pip install pip-tools
+
+          pip-compile
+          -o docker_testing_environment/requirements.txt
+          --extra dev
+          pyproject.toml
 
           docker image build
           -t ghcr.io/lukasturcani/smores-testing-environment:latest
