@@ -24,7 +24,7 @@ __ validation_systems
 Acknowledgements
 ================
 
-This work is a collaboration by stokeware__. Sometimes we stream__.
+This work is a collaboration by stokeware__. Sometimes we stream__ on Twitch.
 
 autin-mroz__ developed this while part of the `Jelfs Group`__ at Imperial College London.
 
