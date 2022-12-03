@@ -37,3 +37,48 @@ jobs:
         run: |
           . /deps/venv/bin/activate
           mypy --explicit-package-bases validation
+  isort:
+    runs-on: ubuntu-22.04
+    container:
+      image: ghcr.io/lukasturcani/smores-testing-environment:latest
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v2
+      - name: Install smores
+        run: |
+          . /deps/venv/bin/activate
+          pip install --no-deps -e .
+      - name: Run isort
+        run: |
+          . /deps/venv/bin/activate
+          isort --check .
+  black:
+    runs-on: ubuntu-22.04
+    container:
+      image: ghcr.io/lukasturcani/smores-testing-environment:latest
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v2
+      - name: Install smores
+        run: |
+          . /deps/venv/bin/activate
+          pip install --no-deps -e .
+      - name: Run black
+        run: |
+          . /deps/venv/bin/activate
+          balck --check .
+  pytest:
+    runs-on: ubuntu-22.04
+    container:
+      image: ghcr.io/lukasturcani/smores-testing-environment:latest
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v2
+      - name: Install smores
+        run: |
+          . /deps/venv/bin/activate
+          pip install --no-deps -e .
+      - name: Run pyest
+        run: |
+          . /deps/venv/bin/activate
+          pytest
