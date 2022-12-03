@@ -36,7 +36,7 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools.package-data]
 smores = ["py.typed"]
 
-[tool.setuptools_.scm]
+[tool.setuptools_scm]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
