@@ -1,0 +1,1 @@
+python ../common_carbon_substituents/4_plot_steric_parameters -i 2_output/steric_parameters.csv -o 3_output

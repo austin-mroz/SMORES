@@ -1,53 +1,4 @@
-import pathlib
 import typing
-from dataclasses import dataclass
-
-import numpy as np
-import numpy.typing as npt
-
-from . import molecule
-
-
-@dataclass(frozen=True)
-class XyzData:
-    elements: list[str]
-    coordinates: npt.NDArray[np.float32]
-
-
-def read_xyz(
-    path: pathlib.Path,
-) -> XyzData:
-
-    with open(path, "r") as f:
-        lines = f.readlines()
-
-    elements = []
-    coordinates = []
-    for line in lines[2:]:
-        element, x, y, z = line.strip().split()
-        elements.append(element)
-        coordinates.append((x, y, z))
-    return XyzData(
-        elements=elements,
-        coordinates=np.array(coordinates),
-    )
-
-
-def write_xyz(
-        path: pathlib.Path,
-        xyz_data: XyzData,
-) -> None:
-    xyz_lines = []
-    xyz_lines.append(f'{len(xyz_data.elements)}')
-    xyz_lines.append('')
-
-    for element, coordinate in zip(xyz_data.elements, xyz_data.coordinates):
-        xyz_lines.append(
-                f'{element}   {coordinate[0]}   {coordinate[1]}   {coordinate[2]}'
-        )
-    content = '\n'.join(xyz_lines)
-    with open(path, 'w') as xyz_file:
-        xyz_file.write(f'{content}\n')
 
 
 atomic_mass: typing.Final = {
@@ -160,4 +111,89 @@ atomic_mass: typing.Final = {
     "Bh": 264.00,
     "Hs": 269.00,
     "Mt": 268.00,
+}
+
+
+streusel_radii: typing.Final = {
+    'H': 1.24,
+    'He': 1.05,
+    'Li': 2.06,
+    'Be': 1.92,
+    'B': 1.75,
+    'C': 1.61,
+    'N': 1.49,
+    'O': 1.46,
+    'F': 1.37,
+    'Ne': 1.26,
+    'Na': 2.13,
+    'Mg': 2.15,
+    'Al': 2.14,
+    'Si': 2.03,
+    'P': 1.93,
+    'S': 1.86,
+    'Cl': 1.75,
+    'Ar': 1.69,
+    'K': 2.35,
+    'Ca': 2.49,
+    'Sc': 2.4,
+    'Ti': 2.34,
+    'V': 2.29,
+    'Cr': 2.24,
+    'Mn': 2.04,
+    'Fe': 2.0,
+    'Co': 1.99,
+    'Cu': 2.02,
+    'Zn': 1.98,
+    'Ga': 2.11,
+    'Ge': 2.07,
+    'As': 2.0,
+    'Se': 1.96,
+    'Br': 1.89,
+    'Kr': 1.84,
+    'Rb': 2.42,
+    'Sr': 2.59,
+    'Y': 2.52,
+    'Zr': 2.47,
+    'Nb': 2.42,
+    'Mo': 2.34,
+    'Tc': 2.3,
+    'Ru': 2.24,
+    'Rh': 2.09,
+    'Ag': 2.01,
+    'Cd': 2.1,
+    'In': 2.23,
+    'Sn': 2.21,
+    'Sb': 2.17,
+    'Te': 2.16,
+    'I': 2.09,
+    'Xe': 2.03,
+    'Cs': 2.54,
+    'Ba': 2.75,
+    'La': 2.6,
+    'Ce': 2.57,
+    'Pr': 2.58,
+    'Nd': 2.65,
+    'Pm': 2.64,
+    'Sm': 2.62,
+    'Eu': 2.6,
+    'Gd': 2.51,
+    'Ho': 2.54,
+    'Er': 2.53,
+    'Tm': 2.51,
+    'Yb': 2.51,
+    'Lu': 2.45,
+    'Hf': 2.42,
+    'Ta': 2.38,
+    'Re': 2.26,
+    'Os': 2.19,
+    'Ir': 2.17,
+    'Pt': 2.14,
+    'Au': 2.07,
+    'Hg': 2.03,
+    'Tl': 2.21,
+    'Pb': 2.24,
+    'Bi': 2.23,
+    'Po': 2.22,
+    'At': 2.14,
+    'Rn': 2.11,
 }

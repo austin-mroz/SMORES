@@ -5,17 +5,17 @@ These are largely drawn from Sigman's Nat. Chem. paper
 The systems are organized using the following structure:
 
 ```
-validation_systems
+validation-systems
 |   validation_plan.md
 |
-|---common_carbon_substituents
+|---common-carbon-substituents
 |   |---H
 |   |   *sub*
 |   |---Me
 |   |   *sub*
 |   |---Bn
 |   |   *sub*
-|---catalytic_reactions
+|---catalytic-reactions
 |   |---NHK
 |   |---desymmetrization
 |   |---propargylation
@@ -46,11 +46,43 @@ approach. The substituents are defined in the
 ``carbon_substituents_smiles.csv``. Br is used as the
 placeholder group for HT generation.
 
-``generate_validation_systems.py`` generates the validation
+``generate_common_carbon_validation_systems.py`` generates the validation
 system directories and initial structures.
 
 
 ## catalytic reactions
-1. NHK allylations of benzaldehyde and acetophenone
-2. desymmetrization of bisphenols
-3. propargylation of acetophenone
+We will validate SMORES with the following catalytic reactions:
+1. NHK allylations of benzaldehyde
+2. NHK allylation of acetophenone
+3. desymmetrization of bisphenols
+4. propargylation of acetophenone
+
+The catalysts for each of these are found in:
+`catalytic_reaction_smiles.csv`
+The subsitunt placement is denoted by `Br` for the cases where there is only one
+substituent (1,2,3). In cases where 2 substiutents are used (1,4), `Lu` is used
+as the second placement atom for enumeration purposes.
+
+`generate_catalyst_validation_systems.py` generates the validation system
+dictectories, initial structures, as well as optimizing the catalysts.
+
+# progress
+Common carbon substituent systems have been generated.
+
+Catalytic reaction validation systems are partly completed --
+Presently, the code can only handle catalysts with one substituent group
+placement (assumed to be Br). However, both the NHK propargylation and the NHK
+allylation with the oxazoline-proline-library require 2 substituent groups
+(assumed to be Br and Lu).
+
+`generate_catalyst_validation_systems.py` needs to be modified to accomodate
+these cases.
+
+need to reorganize workflow -- psi4 is not compatible with xtb and cannot be run
+from the same virtual environment...
+One solution to this is to offer the ability to generate xtb starting structures
+and then write the bash script that automatically runs the optimizations
+^ this has been done
+
+ESP.cube will be calculated in the `SMORES/calculate-sterimol-for-validation-systems/`
+directory.

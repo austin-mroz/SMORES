@@ -1,10 +1,28 @@
 [project]
 name = "smores"
 dynamic = ["version"]
-dependencies = ['tqdm', 'numpy', 'pandas', 'rdkit', 'stk', 'xtb']
+dependencies = [
+  'numpy',
+  'pandas',
+  'rdkit',
+  'stk',
+  "ase",
+  "dbstep",
+  "streusel",
+  "morfeus-ml",
+]
 
 [project.optional-dependencies]
-dev = ['black', 'flake8', 'mypy', 'isort']
+dev = [
+  "black",
+  "flake8",
+  "mypy",
+  "isort",
+  "pytest",
+  "pytest-lazy-fixture",
+  "sphinx",
+  "furo",
+]
 
 
 [build-system]
@@ -15,6 +33,9 @@ build-backend = "setuptools.build_meta"
 smores = ["py.typed"]
 
 [tool.setuptools_.scm]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
 
 [tool.black]
 line-length = 79
@@ -27,5 +48,14 @@ profile = "black"
 no_implicit_optional = true
 
 [[tool.mypy.overrides]]
-module = ["rdkit.*", "psi4.*"]
+module = [
+  "rdkit.*",
+  "psi4.*",
+  "pandas.*",
+  "seaborn.*",
+  "dbstep.*",
+  "ase.*",
+  "streusel.*",
+  "matplotlib.*",
+]
 ignore_missing_imports = true
