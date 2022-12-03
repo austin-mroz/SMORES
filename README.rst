@@ -23,7 +23,10 @@ __ validation_systems
 
 Acknowledgements
 ================
-This work is a collaboration by stokeware__
-A.M.M. developed this while part of the Jelfs Group at Imperial College London
+This work is a collaboration by stokeware__.
+
+autin-mroz__ developed this while part of the `Jelfs Group`__ at Imperial College London.
 
 __ https://github.com/stokewhere
+__ https://github.com/austin-mroz
+__ https://jelfs-group.org
