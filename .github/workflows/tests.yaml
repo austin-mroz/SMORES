@@ -10,7 +10,7 @@ jobs:
   flake8:
     runs-on: ubuntu-22.04
     container:
-      image: ghcr.io/lukasturcani/smores-testing-environment:latest
+      image: ghcr.io/austin-mroz/smores-testing-environment:latest
     steps:
       - name: Git checkout
         uses: actions/checkout@v3
@@ -21,7 +21,7 @@ jobs:
   mypy:
     runs-on: ubuntu-22.04
     container:
-      image: ghcr.io/lukasturcani/smores-testing-environment:latest
+      image: ghcr.io/austin-mroz/smores-testing-environment:latest
     steps:
       - name: Git checkout
         uses: actions/checkout@v3
@@ -40,7 +40,7 @@ jobs:
   isort:
     runs-on: ubuntu-22.04
     container:
-      image: ghcr.io/lukasturcani/smores-testing-environment:latest
+      image: ghcr.io/austin-mroz/smores-testing-environment:latest
     steps:
       - name: Git checkout
         uses: actions/checkout@v3
@@ -55,7 +55,7 @@ jobs:
   black:
     runs-on: ubuntu-22.04
     container:
-      image: ghcr.io/lukasturcani/smores-testing-environment:latest
+      image: ghcr.io/austin-mroz/smores-testing-environment:latest
     steps:
       - name: Git checkout
         uses: actions/checkout@v3
@@ -70,7 +70,7 @@ jobs:
   pytest:
     runs-on: ubuntu-22.04
     container:
-      image: ghcr.io/lukasturcani/smores-testing-environment:latest
+      image: ghcr.io/austin-mroz/smores-testing-environment:latest
     steps:
       - name: Git checkout
         uses: actions/checkout@v3
