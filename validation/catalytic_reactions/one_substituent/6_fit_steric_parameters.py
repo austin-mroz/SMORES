@@ -47,10 +47,10 @@ def main() -> None:
             experimental_results=experimental_results,
             reaction=reaction,
         ):
-            _plot_results(sterimol_parameter_fit)
+            _plot_results(sterimol_parameter_fit, args.output_directory)
 
 
-def _plot_results(sterimol_parameter_fit: SterimolFit) -> None:
+def _plot_results(sterimol_parameter_fit: SterimolFit, output_directory: pathlib.Path) -> None:
     sterimol_parameter_dataframe = pd.DataFrame({
         'experimental_ddGs': sterimol_parameter_fit.experimental_ddGs,
         'predicted_ddGs': sterimol_parameter_fit.predicted_ddGs,
@@ -75,16 +75,20 @@ def _plot_results(sterimol_parameter_fit: SterimolFit) -> None:
     plot.text(
         0,
         sterimol_parameter_dataframe["predicted_ddGs"].max(),
-        
+        fit_equation,        
     )
-
+    plot.text(
+            0,
+            sterimol_parameter_dataframe["predicted_ddGs"].max() - 0.5,
+            sterimol_parameter_fit.r_squared,
+    )
+    basename = "_".join([sterimol_parameter_fit.name, sterimol_parameter_fit.core, sterimol_parameter_fit.L_coefficient, sterimol_parameter_fit.B1_coefficient, sterimol_parameter_fit.B5_coefficient])
     fig = plot.get_figure()
     fig.savefig(
-        f"{radii_type}_fit_desymmetrization_results.png",
+        str(output_directory / f"{basename}.png"),
         bbox_inches="tight",
     )
     fig.clf()
-
 
 
 def _fit_sterimol_parameters(
