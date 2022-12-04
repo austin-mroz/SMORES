@@ -13,7 +13,7 @@ jobs:
       image: ghcr.io/lukasturcani/smores-testing-environment:latest
     steps:
       - name: Git checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Lint with flake8
         run: |
           . /deps/venv/bin/activate
@@ -24,7 +24,7 @@ jobs:
       image: ghcr.io/lukasturcani/smores-testing-environment:latest
     steps:
       - name: Git checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Install smores
         run: |
           . /deps/venv/bin/activate
@@ -43,7 +43,7 @@ jobs:
       image: ghcr.io/lukasturcani/smores-testing-environment:latest
     steps:
       - name: Git checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Install smores
         run: |
           . /deps/venv/bin/activate
@@ -58,7 +58,7 @@ jobs:
       image: ghcr.io/lukasturcani/smores-testing-environment:latest
     steps:
       - name: Git checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Install smores
         run: |
           . /deps/venv/bin/activate
@@ -73,7 +73,7 @@ jobs:
       image: ghcr.io/lukasturcani/smores-testing-environment:latest
     steps:
       - name: Git checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Install smores
         run: |
           . /deps/venv/bin/activate
