@@ -48,6 +48,7 @@ dependencies:
   - packaging=21.3=pyhd3eb1b0_0
   - pcmsolver=1.2.1.1=py310h92d4acf_3
   - pint=0.17=pyhd8ed1ab_0
+  - pip=22.3.1=pyhd8ed1ab_0
   - pluggy=1.0.0=py310h06a4308_1
   - psi4=1.6.1+5b9f6e3=py310h1bd450f_0
   - psutil=5.9.0=py310h5eee18b_0
@@ -79,45 +80,46 @@ dependencies:
   - zipp=3.8.0=py310h06a4308_0
   - zlib=1.2.12=h5eee18b_3
   - pip:
-    - argparse==1.4.0
-    - black==22.10.0
-    - click==8.1.3
-    - contourpy==1.0.5
-    - cycler==0.11.0
-    - dill==0.3.5.1
-    - dnspython==2.2.1
-    - fire==0.4.0
-    - flake8==5.0.4
-    - fonttools==4.37.4
-    - hidapi==0.12.0.post2
-    - isort==5.10.1
-    - kiwisolver==1.4.4
-    - matplotlib==3.6.1
-    - mccabe==0.7.0
-    - mchammer==1.0.4
-    - morfeus-ml==0.7.2
-    - multiprocess==0.70.13
-    - mypy==0.982
-    - mypy-extensions==0.4.3
-    - numpy==1.22.4
-    - pandas==1.5.0
-    - pathos==0.2.9
-    - pathspec==0.10.1
-    - pillow==9.2.0
-    - pip==22.3.1
-    - platformdirs==2.5.2
-    - pox==0.3.1
-    - ppft==1.7.6.5
-    - pycodestyle==2.9.1
-    - pyflakes==2.5.0
-    - pymongo==4.2.0
-    - python-dateutil==2.8.2
-    - pytz==2022.4
-    - rdkit==2022.9.2
-    - rdkit-pypi==2022.3.5
-    - seaborn==0.12.0
-    - spindry==0.0.91
-    - stk==2022.6.17.0
-    - termcolor==2.1.0
-    - tqdm==4.64.1
-    - vabene==0.0.5
+      - argparse==1.4.0
+      - black==22.10.0
+      - click==8.1.3
+      - contourpy==1.0.5
+      - cycler==0.11.0
+      - dill==0.3.5.1
+      - dnspython==2.2.1
+      - fire==0.4.0
+      - flake8==5.0.4
+      - fonttools==4.37.4
+      - hidapi==0.12.0.post2
+      - isort==5.10.1
+      - kiwisolver==1.4.4
+      - matplotlib==3.6.1
+      - mccabe==0.7.0
+      - mchammer==1.0.4
+      - morfeus-ml==0.7.2
+      - multiprocess==0.70.13
+      - mypy==0.982
+      - mypy-extensions==0.4.3
+      - numpy==1.22.4
+      - pandas==1.5.0
+      - pathos==0.2.9
+      - pathspec==0.10.1
+      - patsy==0.5.3
+      - pillow==9.2.0
+      - platformdirs==2.5.2
+      - pox==0.3.1
+      - ppft==1.7.6.5
+      - pycodestyle==2.9.1
+      - pyflakes==2.5.0
+      - pymongo==4.2.0
+      - python-dateutil==2.8.2
+      - pytz==2022.4
+      - rdkit==2022.9.2
+      - rdkit-pypi==2022.3.5
+      - seaborn==0.12.0
+      - spindry==0.0.91
+      - statsmodels==0.13.5
+      - stk==2022.6.17.0
+      - termcolor==2.1.0
+      - tqdm==4.64.1
+      - vabene==0.0.5
