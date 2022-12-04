@@ -1,4 +1,5 @@
 import pathlib
+import typing
 from dataclasses import dataclass
 
 import morfeus
@@ -49,7 +50,7 @@ def test_smores_parameters_match_sterimol_if_same_radii_are_used(
         lazy_fixture("molecule_from_smiles"),
     ),
 )
-def case_data(request) -> CaseData:
+def case_data(request: typing.Any) -> CaseData:
     return request.param
 
 

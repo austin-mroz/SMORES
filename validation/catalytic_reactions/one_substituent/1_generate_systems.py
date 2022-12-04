@@ -87,7 +87,7 @@ def _write_structures(
         )
         writer.writeheader()
         for combo in smores.combine(cores, substituents):
-            reaction_name=reaction_name
+            reaction_name = reaction_name
             name = f"{cores[combo.core]}_{substituents[combo.substituent]}"
             xyz_file = structures_directory / f"{name}.xyz"
             rdkit.MolToXYZFile(combo.product, str(xyz_file))

@@ -1,4 +1,3 @@
-import contextlib
 import itertools
 import os
 import pathlib
@@ -10,6 +9,7 @@ import psi4
 import rdkit.Chem.AllChem as rdkit
 
 from smores._internal.constants import atomic_mass
+from smores._internal.utilities import current_working_directory
 
 
 def calculate_electrostatic_potential(
@@ -73,7 +73,7 @@ def calculate_electrostatic_potential(
         num_voxels_per_dimension=num_voxels_per_dimension,
     )
 
-    with _current_working_directory(output_directory):
+    with current_working_directory(output_directory):
         psi4.set_options(
             {
                 "basis": "aug-cc-pVDZ",
@@ -147,13 +147,3 @@ def _get_center_of_mass(
     atom_masses = np.array([atomic_mass[element] for element in elements])
     scaled_coordinates = coordinates * atom_masses[:, np.newaxis]
     return scaled_coordinates.sum(axis=0) / atom_masses.sum()
-
-
-@contextlib.contextmanager
-def _current_working_directory(directory: pathlib.Path):
-    original_directory = os.getcwd()  # aka OGD
-    try:
-        os.chdir(directory)
-        yield
-    finally:
-        os.chdir(original_directory)

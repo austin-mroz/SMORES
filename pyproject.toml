@@ -11,6 +11,7 @@ dependencies = [
   "streusel",
   "morfeus-ml",
 ]
+requires-python = ">=3.10"
 
 [project.optional-dependencies]
 dev = [
@@ -20,8 +21,12 @@ dev = [
   "isort",
   "pytest",
   "pytest-lazy-fixture",
+  "types-pytest-lazy-fixture",
   "sphinx",
   "furo",
+  "twine",
+  "build",
+  "pip-tools",
 ]
 
 
@@ -32,7 +37,8 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools.package-data]
 smores = ["py.typed"]
 
-[tool.setuptools_.scm]
+[tool.setuptools_scm]
+fallback_version = "v0.0.0"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -46,6 +52,9 @@ profile = "black"
 
 [tool.mypy]
 no_implicit_optional = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
 
 [[tool.mypy.overrides]]
 module = [
@@ -57,5 +66,8 @@ module = [
   "ase.*",
   "streusel.*",
   "matplotlib.*",
+  "setuptools.*",
+  "statsmodels.*",
+  "scipy.*",
 ]
 ignore_missing_imports = true

@@ -1,0 +1,84 @@
+name: Tests
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  flake8:
+    runs-on: ubuntu-22.04
+    container:
+      image: ghcr.io/lukasturcani/smores-testing-environment:latest
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v3
+      - name: Lint with flake8
+        run: |
+          . /deps/venv/bin/activate
+          flake8 .
+  mypy:
+    runs-on: ubuntu-22.04
+    container:
+      image: ghcr.io/lukasturcani/smores-testing-environment:latest
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v3
+      - name: Install smores
+        run: |
+          . /deps/venv/bin/activate
+          pip install --no-deps -e .
+      - name: Run mypy 1
+        run: |
+          . /deps/venv/bin/activate
+          mypy --exclude validation .
+      - name: Run mypy 2
+        run: |
+          . /deps/venv/bin/activate
+          mypy --explicit-package-bases validation
+  isort:
+    runs-on: ubuntu-22.04
+    container:
+      image: ghcr.io/lukasturcani/smores-testing-environment:latest
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v3
+      - name: Install smores
+        run: |
+          . /deps/venv/bin/activate
+          pip install --no-deps -e .
+      - name: Run isort
+        run: |
+          . /deps/venv/bin/activate
+          isort --check .
+  black:
+    runs-on: ubuntu-22.04
+    container:
+      image: ghcr.io/lukasturcani/smores-testing-environment:latest
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v3
+      - name: Install smores
+        run: |
+          . /deps/venv/bin/activate
+          pip install --no-deps -e .
+      - name: Run black
+        run: |
+          . /deps/venv/bin/activate
+          black --check .
+  pytest:
+    runs-on: ubuntu-22.04
+    container:
+      image: ghcr.io/lukasturcani/smores-testing-environment:latest
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v3
+      - name: Install smores
+        run: |
+          . /deps/venv/bin/activate
+          pip install --no-deps -e .
+      - name: Run pytest
+        run: |
+          . /deps/venv/bin/activate
+          pytest

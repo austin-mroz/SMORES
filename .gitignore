@@ -9,3 +9,5 @@ docs/build
 docs/source/_autosummary
 .coverage
 **/dbstep_sanity_check/data
+docker_testing_environment/requirements.txt
+dist
