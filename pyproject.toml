@@ -38,6 +38,7 @@ build-backend = "setuptools.build_meta"
 smores = ["py.typed"]
 
 [tool.setuptools_scm]
+fallback_version = "v0.0.0-fallback"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
