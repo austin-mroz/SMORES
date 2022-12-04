@@ -3,9 +3,9 @@ import argparse
 import pathlib
 import typing
 from dataclasses import dataclass
+
 import pandas as pd
 import seaborn as sns
-
 
 _OUTPUT_CSV_COLUMNS = (
     "name",
@@ -50,12 +50,18 @@ def main() -> None:
             _plot_results(sterimol_parameter_fit, args.output_directory)
 
 
-def _plot_results(sterimol_parameter_fit: SterimolFit, output_directory: pathlib.Path) -> None:
-    sterimol_parameter_dataframe = pd.DataFrame({
-        'experimental_ddGs': sterimol_parameter_fit.experimental_ddGs,
-        'predicted_ddGs': sterimol_parameter_fit.predicted_ddGs,
-    })
-    sterimol_parameter_dataframe["substituent"] = sterimol_parameter_dataframe.index
+def _plot_results(
+    sterimol_parameter_fit: SterimolFit, output_directory: pathlib.Path
+) -> None:
+    sterimol_parameter_dataframe = pd.DataFrame(
+        {
+            "experimental_ddGs": sterimol_parameter_fit.experimental_ddGs,
+            "predicted_ddGs": sterimol_parameter_fit.predicted_ddGs,
+        }
+    )
+    sterimol_parameter_dataframe[
+        "substituent"
+    ] = sterimol_parameter_dataframe.index
 
     plot = sns.scatterplot(
         data=sterimol_parameter_dataframe,
@@ -75,14 +81,22 @@ def _plot_results(sterimol_parameter_fit: SterimolFit, output_directory: pathlib
     plot.text(
         0,
         sterimol_parameter_dataframe["predicted_ddGs"].max(),
-        fit_equation,        
+        fit_equation,
     )
     plot.text(
-            0,
-            sterimol_parameter_dataframe["predicted_ddGs"].max() - 0.5,
-            sterimol_parameter_fit.r_squared,
+        0,
+        sterimol_parameter_dataframe["predicted_ddGs"].max() - 0.5,
+        sterimol_parameter_fit.r_squared,
     )
-    basename = "_".join([sterimol_parameter_fit.name, sterimol_parameter_fit.core, sterimol_parameter_fit.L_coefficient, sterimol_parameter_fit.B1_coefficient, sterimol_parameter_fit.B5_coefficient])
+    basename = "_".join(
+        [
+            sterimol_parameter_fit.name,
+            sterimol_parameter_fit.core,
+            sterimol_parameter_fit.L_coefficient,
+            sterimol_parameter_fit.B1_coefficient,
+            sterimol_parameter_fit.B5_coefficient,
+        ]
+    )
     fig = plot.get_figure()
     fig.savefig(
         str(output_directory / f"{basename}.png"),
@@ -99,7 +113,9 @@ def _fit_sterimol_parameters(
 
     parameter_combinations = _powerset("L", "B1", "B5")
     for parameter_combination in parameter_combinations:
-        experimental_results_reaction_subset = experimental_results[experimental_results["reaction"] == reaction]
+        experimental_results_reaction_subset = experimental_results[
+            experimental_results["reaction"] == reaction
+        ]
         core = experimental_results_reaction_subset["core"].unique()[0]
         smores_results = smores_results[smores_results["core"] == core]
 
@@ -109,35 +125,42 @@ def _fit_sterimol_parameters(
         print(ols_fit.summary())
         predicted_ddGs = _get_predicted_ddGs(sterimol_parameters, ols_fit)
         yield SterimolFit(
-                name=reaction,
-                core=core,
-                L_coefficient = ols_fit.params.get("L"),
-                B1_coefficient = ols_fit.params.get("B1"),
-                B5_coefficient = ols_fit.params.get("B5"),
-                fit_summary = ols_fit.summary(),
-                r_squared = ols_fit.rsquared,
-                experimental_ddGs = _get_experimental_ddGs(experimental_results_reaction_subset),
-                predicted_ddGs = _get_predicted_ddGs(sterimol_parameters, ols_fit)
+            name=reaction,
+            core=core,
+            L_coefficient=ols_fit.params.get("L"),
+            B1_coefficient=ols_fit.params.get("B1"),
+            B5_coefficient=ols_fit.params.get("B5"),
+            fit_summary=ols_fit.summary(),
+            r_squared=ols_fit.rsquared,
+            experimental_ddGs=_get_experimental_ddGs(
+                experimental_results_reaction_subset
+            ),
+            predicted_ddGs=_get_predicted_ddGs(sterimol_parameters, ols_fit),
         )
 
 
-def _get_experimental_ddGs(experimental_results_reaction_subset: pd.DataFrame) -> dict[str, float]:
+def _get_experimental_ddGs(
+    experimental_results_reaction_subset: pd.DataFrame,
+) -> dict[str, float]:
     experimental_ddGs = {}
     for index, row in experimental_results_reaction_subset.iterrows():
         experimental_ddGs[row["substituent"].values[0]] = row["ddG"].values[0]
     return experimental_ddGs
 
 
-def _get_predicted_ddGs(sterimol_parameters: pd.DataFrame, ols_fit: pd.core.series.Series) -> dict[str, float]:
+def _get_predicted_ddGs(
+    sterimol_parameters: pd.DataFrame, ols_fit: pd.core.series.Series
+) -> dict[str, float]:
     predicted_ddGs = {}
     for index, row in sterimol_parameters.iterrows():
         predicted_ddG = (
-                (ols_fit.params.get("L", 0) * substituent["L"])
-                + (ols_fit.params.get("B1", 0) * substituent["B1"])
-                + (ols_fit.params.get("B5", 0) * substituent["B5"])
-                )
+            (ols_fit.params.get("L", 0) * substituent["L"])
+            + (ols_fit.params.get("B1", 0) * substituent["B1"])
+            + (ols_fit.params.get("B5", 0) * substituent["B5"])
+        )
         predicted_ddGs[row["substituent"].values[0]] = predicted_ddG
     return predicted_ddGs
+
 
 def _powerset(*items: str) -> list[list[str]]:
     subsets: list[list[str]] = [[]]
@@ -162,7 +185,7 @@ def _get_command_line_arguments() -> argparse.Namespace:
         "--experimental_results",
         help="A csv file containing experimental ddG.",
         type=pathlib.Path,
-        default=pathlib.Path.cwd() / "exprimental_ddG.csv"
+        default=pathlib.Path.cwd() / "exprimental_ddG.csv",
     )
     parser.add_argument(
         "-o",
