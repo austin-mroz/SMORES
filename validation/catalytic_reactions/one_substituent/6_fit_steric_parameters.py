@@ -66,7 +66,7 @@ def main() -> None:
                 B1_coefficients.append(steric_parameter_fit.B1_coefficient)
                 B5_coefficients.append(steric_parameter_fit.B5_coefficient)
 
-    pd.DataFrame(
+    results = pd.DataFrame(
         {
             "r_squared": r_squareds,
             "reaction": reactions,
@@ -78,8 +78,18 @@ def main() -> None:
     ).sort_values(
         by=["reaction", "radii_type", "r_squared"],
         ascending=False,
-    ).to_csv(
+    )
+    results.to_csv(
         args.output_directory / "r_squared.csv",
+        index=False,
+    )
+
+    results.groupby(["reaction", "radii_type"])[
+        "r_squared"
+    ].max().reset_index().sort_values(
+        by=["reaction", "radii_type", "r_squared"], ascending=False
+    ).to_csv(
+        args.output_directory / "r_squared_summary.csv",
         index=False,
     )
 
