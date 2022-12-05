@@ -30,7 +30,6 @@ class SterimolFit:
     L_coefficient: float | None
     B1_coefficient: float | None
     B5_coefficient: float | None
-    fit_summary: list[str]
     r_squared: float
     experimental_ddGs: dict[str, float]
     predicted_ddGs: dict[str, float]
@@ -124,7 +123,7 @@ def _fit_sterimol_parameters(
         experimental_results_reaction_subset = experimental_results[
             experimental_results["reaction"] == reaction
         ]
-        core = experimental_results_reaction_subset["core"].unique()[0]
+        (core,) = experimental_results_reaction_subset["core"].unique()
         smores_results_reaction_subset = smores_results[
             smores_results["core"] == core
         ]
@@ -133,15 +132,17 @@ def _fit_sterimol_parameters(
         sterimol_parameters = smores_results_reaction_subset[
             parameter_combination
         ]
+        print(sterimol_parameters)
+        print(experimental_ddG)
         ols_fit = LinearRegression().fit(sterimol_parameters, experimental_ddG)
         ols_fit_params = dict(zip(parameter_combination, ols_fit.coef_[0]))
+        print(ols_fit.score(sterimol_parameters, experimental_ddG))
         yield SterimolFit(
             name=reaction,
             core=core,
             L_coefficient=ols_fit_params.get("L"),
             B1_coefficient=ols_fit_params.get("B1"),
             B5_coefficient=ols_fit_params.get("B5"),
-            fit_summary="summary",  # ols_fit.summary(),
             r_squared=ols_fit.score(sterimol_parameters, experimental_ddG),
             experimental_ddGs=_get_experimental_ddGs(
                 experimental_results_reaction_subset
@@ -191,7 +192,9 @@ def _get_command_line_arguments() -> argparse.Namespace:
         "--smores_results",
         help="A csv file containing sterimol parameters.",
         type=pathlib.Path,
-        default=pathlib.Path.cwd() / "4_output" / "steric_parameters.csv",
+        default=pathlib.Path.cwd()
+        / "4_output"
+        / "steric_parameters_from_cube_file.csv",
     )
     parser.add_argument(
         "--experimental_results",
