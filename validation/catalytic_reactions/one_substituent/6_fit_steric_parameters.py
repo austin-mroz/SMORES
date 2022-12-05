@@ -151,7 +151,6 @@ def _get_command_line_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Fit sterimol parameters to experimental results.",
     )
-
     parser.add_argument(
         "--steric_parameters",
         help=(
