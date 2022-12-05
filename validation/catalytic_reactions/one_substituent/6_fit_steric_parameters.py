@@ -8,20 +8,6 @@ import pandas as pd
 import seaborn as sns
 from sklearn.linear_model import LinearRegression
 
-_OUTPUT_CSV_COLUMNS = (
-    "name",
-    "core",
-    "substituent",
-    "smiles",
-    "xyz_file",
-    "dummy_index",
-    "attached_index",
-    "radii_type",
-    "L",
-    "B1",
-    "B5",
-)
-
 
 @dataclass(frozen=True, slots=True)
 class StericParameterFit:
