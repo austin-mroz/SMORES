@@ -3,7 +3,7 @@ import argparse
 import pathlib
 import typing
 from dataclasses import dataclass
-
+import statsmodels.api as sm
 import pandas as pd
 import seaborn as sns
 
