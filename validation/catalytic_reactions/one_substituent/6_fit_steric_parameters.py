@@ -27,40 +27,58 @@ def main() -> None:
 
     r_squareds: list[float] = []
     reactions: list[str] = []
+    radii_types: list[str] = []
     L_coefficients: list[float | None] = []
     B1_coefficients: list[float | None] = []
     B5_coefficients: list[float | None] = []
 
-    for reaction in experimental_ddGs["reaction"].unique():
-        experimental_ddGs_of_reaction = experimental_ddGs[
-            experimental_ddGs["reaction"] == reaction
-        ]
-        (core,) = experimental_ddGs_of_reaction["core"].unique()
-        for steric_parameter_fit in _fit_steric_parameters(
-            data_frame=pd.merge(
-                left=steric_parameters[steric_parameters["core"] == core],
-                right=experimental_ddGs_of_reaction,
-                on=["substituent", "core"],
-                how="inner",
-            ),
-        ):
-            _plot_results(steric_parameter_fit, args.output_directory)
+    for radii_type in steric_parameters["radii_type"].unique():
+        args.output_directory.joinpath(radii_type).mkdir(
+            exist_ok=True,
+            parents=True,
+        )
 
-            r_squareds.append(steric_parameter_fit.r_squared)
-            reactions.append(reaction)
-            L_coefficients.append(steric_parameter_fit.L_coefficient)
-            B1_coefficients.append(steric_parameter_fit.B1_coefficient)
-            B5_coefficients.append(steric_parameter_fit.B5_coefficient)
+        for reaction in experimental_ddGs["reaction"].unique():
+            experimental_ddGs_of_reaction = experimental_ddGs[
+                experimental_ddGs["reaction"] == reaction
+            ]
+            (core,) = experimental_ddGs_of_reaction["core"].unique()
+            for steric_parameter_fit in _fit_steric_parameters(
+                data_frame=pd.merge(
+                    left=steric_parameters[
+                        (steric_parameters["core"] == core)
+                        & (steric_parameters["radii_type"] == radii_type)
+                    ],
+                    right=experimental_ddGs_of_reaction,
+                    on=["substituent", "core"],
+                    how="inner",
+                ),
+            ):
+                _plot_results(
+                    steric_parameter_fit=steric_parameter_fit,
+                    output_directory=args.output_directory / radii_type,
+                )
+
+                r_squareds.append(steric_parameter_fit.r_squared)
+                reactions.append(reaction)
+                radii_types.append(radii_type)
+                L_coefficients.append(steric_parameter_fit.L_coefficient)
+                B1_coefficients.append(steric_parameter_fit.B1_coefficient)
+                B5_coefficients.append(steric_parameter_fit.B5_coefficient)
 
     pd.DataFrame(
         {
             "r_squared": r_squareds,
             "reaction": reactions,
+            "radii_type": radii_types,
             "L_coefficient": L_coefficients,
             "B1_coefficient": B1_coefficients,
             "B5_coefficient": B5_coefficients,
         },
-    ).sort_values(by=["reaction", "r_squared"], ascending=False).to_csv(
+    ).sort_values(
+        by=["reaction", "radii_type", "r_squared"],
+        ascending=False,
+    ).to_csv(
         args.output_directory / "r_squared.csv",
         index=False,
     )
@@ -185,7 +203,7 @@ def _get_command_line_arguments() -> argparse.Namespace:
         type=pathlib.Path,
         default=pathlib.Path.cwd()
         / "4_output"
-        / "steric_parameters_from_cube_file.csv",
+        / "steric_parameters_from_radii.csv",
     )
     parser.add_argument(
         "--experimental_ddGs",
