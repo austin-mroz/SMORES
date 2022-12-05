@@ -6,7 +6,6 @@ from dataclasses import dataclass
 
 import pandas as pd
 import seaborn as sns
-import statsmodels.api as sm
 from sklearn.linear_model import LinearRegression
 
 _OUTPUT_CSV_COLUMNS = (
@@ -41,11 +40,9 @@ def main() -> None:
     args = _get_command_line_arguments()
     args.output_directory.mkdir(parents=True, exist_ok=True)
 
-    all_smores_results = pd.read_csv(args.smores_results)
-    smores_results = all_smores_results[
-        all_smores_results["radii_type"] == "bondi"
-    ]
+    smores_results = pd.read_csv(args.smores_results)
     experimental_results = pd.read_csv(args.experimental_results)
+
     for reaction in experimental_results["reaction"].unique():
         for sterimol_parameter_fit in _fit_sterimol_parameters(
             smores_results=smores_results,
@@ -56,7 +53,8 @@ def main() -> None:
 
 
 def _plot_results(
-    sterimol_parameter_fit: SterimolFit, output_directory: pathlib.Path
+    sterimol_parameter_fit: SterimolFit,
+    output_directory: pathlib.Path,
 ) -> None:
     sterimol_parameter_dataframe = pd.DataFrame(
         {
@@ -80,7 +78,11 @@ def _plot_results(
         title="substituent",
     )
 
-    fit_equation = f"{sterimol_parameter_fit.L_coefficient}L + {sterimol_parameter_fit.B1_coefficient}B1 + {sterimol_parameter_fit.B5_coefficient}B5"
+    fit_equation = (
+        f"{sterimol_parameter_fit.L_coefficient}L "
+        f"+ {sterimol_parameter_fit.B1_coefficient}B1 "
+        f"+ {sterimol_parameter_fit.B5_coefficient}B5"
+    )
 
     plot.text(
         0,
@@ -132,7 +134,7 @@ def _fit_sterimol_parameters(
             parameter_combination
         ]
         ols_fit = LinearRegression().fit(sterimol_parameters, experimental_ddG)
-        ols_fit_params = ols_fit.get_params()
+        ols_fit_params = dict(zip(parameter_combination, ols_fit.coef_[0]))
         yield SterimolFit(
             name=reaction,
             core=core,
@@ -195,7 +197,7 @@ def _get_command_line_arguments() -> argparse.Namespace:
         "--experimental_results",
         help="A csv file containing experimental ddG.",
         type=pathlib.Path,
-        default=pathlib.Path.cwd() / "exprimental_ddG.csv",
+        default=pathlib.Path.cwd() / "experimental_ddG.csv",
     )
     parser.add_argument(
         "-o",
