@@ -87,7 +87,7 @@ def main() -> None:
     results.groupby(["reaction", "radii_type"])[
         "r_squared"
     ].max().reset_index().sort_values(
-        by=["reaction", "radii_type", "r_squared"], ascending=False
+        by=["reaction", "r_squared"], ascending=False
     ).to_csv(
         args.output_directory / "r_squared_summary.csv",
         index=False,
