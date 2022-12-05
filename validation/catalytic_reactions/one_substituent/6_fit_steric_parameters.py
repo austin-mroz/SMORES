@@ -18,6 +18,13 @@ class StericParameterFit:
     results: pd.DataFrame
 
 
+@dataclass(frozen=True, slots=True)
+class ResultsRow:
+    steric_parameter_fit: StericParameterFit
+    reaction: str
+    radii_type: str
+
+
 def main() -> None:
     args = _get_command_line_arguments()
     args.output_directory.mkdir(parents=True, exist_ok=True)
@@ -25,12 +32,7 @@ def main() -> None:
     steric_parameters = pd.read_csv(args.steric_parameters)
     experimental_ddGs = pd.read_csv(args.experimental_ddGs)
 
-    r_squareds: list[float] = []
-    reactions: list[str] = []
-    radii_types: list[str] = []
-    L_coefficients: list[float | None] = []
-    B1_coefficients: list[float | None] = []
-    B5_coefficients: list[float | None] = []
+    results_rows: list[ResultsRow] = []
 
     for radii_type in steric_parameters["radii_type"].unique():
         args.output_directory.joinpath(radii_type).mkdir(
@@ -59,21 +61,30 @@ def main() -> None:
                     output_directory=args.output_directory / radii_type,
                 )
 
-                r_squareds.append(steric_parameter_fit.r_squared)
-                reactions.append(reaction)
-                radii_types.append(radii_type)
-                L_coefficients.append(steric_parameter_fit.L_coefficient)
-                B1_coefficients.append(steric_parameter_fit.B1_coefficient)
-                B5_coefficients.append(steric_parameter_fit.B5_coefficient)
+                results_rows.append(
+                    ResultsRow(
+                        steric_parameter_fit=steric_parameter_fit,
+                        reaction=reaction,
+                        radii_type=radii_type,
+                    )
+                )
 
     results = pd.DataFrame(
         {
-            "r_squared": r_squareds,
-            "reaction": reactions,
-            "radii_type": radii_types,
-            "L_coefficient": L_coefficients,
-            "B1_coefficient": B1_coefficients,
-            "B5_coefficient": B5_coefficients,
+            "r_squared": [
+                row.steric_parameter_fit.r_squared for row in results_rows
+            ],
+            "reaction": [row.reaction for row in results_rows],
+            "radii_type": [row.radii_type for row in results_rows],
+            "L_coefficient": [
+                row.steric_parameter_fit.L_coefficient for row in results_rows
+            ],
+            "B1_coefficient": [
+                row.steric_parameter_fit.B1_coefficient for row in results_rows
+            ],
+            "B5_coefficient": [
+                row.steric_parameter_fit.B5_coefficient for row in results_rows
+            ],
         },
     ).sort_values(
         by=["reaction", "radii_type", "r_squared"],
