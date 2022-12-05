@@ -25,6 +25,12 @@ def main() -> None:
     steric_parameters = pd.read_csv(args.steric_parameters)
     experimental_ddGs = pd.read_csv(args.experimental_ddGs)
 
+    r_squareds: list[float] = []
+    reactions: list[str] = []
+    L_coefficients: list[float | None] = []
+    B1_coefficients: list[float | None] = []
+    B5_coefficients: list[float | None] = []
+
     for reaction in experimental_ddGs["reaction"].unique():
         experimental_ddGs_of_reaction = experimental_ddGs[
             experimental_ddGs["reaction"] == reaction
@@ -39,6 +45,25 @@ def main() -> None:
             ),
         ):
             _plot_results(steric_parameter_fit, args.output_directory)
+
+            r_squareds.append(steric_parameter_fit.r_squared)
+            reactions.append(reaction)
+            L_coefficients.append(steric_parameter_fit.L_coefficient)
+            B1_coefficients.append(steric_parameter_fit.B1_coefficient)
+            B5_coefficients.append(steric_parameter_fit.B5_coefficient)
+
+    pd.DataFrame(
+        {
+            "r_squared": r_squareds,
+            "reaction": reactions,
+            "L_coefficient": L_coefficients,
+            "B1_coefficient": B1_coefficients,
+            "B5_coefficient": B5_coefficients,
+        },
+    ).sort_values(by=["reaction", "r_squared"], ascending=False).to_csv(
+        args.output_directory / "r_squared.csv",
+        index=False,
+    )
 
 
 def _fit_steric_parameters(
