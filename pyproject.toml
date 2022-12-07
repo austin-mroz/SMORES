@@ -69,5 +69,6 @@ module = [
   "setuptools.*",
   "statsmodels.*",
   "scipy.*",
+  "sklearn.*",
 ]
 ignore_missing_imports = true

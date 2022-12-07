@@ -49,6 +49,7 @@ def _plot_sterimol_parameter_by_radii_type(
         bbox_to_anchor=(1.0, 1.0),
         title="substituent",
     )
+    plot.get_figure().autofmt_xdate()
     plot.get_figure().savefig(figure_path, bbox_inches="tight")
     plot.get_figure().clf()
 

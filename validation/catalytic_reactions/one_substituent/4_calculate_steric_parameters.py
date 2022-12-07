@@ -28,8 +28,9 @@ def main() -> None:
     args = _get_command_line_arguments()
     args.output_directory.mkdir(parents=True, exist_ok=True)
 
+    radii_types = ("alvarez", "bondi", "crc", "rahm", "pyykko", "truhlar")
     with open(
-        args.output_directory / "steric_parameters_from_cube_file.csv", "w"
+        args.output_directory / "steric_parameters.csv", "w"
     ) as csv_file:
         writer = csv.DictWriter(csv_file, fieldnames=_OUTPUT_CSV_COLUMNS)
         writer.writeheader()
@@ -38,10 +39,8 @@ def main() -> None:
 
             for row in tuple(_get_rows(catalyst_input_file)):
 
-                smores_esp_molecule = smores.EspMolecule.from_cube_file(
-                    row.xyz_file.parent / "ESP.cube"
-                )
-                smores_params = smores_esp_molecule.get_steric_parameters(
+                smores_molecule = smores.Molecule.from_xyz_file(row.xyz_file)
+                smores_params = smores_molecule.get_steric_parameters(
                     dummy_index=row.dummy_index,
                     attached_index=row.attached_index,
                 )
@@ -60,6 +59,46 @@ def main() -> None:
                         "B5": smores_params.B5,
                     }
                 )
+                smores_esp_molecule = smores.EspMolecule.from_cube_file(
+                    row.xyz_file.parent / "ESP.cube"
+                )
+                smores_params = smores_esp_molecule.get_steric_parameters(
+                    dummy_index=row.dummy_index,
+                    attached_index=row.attached_index,
+                )
+                writer.writerow(
+                    {
+                        "name": row.name,
+                        "core": row.core,
+                        "substituent": row.substituent,
+                        "smiles": row.smiles,
+                        "xyz_file": row.xyz_file,
+                        "dummy_index": row.dummy_index,
+                        "attached_index": row.attached_index,
+                        "radii_type": "streusel_cube",
+                        "L": smores_params.L,
+                        "B1": smores_params.B1,
+                        "B5": smores_params.B5,
+                    }
+                )
+
+                for radii_type in radii_types:
+                    sterimol = _get_sterimol(row, radii_type)
+                    writer.writerow(
+                        {
+                            "name": row.name,
+                            "core": row.core,
+                            "substituent": row.substituent,
+                            "smiles": row.smiles,
+                            "xyz_file": row.xyz_file,
+                            "dummy_index": row.dummy_index,
+                            "attached_index": row.attached_index,
+                            "radii_type": radii_type,
+                            "L": sterimol.L_value,
+                            "B1": sterimol.B_1_value,
+                            "B5": sterimol.B_5_value,
+                        },
+                    )
 
 
 @dataclass(frozen=True, slots=True)
