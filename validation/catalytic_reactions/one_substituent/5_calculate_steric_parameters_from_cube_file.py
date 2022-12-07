@@ -29,7 +29,7 @@ def main() -> None:
     args.output_directory.mkdir(parents=True, exist_ok=True)
 
     with open(
-        args.output_directory / "steric_parameters_from_cube_file.csv", "w"
+        args.output_directory / "steric_parameters.csv", "w"
     ) as csv_file:
         writer = csv.DictWriter(csv_file, fieldnames=_OUTPUT_CSV_COLUMNS)
         writer.writeheader()
@@ -91,17 +91,6 @@ def _get_rows(
             )
 
 
-def _get_sterimol(molecule: CsvRow, radii_type: str) -> morfeus.Sterimol:
-    elements, coordinates = morfeus.read_xyz(molecule.xyz_file)
-    return morfeus.Sterimol(
-        elements=elements,
-        coordinates=coordinates,
-        dummy_index=molecule.dummy_index + 1,
-        attached_index=molecule.attached_index + 1,
-        radii_type=radii_type,
-    )
-
-
 def _get_command_line_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Calculate and SMORES and sterimol parameters.",
@@ -124,7 +113,7 @@ def _get_command_line_arguments() -> argparse.Namespace:
         "-o",
         "--output_directory",
         type=pathlib.Path,
-        default=pathlib.Path.cwd() / "4_output",
+        default=pathlib.Path.cwd() / "5_output",
     )
     return parser.parse_args()
 

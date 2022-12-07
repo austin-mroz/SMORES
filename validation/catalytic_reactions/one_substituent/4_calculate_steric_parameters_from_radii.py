@@ -30,7 +30,7 @@ def main() -> None:
 
     radii_types = ("alvarez", "bondi", "crc", "rahm", "pyykko", "truhlar")
     with open(
-        args.output_directory / "steric_parameters_from_radii.csv", "w"
+        args.output_directory / "steric_parameters.csv", "w"
     ) as csv_file:
         writer = csv.DictWriter(csv_file, fieldnames=_OUTPUT_CSV_COLUMNS)
         writer.writeheader()
