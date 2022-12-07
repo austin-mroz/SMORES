@@ -31,6 +31,7 @@ intersphinx_mapping = {
 
 autodoc_member_order = "groupwise"
 autodoc_typehints = "description"
+autodoc_mock_imports = ["psi4"]
 autoclass_content = "both"
 
 templates_path = ["_templates"]
