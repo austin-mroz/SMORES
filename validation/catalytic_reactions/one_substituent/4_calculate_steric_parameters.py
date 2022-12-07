@@ -155,7 +155,7 @@ def _get_command_line_arguments() -> argparse.Namespace:
         ),
         type=pathlib.Path,
         default=pathlib.Path.cwd()
-        .joinpath("2_output")
+        .joinpath("3_output")
         .glob("*/xyz_files.csv"),
         nargs="+",
     )
