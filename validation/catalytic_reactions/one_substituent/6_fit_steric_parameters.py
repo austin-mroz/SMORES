@@ -167,14 +167,20 @@ def _plot_results(
     )
 
     plot.text(
-        1.0,
+        1.05,
         0.0,
         fit_equation,
+        ha="left",
+        va="bottom",
+        transform=plot.transAxes,
     )
     plot.text(
-        1.0,
+        1.05,
         -0.05,
         f"R2 = {steric_parameter_fit.r_squared}",
+        ha="left",
+        va="bottom",
+        transform=plot.transAxes,
     )
     (reaction,) = steric_parameter_fit.results["reaction"].unique()
     (core,) = steric_parameter_fit.results["core"].unique()
