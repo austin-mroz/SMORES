@@ -62,12 +62,16 @@ html_theme_options = {
         "color-highlighted-background": "#083563",
         "color-guilabel-background": "#08356380",
         "color-guilabel-border": "#13395f80",
-        # --color-api-keyword: var(--color-foreground-secondary);
+        "color-api-keyword": "#9ca0a5",
         "color-highlight-on-target": "#333300",
         "color-admonition-background": "#18181a",
-        # --color-card-border: var(--color-background-secondary);
+        "color-card-border": "#1a1c1e",
         "color-card-background": "#18181a",
-        # --color-card-marginals-background: var(--color-background-hover);
+        "color-card-marginals-background": "#1e2124ff",
+        "color-inline-code-background": "#1a1c1e",
     }
 }
 html_static_path = ["_static"]
+
+pygments_style = "dracula"
+pygments_dark_style = "dracula"
