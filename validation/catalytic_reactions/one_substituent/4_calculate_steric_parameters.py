@@ -62,7 +62,7 @@ def main() -> None:
                 smores_esp_molecule = smores.EspMolecule.from_cube_file(
                     row.xyz_file.parent / "ESP.cube"
                 )
-                smores_params = smores_esp_molecule.get_steric_parameters(
+                esp_smores_params = smores_esp_molecule.get_steric_parameters(
                     dummy_index=row.dummy_index,
                     attached_index=row.attached_index,
                 )
@@ -76,9 +76,9 @@ def main() -> None:
                         "dummy_index": row.dummy_index,
                         "attached_index": row.attached_index,
                         "radii_type": "streusel_cube",
-                        "L": smores_params.L,
-                        "B1": smores_params.B1,
-                        "B5": smores_params.B5,
+                        "L": esp_smores_params.L,
+                        "B1": esp_smores_params.B1,
+                        "B5": esp_smores_params.B5,
                     }
                 )
 
