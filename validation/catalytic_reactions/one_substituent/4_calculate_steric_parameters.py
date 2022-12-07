@@ -28,6 +28,7 @@ def main() -> None:
     args = _get_command_line_arguments()
     args.output_directory.mkdir(parents=True, exist_ok=True)
 
+    radii_types = ("alvarez", "bondi", "crc", "rahm", "pyykko", "truhlar")
     with open(
         args.output_directory / "steric_parameters.csv", "w"
     ) as csv_file:
@@ -38,10 +39,8 @@ def main() -> None:
 
             for row in tuple(_get_rows(catalyst_input_file)):
 
-                smores_esp_molecule = smores.EspMolecule.from_cube_file(
-                    row.xyz_file.parent / "ESP.cube"
-                )
-                smores_params = smores_esp_molecule.get_steric_parameters(
+                smores_molecule = smores.Molecule.from_xyz_file(row.xyz_file)
+                smores_params = smores_molecule.get_steric_parameters(
                     dummy_index=row.dummy_index,
                     attached_index=row.attached_index,
                 )
@@ -60,6 +59,46 @@ def main() -> None:
                         "B5": smores_params.B5,
                     }
                 )
+                smores_esp_molecule = smores.EspMolecule.from_cube_file(
+                    row.xyz_file.parent / "ESP.cube"
+                )
+                smores_params = smores_esp_molecule.get_steric_parameters(
+                    dummy_index=row.dummy_index,
+                    attached_index=row.attached_index,
+                )
+                writer.writerow(
+                    {
+                        "name": row.name,
+                        "core": row.core,
+                        "substituent": row.substituent,
+                        "smiles": row.smiles,
+                        "xyz_file": row.xyz_file,
+                        "dummy_index": row.dummy_index,
+                        "attached_index": row.attached_index,
+                        "radii_type": "streusel_cube",
+                        "L": smores_params.L,
+                        "B1": smores_params.B1,
+                        "B5": smores_params.B5,
+                    }
+                )
+
+                for radii_type in radii_types:
+                    sterimol = _get_sterimol(row, radii_type)
+                    writer.writerow(
+                        {
+                            "name": row.name,
+                            "core": row.core,
+                            "substituent": row.substituent,
+                            "smiles": row.smiles,
+                            "xyz_file": row.xyz_file,
+                            "dummy_index": row.dummy_index,
+                            "attached_index": row.attached_index,
+                            "radii_type": radii_type,
+                            "L": sterimol.L_value,
+                            "B1": sterimol.B_1_value,
+                            "B5": sterimol.B_5_value,
+                        },
+                    )
 
 
 @dataclass(frozen=True, slots=True)
@@ -91,6 +130,17 @@ def _get_rows(
             )
 
 
+def _get_sterimol(molecule: CsvRow, radii_type: str) -> morfeus.Sterimol:
+    elements, coordinates = morfeus.read_xyz(molecule.xyz_file)
+    return morfeus.Sterimol(
+        elements=elements,
+        coordinates=coordinates,
+        dummy_index=molecule.dummy_index + 1,
+        attached_index=molecule.attached_index + 1,
+        radii_type=radii_type,
+    )
+
+
 def _get_command_line_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Calculate and SMORES and sterimol parameters.",
@@ -105,7 +155,7 @@ def _get_command_line_arguments() -> argparse.Namespace:
         ),
         type=pathlib.Path,
         default=pathlib.Path.cwd()
-        .joinpath("3_output")
+        .joinpath("2_output")
         .glob("*/xyz_files.csv"),
         nargs="+",
     )
@@ -113,7 +163,7 @@ def _get_command_line_arguments() -> argparse.Namespace:
         "-o",
         "--output_directory",
         type=pathlib.Path,
-        default=pathlib.Path.cwd() / "5_output",
+        default=pathlib.Path.cwd() / "4_output",
     )
     return parser.parse_args()
 
