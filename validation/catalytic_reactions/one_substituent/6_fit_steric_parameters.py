@@ -229,9 +229,7 @@ def _get_command_line_arguments() -> argparse.Namespace:
             "predict ddG values."
         ),
         type=pathlib.Path,
-        default=pathlib.Path.cwd()
-        / "4_output"
-        / "steric_parameters_from_radii.csv",
+        default=pathlib.Path.cwd() / "4_output" / "steric_parameters.csv",
     )
     parser.add_argument(
         "--experimental_ddGs",
