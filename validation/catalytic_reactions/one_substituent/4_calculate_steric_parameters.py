@@ -8,6 +8,7 @@ from dataclasses import dataclass
 import morfeus
 
 import smores
+from smores._internal.write_cube import write_cube
 
 _OUTPUT_CSV_COLUMNS = (
     "name",
@@ -80,6 +81,19 @@ def main() -> None:
                         "B1": esp_smores_params.B1,
                         "B5": esp_smores_params.B5,
                     }
+                )
+                write_cube(
+                    path=args.output_directory
+                    / f"{row.name}_{row.core}_{row.substituent}.cube",
+                    voxels=smores_esp_molecule._electric_field_surface.voxels,
+                    voxel_dimensions=(
+                        smores_esp_molecule._electric_field_surface.voxel_size
+                    ),
+                    voxel_origin=(
+                        smores_esp_molecule._electric_field_surface.voxel_origin  # noqa
+                    ),
+                    elements=smores_esp_molecule._atoms,
+                    positions=smores_esp_molecule._positions,
                 )
 
                 for radii_type in radii_types:
