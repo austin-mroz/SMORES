@@ -5,7 +5,9 @@ import pathlib
 import typing
 from dataclasses import dataclass
 
+import ase.io.cube
 import morfeus
+import numpy as np
 
 import smores
 from smores._internal.write_cube import write_cube
@@ -81,6 +83,23 @@ def main() -> None:
                         "B1": esp_smores_params.B1,
                         "B5": esp_smores_params.B5,
                     }
+                )
+                data, atoms = ase.io.cube.read_cube_data(
+                    str(row.xyz_file.parent / "ESP.cube")
+                )
+                vectors = np.linalg.norm(atoms.cell, axis=1)
+                with open(row.xyz_file.parent / "ESP.cube") as esp_file:
+                    lines = esp_file.readlines()
+                write_cube(
+                    path=args.output_directory
+                    / f"{row.name}_{row.core}_{row.substituent}_esp.cube",
+                    voxels=data,
+                    voxel_dimensions=vectors / data.shape,
+                    voxel_origin=np.array(
+                        [float(i) for i in lines[2].split()[1:]]
+                    ),
+                    elements=atoms.get_atomic_numbers(),
+                    positions=atoms.positions / ase.units.Bohr,
                 )
                 write_cube(
                     path=args.output_directory
