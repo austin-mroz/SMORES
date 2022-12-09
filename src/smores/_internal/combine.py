@@ -30,6 +30,8 @@ class Combination:
     product: rdkit.Mol
     dummy_index: int
     attached_index: int
+    core_indices: list[int]
+    substituent_indices: list[int]
 
 
 def combine(
@@ -55,9 +57,19 @@ def combine(
         if optimize:
             _optimize(product)
 
+        core_indices = []
+        substituent_indices = []
+        for atom_info in construct.get_atom_infos():
+            if atom_info.get_building_block() is core_bb:
+                core_indices.append(atom_info.get_atom().get_id())
+            if atom_info.get_building_block() is subsituent_bb:
+                substituent_indices.append(atom_info.get_atom().get_id())
+
         yield Combination(
             core=core,
             substituent=substituent,
+            core_indices=core_indices,
+            substituent_indices=substituent_indices,
             product=product,
             dummy_index=steric_atoms.core_atom,
             attached_index=steric_atoms.substituent_atom,
