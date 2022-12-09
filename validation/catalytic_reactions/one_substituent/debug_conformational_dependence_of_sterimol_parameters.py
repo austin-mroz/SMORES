@@ -1,5 +1,6 @@
 #!python
 import argparse
+import json
 import pathlib
 import typing
 
@@ -14,6 +15,13 @@ def main() -> None:
     args.output_directory.mkdir(exist_ok=True, parents=True)
     conformer_directory = args.output_directory / "conformers"
     conformer_directory.mkdir(exist_ok=True, parents=True)
+
+    excluded_atoms = None
+    if args.substructure_indices is not None:
+        with open(args.substructure_indices) as f:
+            excluded_atoms = [
+                index + 1 for index in json.load(f)["core_indices"]
+            ]
 
     molecule = rdkit.MolFromMolFile(
         str(args.input_file),
@@ -34,6 +42,7 @@ def main() -> None:
             coordinates=conformer.GetPositions(),
             dummy_index=args.dummy_index + 1,
             attached_index=args.attached_index + 1,
+            excluded_atoms=excluded_atoms,
         )
         Ls.append(sterimol.L_value)
         B1s.append(sterimol.B_1_value)
@@ -137,6 +146,16 @@ def _get_command_line_arguments() -> argparse.Namespace:
         help="The number of conformers to generate.",
         type=int,
         default=500,
+    )
+    parser.add_argument(
+        "--substructure_indices",
+        help=(
+            "A JSON file holding the indices of core and substituent atoms. "
+            "If provided, the core atoms will be excluded from the sterimol "
+            "parameter calculation."
+        ),
+        type=pathlib.Path,
+        default=None,
     )
     return parser.parse_args()
 
