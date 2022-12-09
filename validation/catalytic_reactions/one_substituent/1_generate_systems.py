@@ -1,6 +1,7 @@
 #!python
 import argparse
 import csv
+import json
 import pathlib
 
 import rdkit.Chem as rdkit
@@ -106,6 +107,14 @@ def _write_structures(
                     "xyz_file": xyz_file.resolve(),
                 },
             )
+            with open(structures_directory / f"{name}.json", "w") as f:
+                json.dump(
+                    {
+                        "core_indices": combo.core_indices,
+                        "substituent_indices": combo.substituent_indices,
+                    },
+                    f,
+                )
 
 
 def _get_command_line_arguments() -> argparse.Namespace:
