@@ -64,7 +64,10 @@ def main() -> None:
             "B5": B5s,
         }
     )
-    data_frame.to_csv(args.output_directory / "steric_parameters.csv")
+    data_frame.to_csv(
+        args.output_directory / "steric_parameters.csv",
+        index=False,
+    )
     plot_histogram(
         data_frame=data_frame,
         parameter="L",
