@@ -6,6 +6,7 @@ from dataclasses import dataclass
 
 import pandas as pd
 import seaborn as sns
+from sklearn import preprocessing
 from sklearn.linear_model import LinearRegression
 
 
@@ -118,7 +119,12 @@ def _fit_steric_parameters(
 
     parameter_combinations = _powerset("L", "B1", "B5")
     for parameter_combination in parameter_combinations:
-        X = data_frame[parameter_combination]
+        X_unscaled = data_frame[parameter_combination]
+        X = (
+            preprocessing.StandardScaler()
+            .fit(X_unscaled)
+            .transform(X_unscaled)
+        )
         y = data_frame["ddG"]
         ols_fit = LinearRegression().fit(X, y)
         coefficients = dict(zip(parameter_combination, ols_fit.coef_))
