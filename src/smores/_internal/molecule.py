@@ -251,6 +251,7 @@ rdkit.Chem.rdDistGeom.html#rdkit.Chem.rdDistGeom.ETKDGv3
         self,
         dummy_index: int,
         attached_index: int,
+        excluded_indices: typing.Iterable[int] | None = None,
     ) -> StericParameters:
         """
         Get the steric paramters from STREUSEL_ radii.
@@ -263,6 +264,10 @@ rdkit.Chem.rdDistGeom.html#rdkit.Chem.rdDistGeom.ETKDGv3
 
             attached_index:
                 The index of the attached atom of the substituent.
+
+            excluded_indices:
+                The indices of atoms which are not included in the
+                parameter calculation.
 
         Returns:
             The parameters.
@@ -277,6 +282,11 @@ rdkit.Chem.rdDistGeom.html#rdkit.Chem.rdDistGeom.ETKDGv3
             dummy_index=dummy_index + 1,
             attached_index=attached_index + 1,
             radii=self._radii,
+            excluded_atoms=(
+                None
+                if excluded_indices is None
+                else [index + 1 for index in excluded_indices]
+            ),
         )
         return StericParameters(
             L=sterimol.L_value,

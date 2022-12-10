@@ -62,6 +62,34 @@ def main() -> None:
                         "B5": smores_params.B5,
                     }
                 )
+
+                with open(row.fragments_file) as f:
+                    core_indices = json.load(f)["core_indices"]
+
+                smores_core_excluded_params = (
+                    smores_molecule.get_steric_parameters(
+                        dummy_index=row.dummy_index,
+                        attached_index=row.attached_index,
+                        excluded_indices=core_indices,
+                    )
+                )
+                writer.writerow(
+                    {
+                        "name": row.name,
+                        "core": row.core,
+                        "substituent": row.substituent,
+                        "smiles": row.smiles,
+                        "xyz_file": row.xyz_file,
+                        "fragments_file": row.fragments_file,
+                        "dummy_index": row.dummy_index,
+                        "attached_index": row.attached_index,
+                        "radii_type": "streusel_core_excluded",
+                        "L": smores_core_excluded_params.L,
+                        "B1": smores_core_excluded_params.B1,
+                        "B5": smores_core_excluded_params.B5,
+                    }
+                )
+
                 smores_esp_molecule = smores.EspMolecule.from_cube_file(
                     row.xyz_file.parent / "ESP.cube"
                 )
@@ -85,9 +113,6 @@ def main() -> None:
                         "B5": esp_smores_params.B5,
                     }
                 )
-
-                with open(row.fragments_file) as f:
-                    core_indices = json.load(f)["core_indices"]
 
                 for radii_type in radii_types:
                     sterimol = _get_sterimol(row, radii_type)
