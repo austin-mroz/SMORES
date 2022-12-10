@@ -43,6 +43,7 @@ def main() -> None:
                     grid_length=10.0,
                     num_voxels_per_dimension=50,
                     optimize=True,
+                    num_threads=16,
                 )
                 _append_to_csv(
                     path=csv_output,

@@ -92,7 +92,7 @@ def _calculate_electrostatic_potentials(
                     core=molecule_input.core,
                     substituent=molecule_input.substituent,
                     smiles=molecule_input.smiles,
-                    xyz_file=calculation_directory / "geom.xyz",
+                    xyz_file=calculation_directory / "xtbopt.xyz",
                     dummy_index=molecule_input.dummy_index,
                     attached_index=molecule_input.attached_index,
                 )
