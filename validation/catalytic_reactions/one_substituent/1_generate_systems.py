@@ -84,6 +84,7 @@ def _write_structures(
                 "dummy_index",
                 "attached_index",
                 "xyz_file",
+                "fragments_file",
             ],
         )
         writer.writeheader()
@@ -92,6 +93,7 @@ def _write_structures(
             name = f"{cores[combo.core]}_{substituents[combo.substituent]}"
             xyz_file = structures_directory / f"{name}.xyz"
             rdkit.MolToXYZFile(combo.product, str(xyz_file))
+            fragments_file = xyz_file.with_suffix(".json")
             writer.writerow(
                 {
                     "reaction_name": reaction_name,
@@ -105,9 +107,10 @@ def _write_structures(
                     "dummy_index": combo.dummy_index,
                     "attached_index": combo.attached_index,
                     "xyz_file": xyz_file.resolve(),
+                    "fragments_file": fragments_file.resolve(),
                 },
             )
-            with open(structures_directory / f"{name}.json", "w") as f:
+            with open(fragments_file, "w") as f:
                 json.dump(
                     {
                         "core_indices": combo.core_indices,
