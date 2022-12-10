@@ -19,7 +19,7 @@ _OUTPUT_CSV_COLUMNS = (
     "substituent",
     "smiles",
     "xyz_file",
-    "substructures_file",
+    "fragments_file",
     "dummy_index",
     "attached_index",
     "radii_type",
@@ -56,7 +56,7 @@ def main() -> None:
                         "substituent": row.substituent,
                         "smiles": row.smiles,
                         "xyz_file": row.xyz_file,
-                        "substructures_file": row.substructures_file,
+                        "fragments_file": row.fragments_file,
                         "dummy_index": row.dummy_index,
                         "attached_index": row.attached_index,
                         "radii_type": "streusel",
@@ -79,7 +79,7 @@ def main() -> None:
                         "substituent": row.substituent,
                         "smiles": row.smiles,
                         "xyz_file": row.xyz_file,
-                        "substructures_file": row.substructures_file,
+                        "fragments_file": row.fragments_file,
                         "dummy_index": row.dummy_index,
                         "attached_index": row.attached_index,
                         "radii_type": "streusel_cube",
@@ -119,7 +119,7 @@ def main() -> None:
                     positions=smores_esp_molecule._positions,
                 )
 
-                with open(row.substructures_file) as f:
+                with open(row.fragments_file) as f:
                     core_indices = json.load(f)["core_indices"]
 
                 for radii_type in radii_types:
@@ -131,7 +131,7 @@ def main() -> None:
                             "substituent": row.substituent,
                             "smiles": row.smiles,
                             "xyz_file": row.xyz_file,
-                            "substructures_file": row.substructures_file,
+                            "fragments_file": row.fragments_file,
                             "dummy_index": row.dummy_index,
                             "attached_index": row.attached_index,
                             "radii_type": radii_type,
@@ -152,7 +152,7 @@ def main() -> None:
                             "substituent": row.substituent,
                             "smiles": row.smiles,
                             "xyz_file": row.xyz_file,
-                            "substructures_file": row.substructures_file,
+                            "fragments_file": row.fragments_file,
                             "dummy_index": row.dummy_index,
                             "attached_index": row.attached_index,
                             "radii_type": f"{radii_type}_core_excluded",
@@ -170,7 +170,7 @@ class CsvRow:
     substituent: str
     smiles: str
     xyz_file: pathlib.Path
-    substructures_file: pathlib.Path
+    fragments_file: pathlib.Path
     dummy_index: int
     attached_index: int
 
@@ -188,7 +188,7 @@ def _get_rows(
                 substituent=row["substituent"],
                 smiles=row["smiles"],
                 xyz_file=pathlib.Path(row["xyz_file"]),
-                substructures_file=pathlib.Path(row["substructures_file"]),
+                fragments_file=pathlib.Path(row["fragments_file"]),
                 dummy_index=int(row["dummy_index"]),
                 attached_index=int(row["attached_index"]),
             )
