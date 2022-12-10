@@ -20,6 +20,7 @@ _OUTPUT_CSV_COLUMNS = (
     "substituent",
     "smiles",
     "xyz_file",
+    "fragments_file",
     "dummy_index",
     "attached_index",
 )
@@ -30,10 +31,8 @@ def main() -> None:
     args.output_directory.mkdir(parents=True, exist_ok=True)
 
     for input_file in args.input_file:
-        molecules = tuple(_read_molecules(input_file))
         _calculate_electrostatic_potentials(
-            input_file=input_file,
-            molecules=molecules,
+            molecules=tuple(_read_molecules(input_file)),
             output_directory=args.output_directory,
         )
 
@@ -48,13 +47,14 @@ class Molecule:
     dummy_index: int
     attached_index: int
     xyz_file: pathlib.Path
+    fragments_file: pathlib.Path
 
 
 def _calculate_electrostatic_potentials(
-    input_file: pathlib.Path,
     molecules: abc.Collection[Molecule],
     output_directory: pathlib.Path,
 ) -> None:
+
     for molecule in molecules:
         reaction_directory = output_directory / molecule.reaction_name
         reaction_directory.mkdir(parents=True, exist_ok=True)
@@ -66,6 +66,7 @@ def _calculate_electrostatic_potentials(
                 fieldnames=_OUTPUT_CSV_COLUMNS,
             )
             writer.writeheader()
+
     for molecule_input in molecules:
         reaction_directory = output_directory / molecule_input.reaction_name
         csv_path = reaction_directory / "xyz_files.csv"
@@ -93,6 +94,7 @@ def _calculate_electrostatic_potentials(
                     substituent=molecule_input.substituent,
                     smiles=molecule_input.smiles,
                     xyz_file=calculation_directory / "xtbopt.xyz",
+                    fragments_file=molecule_input.fragments_file,
                     dummy_index=molecule_input.dummy_index,
                     attached_index=molecule_input.attached_index,
                 )
@@ -112,6 +114,7 @@ def _append_to_csv(
     substituent: str,
     smiles: str,
     xyz_file: pathlib.Path,
+    fragments_file: pathlib.Path,
     dummy_index: int,
     attached_index: int,
 ) -> None:
@@ -128,6 +131,7 @@ def _append_to_csv(
                 "substituent": substituent,
                 "smiles": smiles,
                 "xyz_file": xyz_file.resolve(),
+                "fragments_file": fragments_file,
                 "dummy_index": dummy_index,
                 "attached_index": attached_index,
             },
@@ -147,6 +151,7 @@ def _read_molecules(input_file: pathlib.Path) -> typing.Iterator[Molecule]:
                 dummy_index=int(row["dummy_index"]),
                 attached_index=int(row["attached_index"]),
                 xyz_file=pathlib.Path(row["xyz_file"]),
+                fragments_file=pathlib.Path(row["fragments_file"]),
             )
 
 

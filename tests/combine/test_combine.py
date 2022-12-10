@@ -9,6 +9,7 @@ import smores
     (
         ("CC[Sn]Br", "CC[Ge]Br", "CC[Sn][Ge]CC"),
         ("Br[Sn]CC", "Br[Ge]CC", "CC[Sn][Ge]CC"),
+        ("Br[Sn]CC", "Br[Ge]CCCC", "CC[Sn][Ge]CCCC"),
         ("CC[Sn](Br)CC", "CC[Ge](Br)CC", "CC[Sn](CC)[Ge](CC)CC"),
     ),
 )
@@ -44,6 +45,8 @@ def test_combine(
     assert product_smiles == expected_product_smiles
     assert combo.dummy_index == expected_dummy_index
     assert combo.attached_index == expected_attached_index
+    assert len(combo.core_indices) == core.GetNumAtoms() - 1
+    assert len(combo.substituent_indices) == substituent.GetNumAtoms() - 1
 
 
 def _to_canonical_smiles(smiles: str) -> str:

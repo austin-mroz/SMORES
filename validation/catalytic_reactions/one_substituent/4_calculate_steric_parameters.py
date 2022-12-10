@@ -1,6 +1,7 @@
 #!python
 import argparse
 import csv
+import json
 import pathlib
 import typing
 from dataclasses import dataclass
@@ -15,6 +16,7 @@ _OUTPUT_CSV_COLUMNS = (
     "substituent",
     "smiles",
     "xyz_file",
+    "fragments_file",
     "dummy_index",
     "attached_index",
     "radii_type",
@@ -51,6 +53,7 @@ def main() -> None:
                         "substituent": row.substituent,
                         "smiles": row.smiles,
                         "xyz_file": row.xyz_file,
+                        "fragments_file": row.fragments_file,
                         "dummy_index": row.dummy_index,
                         "attached_index": row.attached_index,
                         "radii_type": "streusel",
@@ -73,6 +76,7 @@ def main() -> None:
                         "substituent": row.substituent,
                         "smiles": row.smiles,
                         "xyz_file": row.xyz_file,
+                        "fragments_file": row.fragments_file,
                         "dummy_index": row.dummy_index,
                         "attached_index": row.attached_index,
                         "radii_type": "streusel_cube",
@@ -81,6 +85,9 @@ def main() -> None:
                         "B5": esp_smores_params.B5,
                     }
                 )
+
+                with open(row.fragments_file) as f:
+                    core_indices = json.load(f)["core_indices"]
 
                 for radii_type in radii_types:
                     sterimol = _get_sterimol(row, radii_type)
@@ -91,12 +98,34 @@ def main() -> None:
                             "substituent": row.substituent,
                             "smiles": row.smiles,
                             "xyz_file": row.xyz_file,
+                            "fragments_file": row.fragments_file,
                             "dummy_index": row.dummy_index,
                             "attached_index": row.attached_index,
                             "radii_type": radii_type,
                             "L": sterimol.L_value,
                             "B1": sterimol.B_1_value,
                             "B5": sterimol.B_5_value,
+                        },
+                    )
+                    sterimol_excluded = _get_sterimol(
+                        molecule=row,
+                        radii_type=radii_type,
+                        excluded_indices=core_indices,
+                    )
+                    writer.writerow(
+                        {
+                            "name": row.name,
+                            "core": row.core,
+                            "substituent": row.substituent,
+                            "smiles": row.smiles,
+                            "xyz_file": row.xyz_file,
+                            "fragments_file": row.fragments_file,
+                            "dummy_index": row.dummy_index,
+                            "attached_index": row.attached_index,
+                            "radii_type": f"{radii_type}_core_excluded",
+                            "L": sterimol_excluded.L_value,
+                            "B1": sterimol_excluded.B_1_value,
+                            "B5": sterimol_excluded.B_5_value,
                         },
                     )
 
@@ -108,6 +137,7 @@ class CsvRow:
     substituent: str
     smiles: str
     xyz_file: pathlib.Path
+    fragments_file: pathlib.Path
     dummy_index: int
     attached_index: int
 
@@ -125,12 +155,18 @@ def _get_rows(
                 substituent=row["substituent"],
                 smiles=row["smiles"],
                 xyz_file=pathlib.Path(row["xyz_file"]),
+                fragments_file=pathlib.Path(row["fragments_file"]),
                 dummy_index=int(row["dummy_index"]),
                 attached_index=int(row["attached_index"]),
             )
 
 
-def _get_sterimol(molecule: CsvRow, radii_type: str) -> morfeus.Sterimol:
+def _get_sterimol(
+    molecule: CsvRow,
+    radii_type: str,
+    excluded_indices: list[int] | None = None,
+) -> morfeus.Sterimol:
+
     elements, coordinates = morfeus.read_xyz(molecule.xyz_file)
     return morfeus.Sterimol(
         elements=elements,
@@ -138,6 +174,11 @@ def _get_sterimol(molecule: CsvRow, radii_type: str) -> morfeus.Sterimol:
         dummy_index=molecule.dummy_index + 1,
         attached_index=molecule.attached_index + 1,
         radii_type=radii_type,
+        excluded_atoms=(
+            None
+            if excluded_indices is None
+            else [index + 1 for index in excluded_indices]
+        ),
     )
 
 
