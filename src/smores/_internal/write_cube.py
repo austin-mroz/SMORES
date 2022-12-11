@@ -62,7 +62,7 @@ def write_cube(
                 f"{voxel_x_vector[2]: >11.6f}"
             ),
             (
-                f"{num_voxels_y: >5} {voxel_y_vector[0]: >11.6f}"
+                f"{num_voxels_y: >5} {voxel_y_vector[0]: >11.6f} "
                 f"{voxel_y_vector[1]: >11.6f} "
                 f"{voxel_y_vector[2]: >11.6f}"
             ),

@@ -38,7 +38,11 @@ def read_cube(path: pathlib.Path) -> CubeFileData:
 
         for _ in range(num_atoms):
             atom, _, x, y, z = next(cube_file).split()
-            atomic_numbers.append(rdkit.Atom(atom).GetAtomicNum())
+            atomic_numbers.append(
+                int(atom)
+                if atom.isnumeric()
+                else rdkit.Atom(atom).GetAtomicNum()
+            )
             positions.append((float(x), float(y), float(z)))
 
         voxels: list[float] = []
