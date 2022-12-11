@@ -38,7 +38,9 @@ def main() -> None:
         ),
         elements=["1", "1"],
         voxel_origin=np.array([-5, -5, -5]),
-        voxel_dimensions=np.array([1.0, 1.0, 1.0]),
+        voxel_x_vector=np.array([1.0, 0.0, 0.0]),
+        voxel_y_vector=np.array([0.0, 1.0, 0.0]),
+        voxel_z_vector=np.array([0.0, 0.0, 1.0]),
     )
 
     big_path = args.output_directory / "big.cube"

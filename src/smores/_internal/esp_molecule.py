@@ -1,14 +1,14 @@
 import pathlib
 import tempfile
 import typing
+from collections import abc
 
-import ase
-import ase.io.cube
 import dbstep.Dbstep as db
 import numpy as np
 import numpy.typing as npt
 import streusel.gaussian_cube
 
+from smores._internal.read_cube import read_cube
 from smores._internal.steric_parameters import StericParameters
 from smores._internal.voxel_grid import VoxelGrid
 from smores._internal.write_cube import write_cube
@@ -46,7 +46,7 @@ class EspMolecule:
 
     def __init__(
         self,
-        atoms: typing.Iterable[str],
+        atoms: typing.Iterable[int],
         positions: npt.ArrayLike,
         electrostatic_potential: VoxelGrid,
     ) -> None:
@@ -55,8 +55,8 @@ class EspMolecule:
 
         Parameters:
 
-            atoms (list[str]):
-                The elemental symbol of each atom of the molecule.
+            atoms (list[int]):
+                The atomic number of each atom of the molecule.
 
             positions (list[list[float]]):
                 The coordinates of each atom of the molecule,
@@ -68,7 +68,7 @@ class EspMolecule:
 
         """
 
-        self._atoms = tuple(atoms)
+        self._atoms: abc.Collection = tuple(atoms)
         self._positions = np.array(positions)
 
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -79,7 +79,9 @@ class EspMolecule:
                 positions=self._positions,
                 elements=self._atoms,
                 voxel_origin=electrostatic_potential.voxel_origin,
-                voxel_dimensions=electrostatic_potential.voxel_size,
+                voxel_x_vector=electrostatic_potential.voxel_x_vector,
+                voxel_y_vector=electrostatic_potential.voxel_y_vector,
+                voxel_z_vector=electrostatic_potential.voxel_z_vector,
             )
             streusel_molecule = streusel.gaussian_cube.Molecule(
                 electrostatic_potential_file,
@@ -93,8 +95,10 @@ class EspMolecule:
 
         self._electric_field_surface = VoxelGrid(
             voxels=electric_field_surface,
-            voxel_size=electrostatic_potential.voxel_size,
             voxel_origin=electrostatic_potential.voxel_origin,
+            voxel_x_vector=electrostatic_potential.voxel_x_vector,
+            voxel_y_vector=electrostatic_potential.voxel_y_vector,
+            voxel_z_vector=electrostatic_potential.voxel_z_vector,
         )
 
     def get_steric_parameters(
@@ -128,7 +132,9 @@ class EspMolecule:
                 positions=self._positions,
                 elements=self._atoms,
                 voxel_origin=self._electric_field_surface.voxel_origin,
-                voxel_dimensions=self._electric_field_surface.voxel_size,
+                voxel_x_vector=self._electric_field_surface.voxel_x_vector,
+                voxel_y_vector=self._electric_field_surface.voxel_y_vector,
+                voxel_z_vector=self._electric_field_surface.voxel_z_vector,
             )
 
             params = db.dbstep(
@@ -158,16 +164,17 @@ class EspMolecule:
         """
 
         instance = cls.__new__(cls)
-        grid, atoms = ase.io.cube.read_cube_data(str(path))
-        instance._atoms = atoms.get_atomic_numbers()
-        instance._positions = atoms.positions / ase.units.Bohr
-
+        cube_data = read_cube(pathlib.Path(path))
+        instance._atoms = cube_data.atomic_numbers
+        instance._positions = np.array(cube_data.positions)
         streusel_molecule = streusel.gaussian_cube.Molecule(str(path))
 
         instance._electric_field_surface = VoxelGrid(
             voxels=_get_electric_field_surface(streusel_molecule),
-            voxel_size=streusel_molecule.res,
-            voxel_origin=streusel_molecule.origin,
+            voxel_origin=cube_data.voxel_grid.voxel_origin,
+            voxel_x_vector=cube_data.voxel_grid.voxel_x_vector,
+            voxel_y_vector=cube_data.voxel_grid.voxel_y_vector,
+            voxel_z_vector=cube_data.voxel_grid.voxel_z_vector,
         )
 
         return instance

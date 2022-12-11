@@ -12,7 +12,11 @@ class VoxelGrid:
 
     #: The voxels of the grid, represented as a 3-D array.
     voxels: npt.NDArray
-    #: The length of a single voxel along the x, y and z dimensions.
-    voxel_size: npt.NDArray
-    #: The origin of voxels.
+    #: The origin of the voxels.
     voxel_origin: npt.NDArray
+    #: The x vector of a single voxel.
+    voxel_x_vector: npt.NDArray
+    #: The y vector of a single voxel.
+    voxel_y_vector: npt.NDArray
+    #: The z vector of a single voxel.
+    voxel_z_vector: npt.NDArray

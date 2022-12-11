@@ -1,5 +1,5 @@
 import pathlib
-import typing
+from collections import abc
 
 import numpy.typing as npt
 
@@ -8,9 +8,11 @@ def write_cube(
     path: pathlib.Path,
     voxels: npt.NDArray,
     positions: npt.NDArray,
-    elements: typing.Sequence[str],
+    elements: abc.Collection[str | int],
     voxel_origin: npt.NDArray,
-    voxel_dimensions: npt.NDArray,
+    voxel_x_vector: npt.NDArray,
+    voxel_y_vector: npt.NDArray,
+    voxel_z_vector: npt.NDArray,
 ) -> None:
     """
     Write a ``.cube`` file.
@@ -28,19 +30,23 @@ def write_cube(
 
         elements:
             For each element of the molecule, its
-            elemental symbol.
+            elemental symbol or atomic number.
 
         voxel_origin:
             Origin of the voxels.
 
-        voxel_dimensions:
-            The length of a single voxel in the x, y and
-            z dimensions.
+        voxel_x_vector:
+            The x vector of a single voxel.
+
+        voxel_y_vector:
+            The y vector of a single voxel.
+
+        voxel_z_vector:
+            The z vector of a single voxel.
 
     """
 
     origin_x, origin_y, origin_z = voxel_origin
-    voxel_x_length, voxel_y_length, voxel_z_length = voxel_dimensions
     num_voxels_x, num_voxels_y, num_voxels_z = voxels.shape
     with open(path, "w") as cube:
         lines = [
@@ -51,16 +57,19 @@ def write_cube(
                 f"{origin_z: >11.6f}"
             ),
             (
-                f"{num_voxels_x: >5} {voxel_x_length: >11.6f} {0.: >11.6f} "
-                f"{0.: >11.6f}"
+                f"{num_voxels_x: >5} {voxel_x_vector[0]: >11.6f} "
+                f"{voxel_x_vector[1]: >11.6f} "
+                f"{voxel_x_vector[2]: >11.6f}"
             ),
             (
-                f"{num_voxels_y: >5} {0.: >11.6f} {voxel_y_length: >11.6f} "
-                f"{0.: >11.6f}"
+                f"{num_voxels_y: >5} {voxel_y_vector[0]: >11.6f}"
+                f"{voxel_y_vector[1]: >11.6f} "
+                f"{voxel_y_vector[2]: >11.6f}"
             ),
             (
-                f"{num_voxels_z: >5} {0.: >11.6f} {0.: >11.6f} "
-                f"{voxel_z_length: >11.6f}"
+                f"{num_voxels_z: >5} {voxel_z_vector[0]: >11.6f} "
+                f"{voxel_z_vector[1]: >11.6f} "
+                f"{voxel_z_vector[2]: >11.6f}"
             ),
         ]
         for element, [x, y, z] in zip(elements, positions):

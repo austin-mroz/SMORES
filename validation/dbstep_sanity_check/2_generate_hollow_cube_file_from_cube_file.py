@@ -25,14 +25,18 @@ def main() -> None:
         positions=atoms.get_positions() / ase.units.Bohr,
         elements=atoms.get_atomic_numbers(),
         voxel_origin=voxel_grid_params.origin,
-        voxel_dimensions=voxel_grid_params.voxel_dimensions,
+        voxel_x_vector=voxel_grid_params.voxel_x_vector,
+        voxel_y_vector=voxel_grid_params.voxel_y_vector,
+        voxel_z_vector=voxel_grid_params.voxel_z_vector,
     )
 
 
 @dataclass(frozen=True, slots=True)
 class VoxelGridParams:
     origin: npt.NDArray
-    voxel_dimensions: npt.NDArray
+    voxel_x_vector: npt.NDArray
+    voxel_y_vector: npt.NDArray
+    voxel_z_vector: npt.NDArray
 
 
 def _get_voxel_grid_params(cube_file: pathlib.Path) -> VoxelGridParams:
@@ -40,13 +44,15 @@ def _get_voxel_grid_params(cube_file: pathlib.Path) -> VoxelGridParams:
         next(f)
         next(f)
         origin = np.array(list(map(float, next(f).split()[1:])))
-        x = float(next(f).split()[1])
-        y = float(next(f).split()[2])
-        z = float(next(f).split()[3])
+        voxel_x_vector = np.array([float(n) for n in next(f).split()[1:]])
+        voxel_y_vector = np.array([float(n) for n in next(f).split()[1:]])
+        voxel_z_vector = np.array([float(n) for n in next(f).split()[1:]])
 
     return VoxelGridParams(
         origin=origin,
-        voxel_dimensions=np.array([x, y, z]),
+        voxel_x_vector=voxel_x_vector,
+        voxel_y_vector=voxel_y_vector,
+        voxel_z_vector=voxel_z_vector,
     )
 
 
