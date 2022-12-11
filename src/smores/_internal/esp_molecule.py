@@ -1,4 +1,5 @@
 import pathlib
+import shutil
 import tempfile
 import typing
 from collections import abc
@@ -135,6 +136,10 @@ class EspMolecule:
                 voxel_x_vector=self._electric_field_surface.voxel_x_vector,
                 voxel_y_vector=self._electric_field_surface.voxel_y_vector,
                 voxel_z_vector=self._electric_field_surface.voxel_z_vector,
+            )
+            shutil.copyfile(
+                electric_field_surface_file,
+                "/home/lukas/projects/scratch/ef_surface.cube",
             )
 
             params = db.dbstep(

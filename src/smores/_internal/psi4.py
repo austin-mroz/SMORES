@@ -127,9 +127,9 @@ def _generate_voxel_grid(
         range(num_voxels_per_dimension),
         range(num_voxels_per_dimension),
     ):
-        itrans = -origin_x + voxel_size * i
-        jtrans = -origin_y + voxel_size * j
-        ktrans = -origin_z + voxel_size * k
+        itrans = origin_x + voxel_size * i
+        jtrans = origin_y + voxel_size * j
+        ktrans = origin_z + voxel_size * k
         grid_xyz_coords.append([itrans, jtrans, ktrans])
 
     with open(output_directory.joinpath("grid.dat"), "w") as file:
