@@ -35,6 +35,10 @@ check:
 
   test $error = 0
 
+# install an editable dev build into the current environment
+install:
+  pip install -e .[dev]
+
 # build the docker testing environment
 build-testing-environment:
   pip-compile -o docker_testing_environment/requirements.txt --extra dev pyproject.toml
