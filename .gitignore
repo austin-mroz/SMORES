@@ -11,3 +11,4 @@ docs/source/_autosummary
 **/dbstep_sanity_check/data
 docker_testing_environment/requirements.txt
 dist
+validation/steric_parameter_distribution_plotting/plots
