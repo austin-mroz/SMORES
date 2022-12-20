@@ -22,7 +22,24 @@ class Molecule:
 
     Examples:
 
-        *Using custom atomic radii*
+        *Calculate steric parameters*
+
+        .. doctest:: molecule-calculate-steric-parameters
+
+            >>> import smores
+            >>> molecule = smores.Molecule.from_smiles("Cl", \
+dummy_index=0, attached_index=1)
+            >>> molecule.get_steric_parameters()
+            StericParameters(L=3.57164113574581, \
+B1=1.9730970556668774, B5=2.320611610648539)
+
+        .. tip::
+
+            There are many different way to initialize a :class:`.Molecule`,
+            for example :meth:`from_mol_file` or :meth:`from_xyz_file`. See
+            the list of methods below.
+
+        *Use custom atomic radii*
 
         If we want to use custom atomic radii, we can simply make use of the
         `radii` parameter, where we provide the desired radius of each atom
