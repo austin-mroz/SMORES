@@ -78,6 +78,5 @@ html_theme_options = {
 }
 html_static_path = ["_static"]
 
-
 pygments_style = "custom_dracula.CustomDraculaStyle"
 pygments_dark_style = "custom_dracula.CustomDraculaStyle"

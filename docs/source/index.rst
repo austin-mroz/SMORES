@@ -160,6 +160,7 @@ for you, unlike RDKit_'s own `rdkit.MolFromSmiles`_ function.
 
    * :meth:`.Molecule.from_rdkit`: For addtional configuration options.
    * :meth:`.EspMolecule.from_rdkit`: For addtional configuration options.
+   * :func:`.rdkit_from_smiles` For additional documentation.
 
 Quick comparison of substituents
 --------------------------------
@@ -177,8 +178,8 @@ you do this quick
       smores.rdkit_from_smiles("c1ccccc1Br"),
   ]
   substituents = [
-    smores.rdkit_from_smiles("BrCCC"),
-    smores.rdkit_from_smiles("BrCC(C)(C)C"),
+      smores.rdkit_from_smiles("BrCCC"),
+      smores.rdkit_from_smiles("BrCC(C)(C)C"),
   ]
   for combo in smores.combine(cores, substituents):
       molecule = smores.Molecule.from_combination(combo)
@@ -211,8 +212,9 @@ potentials defined on a voxel grid
 .. testcode:: using-electrostatic-potentials
   :hide:
 
-  import smores
-
+  import os
+  import tempfile
+  os.chdir(tempfile.TemporaryDirectory())
 
 .. doctest:: using-electrostatic-potentials
 
@@ -220,12 +222,6 @@ potentials defined on a voxel grid
   >>> molecule = smores.EspMolecule.from_cube_file("HBr.cube", dummy_index=0, attached_index=1)
   >>> molecule.get_steric_parameters()
   StericParameters(L=3.57164113574581, B1=1.9730970556668774, B5=2.320611610648539)
-
-.. testcleanup:: using-electrostatic-potentials
-
-  import os
-
-
 
 .. seealso::
 
@@ -251,6 +247,12 @@ Calculating electrostatic potentials
 
 .. _psi4: https://psicode.org/
 
+.. testcode:: calculate-electrostatic-potential
+  :hide:
+
+  import os
+  import tempfile
+  os.chdir(tempfile.TemporaryDirectory())
 
 .. testcode:: calculate-electrostatic-potential
 
@@ -262,7 +264,7 @@ Calculating electrostatic potentials
       output_directory="outdir",
       grid_origin=(-3., -3., -3.),
       grid_length=10.,
-      num_voxels_per_dimension=50,
+      num_voxels_per_dimension=20,
   )
   esp_molecule = smores.EspMolecule.from_cube_file("outdir/ESP.cube", dummy_index=0, attached_index=1)
 

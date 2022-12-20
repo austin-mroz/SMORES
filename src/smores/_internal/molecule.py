@@ -388,7 +388,6 @@ rdkit.Chem.rdDistGeom.html#rdkit.Chem.rdDistGeom.ETKDGv3
         Returns:
             The :mod:`smores` molecule.
 
-
         """
 
         instance = cls.__new__(cls)
