@@ -27,6 +27,7 @@ dev = [
   "twine",
   "build",
   "pip-tools",
+  "scikit-learn",
 ]
 
 

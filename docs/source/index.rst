@@ -53,22 +53,18 @@ Getting started with :mod:`smores` is really simple!
 
 You start with
 
-.. testcode:: quickstart
+.. doctest:: quickstart
 
-  import smores
+  >>> import smores
 
 and then you load a molecule and calculate the steric parameters
 
 
-.. testcode:: quickstart
+.. doctest:: quickstart
 
-  molecule = smores.Molecule.from_smiles("CC")
-  molecule.get_steric_parameters(dummy_index=0, attached_index=1)
-
-.. testoutput::
-
+  >>> molecule = smores.Molecule.from_smiles("CC")
+  >>> molecule.get_steric_parameters(dummy_index=0, attached_index=1)
   StericParameters(L=3.57164113574581, B1=1.9730970556668774, B5=2.320611610648539)
-
 
 Which will calculate the parameters using the STREUSEL__ radii
 of the atoms.
@@ -99,16 +95,16 @@ library like sklearn_
 .. testcode:: ml-workflow
 
   import smores
-  import sklearn
+  import numpy as np
   from glob import glob
+  from sklearn.tree import DecisionTreeClassifier
 
   molecules = [smores.Molecule.from_xyz_file(path) for path in glob("*.xyz")]
 
   # An N x 3 array, where each row holds L, B1 and B2 of a given molecule.
-  params = np.array([list(mol.get_steric_parameters(0, 1)) for mol in molecules])
-
-  classifier = sklearn.tree.DecisionTreeClassifier()
-  classifier.fit(params, target_property)
+  X = np.array([list(mol.get_steric_parameters(0, 1)) for mol in molecules])
+  classifier = DecisionTreeClassifier()
+  classifier.fit(X, y)
   classifier.predict(smores.Molecule.from_xyz_file("test.xyz"))
 
 
@@ -119,10 +115,10 @@ Plays nice with :mod:`rdkit`
 
 :mod:`smores` molecules can easily be created from RDKit_ molecules
 
-.. testcode::
+.. testcode:: rdkit-workflow
 
   import smores
-  import rdkit.Chem as rdkit
+  import rdkit.Chem.AllChem as rdkit
 
   rdkit_molecule = rdkit.AddHs(rdkit.MolFromSmiles("CBr"))
   rdkit.EmbedMolecule(rdkit_molecule)  # Generate a 3-D structure.
@@ -133,7 +129,7 @@ Plays nice with :mod:`rdkit`
 and we provide a handy function for creating rdkit
 molecules from SMILES
 
-.. testcode::
+.. testcode:: rdkit-workflow
 
    rdkit_molecule = smores.rdkit_from_smiles("CC")
 
@@ -197,7 +193,7 @@ Using electrostatic potentials
 :mod:`smores` can also calculate the steric parameters using electrostatic
 potentials defined on a voxel grid
 
-.. testcode:: quickstart
+.. testcode:: using-electrostatic-potentials
 
   molecule = smores.EspMolecule.from_cube_file("my_molecule.cube")
   params = molecule.get_steric_parameters(dummy_index=0, attached_index=1)
