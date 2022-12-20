@@ -1,12 +1,12 @@
 import pathlib
 
+import pytest
+
 import smores
 import smores.psi4
 
 
-def test_get_steric_parameters(
-    datadir: pathlib.Path, tmp_path: pathlib.Path
-) -> None:
+def test_get_steric_parameters(tmp_path: pathlib.Path) -> None:
     molecule = smores.rdkit_from_smiles("Br")
     smores.psi4.calculate_electrostatic_potential(
         molecule=molecule,
