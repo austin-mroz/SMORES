@@ -40,6 +40,9 @@ class Molecule:
         self,
         atoms: typing.Iterable[str],
         positions: npt.ArrayLike,
+        dummy_index: int,
+        attached_index: int,
+        excluded_indices: typing.Iterable[int] | None = None,
         radii: npt.ArrayLike | None = None,
     ) -> None:
         """
@@ -53,6 +56,16 @@ class Molecule:
             positions (list[list[float]]):
                 The coordinates of each atom of the molecule,
                 provided as an N x 3 matrix.
+
+            dummy_index:
+                The index of the dummy atom.
+
+            attached_index:
+                The index of the attached atom of the substituent.
+
+            excluded_indices (list[int]):
+                The indices of atoms which are not included in the
+                parameter calculation.
 
             radii (list[float]):
                 The radius of each atom of the molecule. If
@@ -71,11 +84,33 @@ class Molecule:
         self._atoms = tuple(atoms)
         self._positions = np.array(positions)
         self._radii = radii
+        self._morfeus_dummy_index = dummy_index + 1
+        self._morfeus_attached_index = attached_index + 1
+        self._morfeus_excluded_indices = (
+            None
+            if excluded_indices is None
+            else tuple(index + 1 for index in excluded_indices)
+        )
+
+    def get_dummy_index(self) -> int:
+        return self._morfeus_dummy_index - 1
+
+    def get_attached_index(self) -> int:
+        return self._morfeus_attached_index - 1
+
+    def get_excluded_indices(self) -> typing.Iterable[int]:
+        if self._morfeus_excluded_indices is None:
+            return
+        for index in self._morfeus_excluded_indices:
+            yield index - 1
 
     @classmethod
     def from_xyz_file(
         cls,
         path: pathlib.Path | str,
+        dummy_index: int,
+        attached_index: int,
+        excluded_indices: typing.Iterable[int] | None = None,
         radii: npt.ArrayLike | None = None,
     ) -> "Molecule":
         """
@@ -85,6 +120,16 @@ class Molecule:
 
             path:
                 The path to the file.
+
+            dummy_index:
+                The index of the dummy atom.
+
+            attached_index:
+                The index of the attached atom of the substituent.
+
+            excluded_indices (list[int]):
+                The indices of atoms which are not included in the
+                parameter calculation.
 
             radii (list[float]):
                 The radius of each atom of the molecule. If
@@ -107,6 +152,13 @@ class Molecule:
             )
         else:
             instance._radii = np.array(radii)
+        instance._morfeus_dummy_index = dummy_index + 1
+        instance._morfeus_attached_index = attached_index + 1
+        instance._morfeus_excluded_indices = (
+            None
+            if excluded_indices is None
+            else tuple(index + 1 for index in excluded_indices)
+        )
         return instance
 
     @classmethod
@@ -247,27 +299,9 @@ rdkit.Chem.rdDistGeom.html#rdkit.Chem.rdDistGeom.ETKDGv3
 
         return instance
 
-    def get_steric_parameters(
-        self,
-        dummy_index: int,
-        attached_index: int,
-        excluded_indices: typing.Iterable[int] | None = None,
-    ) -> StericParameters:
+    def get_steric_parameters(self) -> StericParameters:
         """
         Get the steric paramters from STREUSEL_ radii.
-
-
-        Parameters:
-
-            dummy_index:
-                The index of the dummy atom.
-
-            attached_index:
-                The index of the attached atom of the substituent.
-
-            excluded_indices:
-                The indices of atoms which are not included in the
-                parameter calculation.
 
         Returns:
             The parameters.
@@ -279,14 +313,10 @@ rdkit.Chem.rdDistGeom.html#rdkit.Chem.rdDistGeom.ETKDGv3
         sterimol = morfeus.Sterimol(
             elements=self._atoms,
             coordinates=self._positions,
-            dummy_index=dummy_index + 1,
-            attached_index=attached_index + 1,
+            dummy_index=self._morfeus_dummy_index,
+            attached_index=self._morfeus_attached_index,
             radii=self._radii,
-            excluded_atoms=(
-                None
-                if excluded_indices is None
-                else [index + 1 for index in excluded_indices]
-            ),
+            excluded_atoms=self._morfeus_excluded_indices,
         )
         return StericParameters(
             L=sterimol.L_value,
