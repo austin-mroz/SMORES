@@ -94,12 +94,11 @@ def main() -> None:
                 )
 
                 smores_esp_molecule = smores.EspMolecule.from_cube_file(
-                    row.xyz_file.parent / "ESP.cube"
-                )
-                esp_smores_params = smores_esp_molecule.get_steric_parameters(
+                    path=row.xyz_file.parent / "ESP.cube",
                     dummy_index=row.dummy_index,
                     attached_index=row.attached_index,
                 )
+                esp_smores_params = smores_esp_molecule.get_steric_parameters()
                 writer.writerow(
                     {
                         "name": row.name,
