@@ -6,6 +6,7 @@ import numpy as np
 import numpy.typing as npt
 import rdkit.Chem.AllChem as rdkit
 
+from smores._internal.combine import Combination
 from smores._internal.constants import streusel_radii
 from smores._internal.steric_parameters import StericParameters
 
@@ -93,16 +94,71 @@ class Molecule:
         )
 
     def get_dummy_index(self) -> int:
+        """
+        Get the index of the dummy atom.
+
+        Returns:
+            The index of the dummy atom.
+
+        """
         return self._morfeus_dummy_index - 1
 
     def get_attached_index(self) -> int:
+        """
+        Get the index of the atom attached to the substituent.
+
+        Returns:
+            The index of the atom attached to the substituent.
+
+        """
         return self._morfeus_attached_index - 1
 
     def get_excluded_indices(self) -> typing.Iterable[int]:
+        """
+        Yield indices of atoms excluded from the parameter calculation.
+
+        Yields:
+            The index of an excluded atom.
+
+        """
         if self._morfeus_excluded_indices is None:
             return
         for index in self._morfeus_excluded_indices:
             yield index - 1
+
+    @classmethod
+    def from_combination(
+        cls,
+        combination: Combination,
+        radii: npt.ArrayLike | None = None,
+    ) -> "Molecule":
+        """
+        Get a molecule from a :class:`.Combination`.
+
+        The molecule will automatically use the dummy and attached
+        index defined in `combination` and set all the
+        :attr:`~.Combination.core_indices` as excluded indices.
+
+        Parameters:
+
+            combination:
+                A combination of a core and substituent molecule.
+
+            radii (list[float]):
+                The radius of each atom of the molecule. If
+                ``None`` the STREUSEL_ radii will be used.
+
+        Returns:
+            The molecule.
+
+        """
+        return cls.from_rdkit(
+            molecule=combination.product,
+            dummy_index=combination.dummy_index,
+            attached_index=combination.attached_index,
+            excluded_indices=combination.core_indices,
+            radii=radii,
+        )
 
     @classmethod
     def from_xyz_file(
@@ -165,6 +221,9 @@ class Molecule:
     def from_mol_file(
         cls,
         path: pathlib.Path | str,
+        dummy_index: int,
+        attached_index: int,
+        excluded_indices: typing.Iterable[int] | None = None,
         radii: npt.ArrayLike | None = None,
     ) -> "Molecule":
         """
@@ -174,6 +233,16 @@ class Molecule:
 
             path:
                 The path to the file.
+
+            dummy_index:
+                The index of the dummy atom.
+
+            attached_index:
+                The index of the attached atom of the substituent.
+
+            excluded_indices (list[int]):
+                The indices of atoms which are not included in the
+                parameter calculation.
 
             radii (list[float]):
                 The radius of each atom of the molecule. If
@@ -195,12 +264,22 @@ class Molecule:
             )
         else:
             instance._radii = np.array(radii)
+        instance._morfeus_dummy_index = dummy_index + 1
+        instance._morfeus_attached_index = attached_index + 1
+        instance._morfeus_excluded_indices = (
+            None
+            if excluded_indices is None
+            else tuple(index + 1 for index in excluded_indices)
+        )
         return instance
 
     @classmethod
     def from_smiles(
         cls,
         smiles: str,
+        dummy_index: int,
+        attached_index: int,
+        excluded_indices: typing.Iterable[int] | None = None,
         positions: npt.ArrayLike | None = None,
         radii: npt.ArrayLike | None = None,
     ) -> "Molecule":
@@ -211,6 +290,16 @@ class Molecule:
 
             smiles:
                 The SMILES of the molecule.
+
+            dummy_index:
+                The index of the dummy atom.
+
+            attached_index:
+                The index of the attached atom of the substituent.
+
+            excluded_indices (list[int]):
+                The indices of atoms which are not included in the
+                parameter calculation.
 
             positions (list[list[float]]):
                 The coordinates of each atom of the molecule
@@ -250,6 +339,13 @@ rdkit.Chem.rdDistGeom.html#rdkit.Chem.rdDistGeom.ETKDGv3
             )
         else:
             instance._radii = np.array(radii)
+        instance._morfeus_dummy_index = dummy_index + 1
+        instance._morfeus_attached_index = attached_index + 1
+        instance._morfeus_excluded_indices = (
+            None
+            if excluded_indices is None
+            else tuple(index + 1 for index in excluded_indices)
+        )
 
         return instance
 
@@ -257,6 +353,9 @@ rdkit.Chem.rdDistGeom.html#rdkit.Chem.rdDistGeom.ETKDGv3
     def from_rdkit(
         cls,
         molecule: rdkit.Mol,
+        dummy_index: int,
+        attached_index: int,
+        excluded_indices: typing.Iterable[int] | None = None,
         radii: npt.ArrayLike | None = None,
         conformer_id: int = 0,
     ) -> "Molecule":
@@ -268,6 +367,16 @@ rdkit.Chem.rdDistGeom.html#rdkit.Chem.rdDistGeom.ETKDGv3
             molecule:
                 The :mod:`rdkit` molecule. It must have at least
                 one conformer.
+
+            dummy_index:
+                The index of the dummy atom.
+
+            attached_index:
+                The index of the attached atom of the substituent.
+
+            excluded_indices (list[int]):
+                The indices of atoms which are not included in the
+                parameter calculation.
 
             radii (list[float]):
                 The radius of each atom of the molecule. If
@@ -296,6 +405,14 @@ rdkit.Chem.rdDistGeom.html#rdkit.Chem.rdDistGeom.ETKDGv3
             )
         else:
             instance._radii = np.array(radii)
+
+        instance._morfeus_dummy_index = dummy_index + 1
+        instance._morfeus_attached_index = attached_index + 1
+        instance._morfeus_excluded_indices = (
+            None
+            if excluded_indices is None
+            else tuple(index + 1 for index in excluded_indices)
+        )
 
         return instance
 
