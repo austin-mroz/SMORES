@@ -139,8 +139,7 @@ Plays nice with :mod:`rdkit`
 
   rdkit_molecule = rdkit.AddHs(rdkit.MolFromSmiles("CBr"))
   rdkit.EmbedMolecule(rdkit_molecule)  # Generate a 3-D structure.
-
-  smores_molecule = smores.Molecule.from_rdkit(rdkit_molecule)
+  smores_molecule = smores.Molecule.from_rdkit(rdkit_molecule, dummy_index=0, attached_index=1)
 
 
 and we provide a handy function for creating rdkit
@@ -165,7 +164,7 @@ for you, unlike RDKit_'s own `rdkit.MolFromSmiles`_ function.
 Quick comparison of substituents
 --------------------------------
 
-A very common workflow is to try different subsituents on a molecule
+A very common workflow is to try different substituents on a molecule
 and compare their steric parameters, so we wrote some code that lets
 you do this quick
 
@@ -181,22 +180,20 @@ you do this quick
     smores.rdkit_from_smiles("BrCCC"),
     smores.rdkit_from_smiles("BrCC(C)(C)C"),
   ]
-  for combo in smores.combine(cores, subsituents):
-      molecule = smores.Molecule.from_rdkit(combo.product)
-      params = molecule.get_steric_parameters(
-          dummy_index=combo.dummy_index,
-          attached_index=combo.attached_index,
-      )
+  for combo in smores.combine(cores, substituents):
+      molecule = smores.Molecule.from_combination(combo)
+      params = molecule.get_steric_parameters()
       print(
-          f"Combination of {rdkit.MolToSmiles(combo.core)} and "
-          f"{rdkit.MolToSmiles(combo.substituent)} "
+          f"Combination of {rdkit.MolToSmiles(rdkit.RemoveHs(combo.core))} and "
+          f"{rdkit.MolToSmiles(rdkit.RemoveHs(combo.substituent))} "
           f"has SMORES parameters of {params}."
       )
 
 
-Note that this code allows you to easily identify what the dummy
-and attachment atoms are, which can be a bit of a burden otherwise.
+.. testoutput:: substituent-comparison
 
+  Combination of Brc1ccccc1 and CCCBr has SMORES parameters of StericParameters(L=5.6397512133212935, B1=1.7820154803719914, B5=3.4938688496917782).
+  Combination of Brc1ccccc1 and CC(C)(C)CBr has SMORES parameters of StericParameters(L=5.668756954899209, B1=1.747631456476209, B5=4.532148595320116).
 
 .. seealso::
 
@@ -210,11 +207,24 @@ Using electrostatic potentials
 :mod:`smores` can also calculate the steric parameters using electrostatic
 potentials defined on a voxel grid
 
-.. testcode:: using-electrostatic-potentials
 
-  molecule = smores.EspMolecule.from_cube_file("my_molecule.cube")
-  params = molecule.get_steric_parameters(dummy_index=0, attached_index=1)
-  print(params.L, params.B1, params.B5)
+.. testcode:: using-electrostatic-potentials
+  :hide:
+
+  import smores
+
+
+.. doctest:: using-electrostatic-potentials
+
+  >>> import smores
+  >>> molecule = smores.EspMolecule.from_cube_file("HBr.cube", dummy_index=0, attached_index=1)
+  >>> molecule.get_steric_parameters()
+  StericParameters(L=3.57164113574581, B1=1.9730970556668774, B5=2.320611610648539)
+
+.. testcleanup:: using-electrostatic-potentials
+
+  import os
+
 
 
 .. seealso::
@@ -254,10 +264,12 @@ Calculating electrostatic potentials
       grid_length=10.,
       num_voxels_per_dimension=50,
   )
+  esp_molecule = smores.EspMolecule.from_cube_file("outdir/ESP.cube", dummy_index=0, attached_index=1)
 
-  esp_molecule = smores.EspMolecule.from_cube_file("outdir/ESP.cube")
-  params = esp_molecule.get_steric_parameters(dummy_index=0, attached_index=1)
-  print(params.L, params.B1, params.B5)
+.. doctest:: calculate-electrostatic-potential
+
+  >>> esp_molecule.get_steric_parameters()
+  StericParameters(L=3.57164113574581, B1=1.9730970556668774, B5=2.320611610648539)
 
 .. seealso::
 
