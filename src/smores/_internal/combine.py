@@ -15,6 +15,11 @@ def rdkit_from_smiles(smiles: str) -> rdkit.Mol:
     Returns:
         The :mod:`rdkit` molecule.
 
+    Examples:
+
+        *Create an rdkit molecule*
+
+
     """
 
     molecule = rdkit.AddHs(rdkit.MolFromSmiles(smiles))
@@ -25,6 +30,8 @@ def rdkit_from_smiles(smiles: str) -> rdkit.Mol:
 
 @dataclass
 class Combination:
+    """ """
+
     core: rdkit.Mol
     substituent: rdkit.Mol
     product: rdkit.Mol
@@ -40,6 +47,23 @@ def combine(
     join_atom: str = "Br",
     optimize: bool = True,
 ) -> typing.Iterator[Combination]:
+    """
+    Yield a set of molecules by combining `cores` with `substituents`.
+
+    Parameters:
+
+        cores (list[Mol]):
+
+        substituents (list[Mol]):
+
+        join_atom:
+
+        optimize:
+
+    Yield:
+
+
+    """
 
     for core, substituent in itertools.product(cores, substituents):
         core_bb = _get_building_block(core, join_atom)
