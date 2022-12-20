@@ -62,8 +62,8 @@ and then you load a molecule and calculate the steric parameters
 
 .. doctest:: quickstart
 
-  >>> molecule = smores.Molecule.from_smiles("CC")
-  >>> molecule.get_steric_parameters(dummy_index=0, attached_index=1)
+  >>> molecule = smores.Molecule.from_smiles("CC", dummy_index=0, attached_index=1)
+  >>> molecule.get_steric_parameters()
   StericParameters(L=3.57164113574581, B1=1.9730970556668774, B5=2.320611610648539)
 
 Which will calculate the parameters using the STREUSEL__ radii
@@ -88,27 +88,44 @@ Integration with machine learning workflows
 -------------------------------------------
 
 It doesn't take a lot of code to get :mod:`smores` working with a great
-library like sklearn_
+library like sklearn_! Here we calculate the steric parameters for a
+bunch of molecules with varying chain lengths and use them to predict
+their UFF energy.
 
 .. _sklearn: https://scikit-learn.org/stable/
 
 .. testcode:: ml-workflow
 
+  import rdkit.Chem.AllChem as rdkit
   import smores
-  import numpy as np
-  from glob import glob
-  from sklearn.tree import DecisionTreeClassifier
+  from sklearn.linear_model import LinearRegression
 
-  molecules = [smores.Molecule.from_xyz_file(path) for path in glob("*.xyz")]
+  def uff_energy(molecule):
+      rdkit.SanitizeMol(molecule)
+      return rdkit.UFFGetMoleculeForceField(molecule).CalcEnergy()
 
-  # An N x 3 array, where each row holds L, B1 and B2 of a given molecule.
-  X = np.array([list(mol.get_steric_parameters(0, 1)) for mol in molecules])
-  classifier = DecisionTreeClassifier()
-  classifier.fit(X, y)
-  classifier.predict(smores.Molecule.from_xyz_file("test.xyz"))
+  cores = [smores.rdkit_from_smiles("CBr")]
+  chains = ["C" * chain_length for chain_length in range(1, 50)]
+  substituents = [smores.rdkit_from_smiles("Br" + chain) for chain in chains]
 
+  X = []
+  y = []
+  for combo in smores.combine(cores, substituents):
+      molecule = smores.Molecule.from_combination(combo)
+      X.append(list(molecule.get_steric_parameters()))
+      y.append(uff_energy(combo.product))
+
+  reg = LinearRegression()
+  reg.fit(X, y)
+
+.. doctest:: ml-workflow
+
+  >>> reg.score(X, y)
+  0.8067966147933283
 
 We hope that's a useful jumping off point for some quick prototyping!
+We expect there are much more useful and interesting properties you can
+target.
 
 Plays nice with :mod:`rdkit`
 ----------------------------
