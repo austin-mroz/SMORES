@@ -37,11 +37,12 @@ def main() -> None:
 
         for row in tuple(_get_rows(args.input_file)):
 
-            smores_molecule = smores.Molecule.from_xyz_file(row.xyz_file)
-            smores_params = smores_molecule.get_steric_parameters(
+            smores_molecule = smores.Molecule.from_xyz_file(
+                path=row.xyz_file,
                 dummy_index=row.dummy_index,
                 attached_index=row.attached_index,
             )
+            smores_params = smores_molecule.get_steric_parameters()
             writer.writerow(
                 {
                     "name": row.name,

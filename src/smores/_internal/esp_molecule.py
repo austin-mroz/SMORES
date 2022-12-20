@@ -48,6 +48,8 @@ class EspMolecule:
         self,
         atoms: typing.Iterable[str],
         positions: npt.ArrayLike,
+        dummy_index: int,
+        attached_index: int,
         electrostatic_potential: VoxelGrid,
     ) -> None:
         """
@@ -62,6 +64,12 @@ class EspMolecule:
                 The coordinates of each atom of the molecule,
                 provided as an N x 3 matrix.
 
+            dummy_index:
+                The index of the dummy atom.
+
+            attached_index:
+                The index of the attached atom of the substituent.
+
             electrostatic_potential:
                 The electrostatic potential used for calculating
                 the steric parameters.
@@ -70,6 +78,8 @@ class EspMolecule:
 
         self._atoms = tuple(atoms)
         self._positions = np.array(positions)
+        self._dummy_index = dummy_index
+        self._attached_index = attached_index
 
         with tempfile.TemporaryDirectory() as tmp_dir:
             electrostatic_potential_file = pathlib.Path(tmp_dir) / "esp.cube"
@@ -97,21 +107,9 @@ class EspMolecule:
             voxel_origin=electrostatic_potential.voxel_origin,
         )
 
-    def get_steric_parameters(
-        self,
-        dummy_index: int,
-        attached_index: int,
-    ) -> StericParameters:
+    def get_steric_parameters(self) -> StericParameters:
         """
         Get the steric parameters from the electrostatic potential.
-
-        Parameters:
-
-            dummy_index:
-                The index of the dummy atom.
-
-            attached_index:
-                The index of the attached atom of the substituent.
 
         Returns:
             The parameters.
@@ -133,8 +131,8 @@ class EspMolecule:
 
             params = db.dbstep(
                 str(electric_field_surface_file),
-                atom1=dummy_index,
-                atom2=attached_index,
+                atom1=self._dummy_index,
+                atom2=self._attached_index,
                 surface="density",
                 sterimol=True,
                 quiet=True,
@@ -146,21 +144,58 @@ class EspMolecule:
             B5=params.Bmax,
         )
 
+    def get_dummy_index(self) -> int:
+        """
+        Get the index of the dummy atom.
+
+        Returns:
+            The index of the dummy atom.
+
+        """
+        return self._dummy_index
+
+    def get_attached_index(self) -> int:
+        """
+        Get the index of the atom attached to the substituent.
+
+        Returns:
+            The index of the atom attached to the substituent.
+
+        """
+        return self._attached_index
+
     @classmethod
-    def from_cube_file(cls, path: pathlib.Path | str) -> "EspMolecule":
+    def from_cube_file(
+        cls,
+        path: pathlib.Path | str,
+        dummy_index: int,
+        attached_index: int,
+    ) -> "EspMolecule":
         """
         Get a molecule from a ``.cube`` file.
 
         Parameters:
-            path: The path to the file.
+
+            path:
+                The path to the file.
+
+            dummy_index:
+                The index of the dummy atom.
+
+            attached_index:
+                The index of the attached atom of the substituent.
+
         Returns:
             The molecule.
+
         """
 
         instance = cls.__new__(cls)
         grid, atoms = ase.io.cube.read_cube_data(str(path))
         instance._atoms = atoms.get_atomic_numbers()
         instance._positions = atoms.positions / ase.units.Bohr
+        instance._dummy_index = dummy_index
+        instance._attached_index = attached_index
 
         streusel_molecule = streusel.gaussian_cube.Molecule(str(path))
 
