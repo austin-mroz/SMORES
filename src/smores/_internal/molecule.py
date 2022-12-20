@@ -22,13 +22,19 @@ class Molecule:
 
     Examples:
 
-        Using custom atomic radii
+        *Using custom atomic radii*
 
-        .. testcode:: custom-atomic-radii
+        If we want to use custom atomic radii, we can simply make use of the
+        `radii` parameter, where we provide the desired radius of each atom
 
-            import smores
-            molecule = smores.Molecule.from_smiles("CBr")
-            params = molecule.get_steric_parameters(0, 1)
+        .. doctest:: custom-atomic-radii
+
+            >>> import smores
+            >>> molecule = smores.Molecule.from_smiles("Cl", \
+dummy_index=0, attached_index=1, radii=[1.75, 1.2])
+            >>> molecule.get_steric_parameters()
+            StericParameters(L=3.57164113574581, \
+B1=1.9730970556668774, B5=2.320611610648539)
 
     """
 
