@@ -33,8 +33,8 @@ class EspMolecule:
         .. doctest:: esp-molecule-calculate-steric-parameters
 
             >>> import smores
-            >>> molecule = smores.EspMolecule.from_cube_file("HBr", dummy_index=0, \
-attached_index=1)
+            >>> molecule = smores.EspMolecule.from_cube_file("HBr", \
+dummy_index=0, attached_index=1)
             >>> molecule.get_steric_parameters()
             StericParameters(L=3.57164113574581, \
 B1=1.9730970556668774, B5=2.320611610648539)
