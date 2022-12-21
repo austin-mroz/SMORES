@@ -28,6 +28,7 @@ dev = [
   "build",
   "pip-tools",
   "scikit-learn",
+  "types-Pygments",
 ]
 
 
