@@ -14,7 +14,7 @@ Welcome to SMORES!
   Molecule <_autosummary/smores.Molecule>
   EspMolecule <_autosummary/smores.EspMolecule>
   combine <_autosummary/smores.combine>
-  Psi4 <_autosummary/smores.psi4>
+  psi4.calculate_electrostatic_potential <_autosummary/smores.psi4.calculate_electrostatic_potential>
   Modules <modules>
 
 GitHub: https://github.com/austin-mroz/SMORES
