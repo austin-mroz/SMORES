@@ -37,7 +37,7 @@ def optimize_geometry(
 
             import smores
             molecule = smores.rdkit_from_smiles("CBr")
-            optimized = smores.xtb.optimize_geometry(molecule, "CBr_xtb")
+            optimized = smores.xtb.optimize_geometry(molecule, "xtb_output")
 
     Parameters:
         molecule:

@@ -41,10 +41,26 @@ GitHub: https://github.com/austin-mroz/SMORES
 Installation
 ------------
 
-
 .. code-block:: bash
 
   pip install smores
+
+Getting help
+------------
+
+We want to make sure you're able to use :mod:`smores` to the
+fullest, and we recognize that not everyone who wishes to use
+:mod:`smores` is a confident programmer. As such, if you get
+stuck using our tool we encourage you to get in touch with us on
+Discord (`invite link`_), or by asking us in the `Q&A`_
+section. We're happy to help!
+
+If on the other hand you find an issue or bug with
+:mod:`smores` please let us know by making an issue_.
+
+.. _`invite link`: https://discord.gg/zbCUzuxe2B
+.. _`Q&A`: https://github.com/lukasturcani/stk/discussions/categories/q-a
+.. _issue: https://github.com/austin-mroz/SMORES/issues
 
 
 Quickstart
@@ -282,6 +298,36 @@ Calculating electrostatic potentials
 
 Optimizing molecules with xtb
 -----------------------------
+
+To make your experience using :mod:`smores` a little smoother, we
+provide a little helper function in case you want to optimize your
+structures using xtb_
+
+.. _xtb: https://github.com/grimme-lab/xtb
+
+.. testcode:: xtb-optimize-the-geometry-of-a-molecule
+  :hide:
+
+  import os
+  import tempfile
+  tmp_dir = tempfile.TemporaryDirectory()
+  os.chdir(tmp_dir.name)
+
+.. testcode:: xtb-optimize-the-geometry-of-a-molecule
+
+  import smores
+  molecule = smores.rdkit_from_smiles("CBr")
+  optimized = smores.xtb.optimize_geometry(molecule, "xtb_output")
+
+Whether this is necessary, we leave to your judgement, but it's
+here if you need it.
+
+.. note::
+
+ This example assumes that you have xtb available in your PATH.
+ If that's not the case, you can set the location of the
+ xtb binary using the `xtb_path` parameter. For more details,
+ see :func:`.xtb.optimize_geometry`.
 
 .. seealso::
 
