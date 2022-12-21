@@ -7,6 +7,7 @@ import ase.io.cube
 import dbstep.Dbstep as db
 import numpy as np
 import numpy.typing as npt
+import rdkit.Chem.AllChem as rdkit
 import streusel.gaussian_cube
 
 from smores._internal.steric_parameters import StericParameters
@@ -27,19 +28,16 @@ class EspMolecule:
 
     Examples:
 
-        .. testcode:: get-steric-parameters
+        *Calculate steric parameters*
 
-            import smores
+        .. doctest:: esp-molecule-calculate-steric-parameters
 
-            molecule = smores.EspMolecule(
-                atoms=["H", "Br"],
-                positions=[[0., 0., 0.], [1.47, 0., 0.]]
-                electrostatic_potential=smores.ElectrostaticPotentialGrid(
-                    grid=
-                    voxel_size=
-                ),
-            )
-            params = molecule.get_steric_parameters()
+            >>> import smores
+            >>> molecule = smores.EspMolecule.from_cube_file("HBr", \
+dummy_index=0, attached_index=1)
+            >>> molecule.get_steric_parameters()
+            StericParameters(L=3.57164113574581, \
+B1=1.9730970556668774, B5=2.320611610648539)
 
 
     """
@@ -206,6 +204,50 @@ class EspMolecule:
         )
 
         return instance
+
+    @classmethod
+    def from_rdkit(
+        cls,
+        molecule: rdkit.Mol,
+        dummy_index: int,
+        attached_index: int,
+        electrostatic_potential: VoxelGrid,
+        conformer_id: int = 0,
+    ) -> "EspMolecule":
+        """
+        Get a molecule from an :mod:`rdkit` molecule.
+
+        Parameters:
+
+            molecule:
+                The :mod:`rdkit` molecule. It must have at least
+                one conformer.
+
+            dummy_index:
+                The index of the dummy atom.
+
+            attached_index:
+                The index of the attached atom of the substituent.
+
+            electrostatic_potential:
+                The electrostatic potential used for calculating
+                the steric parameters.
+
+            conformer_id:
+                The id of the conformer to use.
+
+        Returns:
+            The :mod:`smores` molecule.
+
+        """
+
+        return cls(
+            atoms=(atom.GetSymbol() for atom in molecule.GetAtoms()),
+            positions=molecule.GetConformer(conformer_id).GetPositions(),
+            dummy_index=dummy_index,
+            attached_index=attached_index,
+            electrostatic_potential=electrostatic_potential,
+        )
 
 
 def _get_electric_field_surface(

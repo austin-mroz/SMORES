@@ -3,6 +3,11 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+import pathlib
+import sys
+
+sys.path.append(str(pathlib.Path(__file__).absolute().parent / "ext"))
+
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
@@ -73,5 +78,5 @@ html_theme_options = {
 }
 html_static_path = ["_static"]
 
-pygments_style = "dracula"
-pygments_dark_style = "dracula"
+pygments_style = "custom_dracula.CustomDraculaStyle"
+pygments_dark_style = "custom_dracula.CustomDraculaStyle"
