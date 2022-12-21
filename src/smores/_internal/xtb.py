@@ -24,6 +24,15 @@ def optimize_geometry(
 
         *Optimize the geometry of a molecule*
 
+
+        .. testcode:: optimize-the-geometry-of-a-molecule
+            :hide:
+
+            import os
+            import tempfile
+            tmp_dir = tempfile.TemporaryDirectory()
+            os.chdir(tmp_dir.name)
+
         .. testcode:: optimize-the-geometry-of-a-molecule
 
             import smores
@@ -49,7 +58,7 @@ def optimize_geometry(
     rdkit.MolToXYZFile(molecule, xyz_path)
 
     with current_working_directory(output_directory):
-        subprocess.run(
+        process = subprocess.run(
             [
                 str(xtb_path),
                 xyz_path,
@@ -57,6 +66,23 @@ def optimize_geometry(
                 level,
             ],
             check=True,
+            capture_output=True,
+            text=True,
         )
 
-    return rdkit.MolFromXYZFile(str(output_directory / "xtbopt.xyz"))
+    with open(output_directory / "xtb.stdout", "x") as f:
+        f.write(process.stdout)
+
+    with open(output_directory / "xtb.stderr", "x") as f:
+        f.write(process.stderr)
+
+    bondless_optimized = rdkit.MolFromXYZFile(
+        str(output_directory / "xtbopt.xyz")
+    )
+    optimized = rdkit.Mol(molecule)
+    optimized_conformer = optimized.GetConformer()
+    for atom_id, position in enumerate(
+        bondless_optimized.GetConformer().GetPositions()
+    ):
+        optimized_conformer.SetAtomPosition(atom_id, position)
+    return optimized
