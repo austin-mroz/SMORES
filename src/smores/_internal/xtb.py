@@ -10,12 +10,25 @@ def optimize_geometry(
     molecule: rdkit.Mol,
     output_directory: pathlib.Path | str,
     level: str = "extreme",
+    xtb_path: pathlib.Path | str = "xtb",
 ) -> rdkit.Mol:
     """
     Optimize the geometry of a molecule.
 
+    .. warning::
+
+        xtb will not work if you have an activate Python environment
+        in which ``psi4`` is installed.
+
     Examples:
+
         *Optimize the geometry of a molecule*
+
+        .. testcode:: optimize-the-geometry-of-a-molecule
+
+            import smores
+            molecule = smores.rdkit_from_smiles("CBr")
+            optimized = smores.xtb.optimize_geometry(molecule, "CBr_xtb")
 
     Parameters:
         molecule:
@@ -24,6 +37,8 @@ def optimize_geometry(
             The directory in which xtb places its files.
         level:
             The optimization level. Passed directly to xtb.
+        xtb_path:
+            The path to the xtb binary.
     Returns:
         The optimized molecule.
 
@@ -36,7 +51,7 @@ def optimize_geometry(
     with current_working_directory(output_directory):
         subprocess.run(
             [
-                "xtb",
+                str(xtb_path),
                 xyz_path,
                 "--opt",
                 level,
