@@ -261,14 +261,14 @@ Calculating electrostatic potentials
   import smores
   import smores.psi4
 
-  smores.psi4.calculate_electrostatic_potential(
+  cube_path = smores.psi4.calculate_electrostatic_potential(
       molecule=smores.rdkit_from_smiles("Br"),
       output_directory="outdir",
       grid_origin=(-3., -3., -3.),
       grid_length=10.,
       num_voxels_per_dimension=20,
   )
-  esp_molecule = smores.EspMolecule.from_cube_file("outdir/ESP.cube", dummy_index=0, attached_index=1)
+  esp_molecule = smores.EspMolecule.from_cube_file(cube_path, dummy_index=0, attached_index=1)
 
 .. doctest:: calculate-electrostatic-potential
 
