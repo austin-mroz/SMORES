@@ -70,19 +70,14 @@ def optimize_geometry(
             text=True,
         )
 
-    with open(output_directory / "xtb.stdout", "x") as f:
+    with open(output_directory / "xtb.stdout", "w") as f:
         f.write(process.stdout)
 
-    with open(output_directory / "xtb.stderr", "x") as f:
+    with open(output_directory / "xtb.stderr", "w") as f:
         f.write(process.stderr)
 
-    bondless_optimized = rdkit.MolFromXYZFile(
-        str(output_directory / "xtbopt.xyz")
-    )
+    xtb_molecule = rdkit.MolFromXYZFile(str(output_directory / "xtbopt.xyz"))
     optimized = rdkit.Mol(molecule)
-    optimized_conformer = optimized.GetConformer()
-    for atom_id, position in enumerate(
-        bondless_optimized.GetConformer().GetPositions()
-    ):
-        optimized_conformer.SetAtomPosition(atom_id, position)
+    optimized.RemoveConformer(0)
+    optimized.AddConformer(xtb_molecule.GetConformer())
     return optimized

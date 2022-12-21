@@ -278,4 +278,11 @@ Calculating electrostatic potentials
 
 .. seealso::
 
-   * :func:`.calculate_electrostatic_potential`: For configuration options.
+   * :func:`.psi4.calculate_electrostatic_potential`: For configuration options.
+
+Optimizing molecules with xtb
+-----------------------------
+
+.. seealso::
+
+   * :func:`.xtb.optimize_geometry`: For configuration options.
