@@ -24,6 +24,9 @@ def optimize_geometry(
 
         *Optimize the geometry of a molecule*
 
+        The values of the calculated steric parameters depend on the
+        geometry of the molecule. As a result, you might want to optimize
+        the geometry, for example using xtb_
 
         .. testcode:: optimize-the-geometry-of-a-molecule
             :hide:
@@ -33,11 +36,17 @@ def optimize_geometry(
             tmp_dir = tempfile.TemporaryDirectory()
             os.chdir(tmp_dir.name)
 
-        .. testcode:: optimize-the-geometry-of-a-molecule
+        .. doctest:: optimize-the-geometry-of-a-molecule
 
-            import smores
-            molecule = smores.rdkit_from_smiles("CBr")
-            optimized = smores.xtb.optimize_geometry(molecule, "xtb_output")
+            >>> import smores
+            >>> molecule = smores.rdkit_from_smiles("CBr")
+            >>> optimized = smores.xtb.optimize_geometry(molecule, \
+"xtb_output")
+            >>> smores_molecule = smores.Molecule.from_rdkit(optimized, \
+dummy_index=0, attached_index=1)
+            >>> smores_molecule.get_steric_parameters()
+            StericParameters(L=3.57164113574581, B1=1.9730970556668774, \
+B5=2.320611610648539)
 
     Parameters:
         molecule:
@@ -50,6 +59,8 @@ def optimize_geometry(
             The path to the xtb binary.
     Returns:
         The optimized molecule.
+
+    .. _xtb: https://github.com/grimme-lab/xtb
 
     """
     output_directory = pathlib.Path(output_directory)

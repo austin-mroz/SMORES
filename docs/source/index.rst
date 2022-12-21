@@ -299,9 +299,17 @@ Calculating electrostatic potentials
 Optimizing molecules with xtb
 -----------------------------
 
-To make your experience using :mod:`smores` a little smoother, we
-provide a little helper function in case you want to optimize your
-structures using xtb_
+The values of the calculated steric parameters depend on the
+geometry of the molecule. There are many different ways to
+determine the geometry of a molecule. It may well be that the
+structure returned by :func:`.rdkit_from_smiles` is suitable
+for your purposes.
+
+However, if that's not the case, you may want to optimize the
+geometry yourself. To make your experience using
+:mod:`smores` a little smoother, we provide a little helper
+function in case you want to optimize your structures
+using xtb_
 
 .. _xtb: https://github.com/grimme-lab/xtb
 
@@ -313,13 +321,16 @@ structures using xtb_
   tmp_dir = tempfile.TemporaryDirectory()
   os.chdir(tmp_dir.name)
 
-.. testcode:: xtb-optimize-the-geometry-of-a-molecule
+.. doctest:: xtb-optimize-the-geometry-of-a-molecule
 
-  import smores
-  molecule = smores.rdkit_from_smiles("CBr")
-  optimized = smores.xtb.optimize_geometry(molecule, "xtb_output")
+  >>> import smores
+  >>> molecule = smores.rdkit_from_smiles("CBr")
+  >>> optimized = smores.xtb.optimize_geometry(molecule, "xtb_output")
+  >>> smores_molecule = smores.Molecule.from_rdkit(optimized, dummy_index=0, attached_index=1)
+  >>> smores_molecule.get_steric_parameters()
+  StericParameters(L=3.57164113574581, B1=1.9730970556668774, B5=2.320611610648539)
 
-Whether this is necessary, we leave to your judgement, but it's
+Whether this is necessary or desirable, we leave to your judgement, but it's
 here if you need it.
 
 .. note::
