@@ -77,25 +77,6 @@ def combine(
     The function produces every possible pairwise combination of
     `cores` and `substituents`.
 
-    Parameters:
-
-        cores (list[Mol]):
-            The core molecules.
-
-        substituents (list[Mol]):
-            The substituent molecules.
-
-        join_atom:
-            The atom in `cores` and `substituents` which specifies
-            the location where they are joined.
-
-        optimize:
-            If ``True``, the generated molecules will have an optimized
-            structure generated with ETKDG_.
-
-    Yield:
-        A combination of a core and substituent molecule.
-
     Examples:
 
         *Compare the steric parameters of various substituents*
@@ -131,6 +112,24 @@ B5=3.430948246451143).
 StericParameters(L=6.713047422661813, B1=1.7856585950046786, \
 B5=3.5556262756974535).
 
+    Parameters:
+
+        cores (list[Mol]):
+            The core molecules.
+
+        substituents (list[Mol]):
+            The substituent molecules.
+
+        join_atom:
+            The atom in `cores` and `substituents` which specifies
+            the location where they are joined.
+
+        optimize:
+            If ``True``, the generated molecules will have an optimized
+            structure generated with ETKDG_.
+
+    Yield:
+        A combination of a core and substituent molecule.
 
     .. _ETKDG: https://www.rdkit.org/docs/source/\
 rdkit.Chem.rdDistGeom.html#rdkit.Chem.rdDistGeom.ETKDGv3
