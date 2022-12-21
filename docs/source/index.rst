@@ -214,7 +214,8 @@ potentials defined on a voxel grid
 
   import os
   import tempfile
-  os.chdir(tempfile.TemporaryDirectory())
+  tmp_dir = tempfile.TemporaryDirectory()
+  os.chdir(tmp_dir.name)
 
 .. doctest:: using-electrostatic-potentials
 
@@ -252,7 +253,8 @@ Calculating electrostatic potentials
 
   import os
   import tempfile
-  os.chdir(tempfile.TemporaryDirectory())
+  tmp_dir = tempfile.TemporaryDirectory()
+  os.chdir(tmp_dir.name)
 
 .. testcode:: calculate-electrostatic-potential
 
