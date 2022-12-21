@@ -15,6 +15,7 @@ Welcome to SMORES!
   EspMolecule <_autosummary/smores.EspMolecule>
   combine <_autosummary/smores.combine>
   psi4.calculate_electrostatic_potential <_autosummary/smores.psi4.calculate_electrostatic_potential>
+  xtb.optimize_geometry <_autosummary/smores.xtb.optimize_geometry>
   Modules <modules>
 
 GitHub: https://github.com/austin-mroz/SMORES

@@ -10,9 +10,22 @@ def optimize_geometry(
     molecule: rdkit.Mol,
     output_directory: pathlib.Path | str,
     level: str = "extreme",
-) -> pathlib.Path:
+) -> rdkit.Mol:
     """
     Optimize the geometry of a molecule.
+
+    Examples:
+        *Optimize the geometry of a molecule*
+
+    Parameters:
+        molecule:
+            The molecule to optimize.
+        output_directory:
+            The directory in which xtb places its files.
+        level:
+            The optimization level. Passed directly to xtb.
+    Returns:
+        The optimized molecule.
 
     """
     output_directory = pathlib.Path(output_directory)
