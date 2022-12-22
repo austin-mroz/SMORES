@@ -12,3 +12,4 @@ docs/source/_autosummary
 docker_testing_environment/requirements.txt
 dist
 validation/steric_parameter_distribution_plotting/plots
+build
