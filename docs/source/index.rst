@@ -13,6 +13,7 @@ Welcome to SMORES!
 
   Molecule <_autosummary/smores.Molecule>
   EspMolecule <_autosummary/smores.EspMolecule>
+  rdkit_from_smiles <_autosummary/smores.rdkit_from_smiles>
   combine <_autosummary/smores.combine>
   psi4.calculate_electrostatic_potential <_autosummary/smores.psi4.calculate_electrostatic_potential>
   xtb.optimize_geometry <_autosummary/smores.xtb.optimize_geometry>

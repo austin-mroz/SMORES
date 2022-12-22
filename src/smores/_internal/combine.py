@@ -10,11 +10,6 @@ def rdkit_from_smiles(smiles: str) -> rdkit.Mol:
     """
     Get an embeded :mod:`rdkit` molecule from SMILES.
 
-    Parameters:
-        smiles: The SMILES of the molecule.
-    Returns:
-        The :mod:`rdkit` molecule.
-
     Examples:
 
         *Create an rdkit molecule*
@@ -26,6 +21,11 @@ def rdkit_from_smiles(smiles: str) -> rdkit.Mol:
             >>> import rdkit.Chem.AllChem as rdkit
             >>> rdkit.MolToSmiles(molecule)
             '[H]Br'
+
+    Parameters:
+        smiles: The SMILES of the molecule.
+    Returns:
+        The :mod:`rdkit` molecule.
 
     """
 
