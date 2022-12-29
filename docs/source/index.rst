@@ -60,7 +60,7 @@ If on the other hand you find an issue or bug with
 :mod:`smores` please let us know by making an issue_.
 
 .. _`invite link`: https://discord.gg/zbCUzuxe2B
-.. _`Q&A`: https://github.com/lukasturcani/stk/discussions/categories/q-a
+.. _`Q&A`: https://github.com/austin-mroz/SMORES/discussions/categories/q-a
 .. _issue: https://github.com/austin-mroz/SMORES/issues
 
 
