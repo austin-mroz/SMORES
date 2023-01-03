@@ -15,6 +15,7 @@ class StericParameterFit:
     L_coefficient: float | None
     B1_coefficient: float | None
     B5_coefficient: float | None
+    intercept: float
     r_squared: float
     results: pd.DataFrame
 
@@ -24,6 +25,7 @@ class ResultsTable:
         self.L_coefficients: list[float | None] = []
         self.B1_coefficients: list[float | None] = []
         self.B5_coefficients: list[float | None] = []
+        self.intercepts: list[float] = []
         self.r_squareds: list[float] = []
         self.reactions: list[str] = []
         self.radii_types: list[str] = []
@@ -37,6 +39,7 @@ class ResultsTable:
         self.L_coefficients.append(steric_parameter_fit.L_coefficient)
         self.B1_coefficients.append(steric_parameter_fit.B1_coefficient)
         self.B5_coefficients.append(steric_parameter_fit.B5_coefficient)
+        self.intercepts.append(steric_parameter_fit.intercept)
         self.r_squareds.append(steric_parameter_fit.r_squared)
         self.reactions.append(reaction)
         self.radii_types.append(radii_type)
@@ -91,6 +94,7 @@ def main() -> None:
             "L_coefficient": results_table.L_coefficients,
             "B1_coefficient": results_table.B1_coefficients,
             "B5_coefficient": results_table.B5_coefficients,
+            "intercept": results_table.intercepts,
         },
     ).sort_values(
         by=["reaction", "radii_type", "r_squared"],
@@ -138,6 +142,7 @@ def _fit_steric_parameters(
             L_coefficient=coefficients.get("L"),
             B1_coefficient=coefficients.get("B1"),
             B5_coefficient=coefficients.get("B5"),
+            intercept=ols_fit.intercept_,
             r_squared=ols_fit.score(X, y),
             results=pd.merge(
                 left=data_frame,
