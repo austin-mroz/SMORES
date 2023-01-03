@@ -82,7 +82,7 @@ def _calculate_electrostatic_potentials(
                     output_directory=calculation_directory,
                     grid_origin=(-10, -10, -10),
                     grid_length=20.0,
-                    num_voxels_per_dimension=100,
+                    num_voxels_per_dimension=50,
                     optimize=False,
                     num_threads=20,
                 )
