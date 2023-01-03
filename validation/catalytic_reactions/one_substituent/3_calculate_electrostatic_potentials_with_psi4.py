@@ -80,9 +80,9 @@ def _calculate_electrostatic_potentials(
                 smores.psi4.calculate_electrostatic_potential(
                     molecule=molecule,
                     output_directory=calculation_directory,
-                    grid_origin=(-5, -5, -5),
-                    grid_length=10.0,
-                    num_voxels_per_dimension=50,
+                    grid_origin=(-10, -10, -10),
+                    grid_length=20.0,
+                    num_voxels_per_dimension=100,
                     optimize=False,
                     num_threads=20,
                 )
