@@ -41,11 +41,12 @@ def main() -> None:
 
             for row in tuple(_get_rows(catalyst_input_file)):
 
-                smores_molecule = smores.Molecule.from_xyz_file(row.xyz_file)
-                smores_params = smores_molecule.get_steric_parameters(
+                smores_molecule = smores.Molecule.from_xyz_file(
+                    path=row.xyz_file,
                     dummy_index=row.dummy_index,
                     attached_index=row.attached_index,
                 )
+                smores_params = smores_molecule.get_steric_parameters()
                 writer.writerow(
                     {
                         "name": row.name,
@@ -66,12 +67,14 @@ def main() -> None:
                 with open(row.fragments_file) as f:
                     core_indices = json.load(f)["core_indices"]
 
+                smores_core_excluded_molecule = smores.Molecule.from_xyz_file(
+                    path=row.xyz_file,
+                    dummy_index=row.dummy_index,
+                    attached_index=row.attached_index,
+                    excluded_indices=core_indices,
+                )
                 smores_core_excluded_params = (
-                    smores_molecule.get_steric_parameters(
-                        dummy_index=row.dummy_index,
-                        attached_index=row.attached_index,
-                        excluded_indices=core_indices,
-                    )
+                    smores_core_excluded_molecule.get_steric_parameters()
                 )
                 writer.writerow(
                     {
@@ -91,12 +94,11 @@ def main() -> None:
                 )
 
                 smores_esp_molecule = smores.EspMolecule.from_cube_file(
-                    row.xyz_file.parent / "ESP.cube"
-                )
-                esp_smores_params = smores_esp_molecule.get_steric_parameters(
+                    path=row.xyz_file.parent / "ESP.cube",
                     dummy_index=row.dummy_index,
                     attached_index=row.attached_index,
                 )
+                esp_smores_params = smores_esp_molecule.get_steric_parameters()
                 writer.writerow(
                     {
                         "name": row.name,

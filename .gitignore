@@ -7,8 +7,9 @@ method_tests/efield_generation/res_check
 timer.dat
 docs/build
 docs/source/_autosummary
-.coverage
+/.coverage
 **/dbstep_sanity_check/data
 docker_testing_environment/requirements.txt
-dist
 validation/steric_parameter_distribution_plotting/plots
+/dist
+/build

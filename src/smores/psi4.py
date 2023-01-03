@@ -1,7 +1,6 @@
 """
 This module provides utility functions for using Psi4.
 
-
 """
 
 

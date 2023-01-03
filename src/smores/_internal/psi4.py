@@ -142,9 +142,36 @@ def calculate_electrostatic_potential(
     num_threads: int | None = None,
     optimize: bool = False,
     conformer_id: int = 0,
-) -> None:
+) -> pathlib.Path:
     """
     Calculate the electrostatic potential.
+
+    Examples:
+
+        *Calculate the steric parameters from a cube file*
+
+        .. testcode:: calculate-steric-parameters-from-cube-file
+
+            import smores
+            import smores.psi4
+
+            molecule = smores.rdkit_from_smiles("Br")
+            cube_path = smores.psi4.calculate_electrostatic_potential(
+                molecule=molecule,
+                output_directory="HBr_ESP",
+                grid_origin=(-10, -10, -10),
+                grid_length=20,
+                num_voxels_per_dimension=50,
+            )
+            esp_molecule = smores.EspMolecule.from_cube_file(cube_path, \
+dummy_index=0, attached_index=1)
+
+        .. doctest:: calculate-steric-parameters-from-cube-file
+
+            >>> esp_molecule.get_steric_parameters()
+            StericParameters(L=3.57164113574581, \
+B1=1.9730970556668774, B5=2.320611610648539)
+
 
     Parameters:
 
@@ -175,9 +202,9 @@ def calculate_electrostatic_potential(
         conformer_id:
             The conformer of `molecule` to use.
 
-    Examples:
-
-        See :mod:`smores.psi4`.
+    Returns:
+        The path to the ``.cube`` file holding the electrostatic
+        potential of `molecule`.
 
     """
 
@@ -239,6 +266,7 @@ def calculate_electrostatic_potential(
             return_wfn=True,
         )
         psi4.cubeprop(wfn)
+        return output_directory / "ESP.cube"
 
 
 def _generate_voxel_grid(

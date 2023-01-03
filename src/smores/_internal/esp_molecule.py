@@ -7,6 +7,7 @@ from collections import abc
 import dbstep.Dbstep as db
 import numpy as np
 import numpy.typing as npt
+import rdkit.Chem.AllChem as rdkit
 import streusel.gaussian_cube
 
 from smores._internal.read_cube import read_cube
@@ -28,19 +29,16 @@ class EspMolecule:
 
     Examples:
 
-        .. testcode:: get-steric-parameters
+        *Calculate steric parameters*
 
-            import smores
+        .. doctest:: esp-molecule-calculate-steric-parameters
 
-            molecule = smores.EspMolecule(
-                atoms=["H", "Br"],
-                positions=[[0., 0., 0.], [1.47, 0., 0.]]
-                electrostatic_potential=smores.ElectrostaticPotentialGrid(
-                    grid=
-                    voxel_size=
-                ),
-            )
-            params = molecule.get_steric_parameters()
+            >>> import smores
+            >>> molecule = smores.EspMolecule.from_cube_file("HBr", \
+dummy_index=0, attached_index=1)
+            >>> molecule.get_steric_parameters()
+            StericParameters(L=3.57164113574581, \
+B1=1.9730970556668774, B5=2.320611610648539)
 
 
     """
@@ -49,6 +47,8 @@ class EspMolecule:
         self,
         atoms: typing.Iterable[int],
         positions: npt.ArrayLike,
+        dummy_index: int,
+        attached_index: int,
         electrostatic_potential: VoxelGrid,
     ) -> None:
         """
@@ -63,6 +63,12 @@ class EspMolecule:
                 The coordinates of each atom of the molecule,
                 provided as an N x 3 matrix.
 
+            dummy_index:
+                The index of the dummy atom.
+
+            attached_index:
+                The index of the attached atom of the substituent.
+
             electrostatic_potential:
                 The electrostatic potential used for calculating
                 the steric parameters.
@@ -71,6 +77,8 @@ class EspMolecule:
 
         self._atoms: abc.Collection = tuple(atoms)
         self._positions = np.array(positions)
+        self._dummy_index = dummy_index
+        self._attached_index = attached_index
 
         with tempfile.TemporaryDirectory() as tmp_dir:
             electrostatic_potential_file = pathlib.Path(tmp_dir) / "esp.cube"
@@ -102,21 +110,9 @@ class EspMolecule:
             voxel_z_vector=electrostatic_potential.voxel_z_vector,
         )
 
-    def get_steric_parameters(
-        self,
-        dummy_index: int,
-        attached_index: int,
-    ) -> StericParameters:
+    def get_steric_parameters(self) -> StericParameters:
         """
         Get the steric parameters from the electrostatic potential.
-
-        Parameters:
-
-            dummy_index:
-                The index of the dummy atom.
-
-            attached_index:
-                The index of the attached atom of the substituent.
 
         Returns:
             The parameters.
@@ -144,8 +140,8 @@ class EspMolecule:
 
             params = db.dbstep(
                 str(electric_field_surface_file),
-                atom1=dummy_index,
-                atom2=attached_index,
+                atom1=self._dummy_index,
+                atom2=self._attached_index,
                 surface="density",
                 sterimol=True,
                 quiet=True,
@@ -157,21 +153,60 @@ class EspMolecule:
             B5=params.Bmax,
         )
 
+    def get_dummy_index(self) -> int:
+        """
+        Get the index of the dummy atom.
+
+        Returns:
+            The index of the dummy atom.
+
+        """
+        return self._dummy_index
+
+    def get_attached_index(self) -> int:
+        """
+        Get the index of the atom attached to the substituent.
+
+        Returns:
+            The index of the atom attached to the substituent.
+
+        """
+        return self._attached_index
+
     @classmethod
-    def from_cube_file(cls, path: pathlib.Path | str) -> "EspMolecule":
+    def from_cube_file(
+        cls,
+        path: pathlib.Path | str,
+        dummy_index: int,
+        attached_index: int,
+    ) -> "EspMolecule":
         """
         Get a molecule from a ``.cube`` file.
 
         Parameters:
-            path: The path to the file.
+
+            path:
+                The path to the file.
+
+            dummy_index:
+                The index of the dummy atom.
+
+            attached_index:
+                The index of the attached atom of the substituent.
+
         Returns:
             The molecule.
+
         """
 
         instance = cls.__new__(cls)
-        cube_data = read_cube(pathlib.Path(path))
-        instance._atoms = cube_data.atomic_numbers
-        instance._positions = np.array(cube_data.positions)
+
+        grid, atoms = ase.io.cube.read_cube_data(str(path))
+        instance._atoms = atoms.get_atomic_numbers()
+        instance._positions = atoms.positions / ase.units.Bohr
+        instance._dummy_index = dummy_index
+        instance._attached_index = attached_index
+
         streusel_molecule = streusel.gaussian_cube.Molecule(str(path))
 
         instance._electric_field_surface = VoxelGrid(
@@ -183,6 +218,50 @@ class EspMolecule:
         )
 
         return instance
+
+    @classmethod
+    def from_rdkit(
+        cls,
+        molecule: rdkit.Mol,
+        dummy_index: int,
+        attached_index: int,
+        electrostatic_potential: VoxelGrid,
+        conformer_id: int = 0,
+    ) -> "EspMolecule":
+        """
+        Get a molecule from an :mod:`rdkit` molecule.
+
+        Parameters:
+
+            molecule:
+                The :mod:`rdkit` molecule. It must have at least
+                one conformer.
+
+            dummy_index:
+                The index of the dummy atom.
+
+            attached_index:
+                The index of the attached atom of the substituent.
+
+            electrostatic_potential:
+                The electrostatic potential used for calculating
+                the steric parameters.
+
+            conformer_id:
+                The id of the conformer to use.
+
+        Returns:
+            The :mod:`smores` molecule.
+
+        """
+
+        return cls(
+            atoms=(atom.GetSymbol() for atom in molecule.GetAtoms()),
+            positions=molecule.GetConformer(conformer_id).GetPositions(),
+            dummy_index=dummy_index,
+            attached_index=attached_index,
+            electrostatic_potential=electrostatic_potential,
+        )
 
 
 def _get_electric_field_surface(

@@ -13,8 +13,10 @@ Welcome to SMORES!
 
   Molecule <_autosummary/smores.Molecule>
   EspMolecule <_autosummary/smores.EspMolecule>
+  rdkit_from_smiles <_autosummary/smores.rdkit_from_smiles>
   combine <_autosummary/smores.combine>
-  Psi4 <_autosummary/smores.psi4>
+  psi4.calculate_electrostatic_potential <_autosummary/smores.psi4.calculate_electrostatic_potential>
+  xtb.optimize_geometry <_autosummary/smores.xtb.optimize_geometry>
   Modules <modules>
 
 GitHub: https://github.com/austin-mroz/SMORES
@@ -40,10 +42,26 @@ GitHub: https://github.com/austin-mroz/SMORES
 Installation
 ------------
 
-
 .. code-block:: bash
 
   pip install smores
+
+Getting help
+------------
+
+We want to make sure you're able to use :mod:`smores` to the
+fullest, and we recognize that not everyone who wishes to use
+:mod:`smores` is a confident programmer. As such, if you get
+stuck using our tool we encourage you to get in touch with us on
+Discord (`invite link`_), or by asking us in the `Q&A`_
+section. We're happy to help!
+
+If on the other hand you find an issue or bug with
+:mod:`smores` please let us know by making an issue_.
+
+.. _`invite link`: https://discord.gg/zbCUzuxe2B
+.. _`Q&A`: https://github.com/austin-mroz/SMORES/discussions/categories/q-a
+.. _issue: https://github.com/austin-mroz/SMORES/issues
 
 
 Quickstart
@@ -53,22 +71,18 @@ Getting started with :mod:`smores` is really simple!
 
 You start with
 
-.. testcode:: quickstart
+.. doctest:: quickstart
 
-  import smores
+  >>> import smores
 
 and then you load a molecule and calculate the steric parameters
 
 
-.. testcode:: quickstart
+.. doctest:: quickstart
 
-  molecule = smores.Molecule.from_smiles("CC")
-  molecule.get_steric_parameters(dummy_index=0, attached_index=1)
-
-.. testoutput::
-
+  >>> molecule = smores.Molecule.from_smiles("CC", dummy_index=0, attached_index=1)
+  >>> molecule.get_steric_parameters()
   StericParameters(L=3.57164113574581, B1=1.9730970556668774, B5=2.320611610648539)
-
 
 Which will calculate the parameters using the STREUSEL__ radii
 of the atoms.
@@ -92,48 +106,64 @@ Integration with machine learning workflows
 -------------------------------------------
 
 It doesn't take a lot of code to get :mod:`smores` working with a great
-library like sklearn_
+library like sklearn_! Here we calculate the steric parameters for a
+bunch of molecules with varying chain lengths and use them to predict
+their UFF energy.
 
 .. _sklearn: https://scikit-learn.org/stable/
 
 .. testcode:: ml-workflow
 
+  import rdkit.Chem.AllChem as rdkit
   import smores
-  import sklearn
-  from glob import glob
+  from sklearn.linear_model import LinearRegression
 
-  molecules = [smores.Molecule.from_xyz_file(path) for path in glob("*.xyz")]
+  def uff_energy(molecule):
+      rdkit.SanitizeMol(molecule)
+      return rdkit.UFFGetMoleculeForceField(molecule).CalcEnergy()
 
-  # An N x 3 array, where each row holds L, B1 and B2 of a given molecule.
-  params = np.array([list(mol.get_steric_parameters(0, 1)) for mol in molecules])
+  cores = [smores.rdkit_from_smiles("CBr")]
+  chains = ["C" * chain_length for chain_length in range(1, 50)]
+  substituents = [smores.rdkit_from_smiles("Br" + chain) for chain in chains]
 
-  classifier = sklearn.tree.DecisionTreeClassifier()
-  classifier.fit(params, target_property)
-  classifier.predict(smores.Molecule.from_xyz_file("test.xyz"))
+  X = []
+  y = []
+  for combo in smores.combine(cores, substituents):
+      molecule = smores.Molecule.from_combination(combo)
+      X.append(list(molecule.get_steric_parameters()))
+      y.append(uff_energy(combo.product))
 
+  reg = LinearRegression()
+  reg.fit(X, y)
+
+.. doctest:: ml-workflow
+
+  >>> reg.score(X, y)
+  0.8067966147933283
 
 We hope that's a useful jumping off point for some quick prototyping!
+We expect there are much more useful and interesting properties you can
+target.
 
 Plays nice with :mod:`rdkit`
 ----------------------------
 
 :mod:`smores` molecules can easily be created from RDKit_ molecules
 
-.. testcode::
+.. testcode:: rdkit-workflow
 
   import smores
-  import rdkit.Chem as rdkit
+  import rdkit.Chem.AllChem as rdkit
 
   rdkit_molecule = rdkit.AddHs(rdkit.MolFromSmiles("CBr"))
   rdkit.EmbedMolecule(rdkit_molecule)  # Generate a 3-D structure.
-
-  smores_molecule = smores.Molecule.from_rdkit(rdkit_molecule)
+  smores_molecule = smores.Molecule.from_rdkit(rdkit_molecule, dummy_index=0, attached_index=1)
 
 
 and we provide a handy function for creating rdkit
 molecules from SMILES
 
-.. testcode::
+.. testcode:: rdkit-workflow
 
    rdkit_molecule = smores.rdkit_from_smiles("CC")
 
@@ -148,11 +178,12 @@ for you, unlike RDKit_'s own `rdkit.MolFromSmiles`_ function.
 
    * :meth:`.Molecule.from_rdkit`: For addtional configuration options.
    * :meth:`.EspMolecule.from_rdkit`: For addtional configuration options.
+   * :func:`.rdkit_from_smiles` For additional documentation.
 
 Quick comparison of substituents
 --------------------------------
 
-A very common workflow is to try different subsituents on a molecule
+A very common workflow is to try different substituents on a molecule
 and compare their steric parameters, so we wrote some code that lets
 you do this quick
 
@@ -165,25 +196,23 @@ you do this quick
       smores.rdkit_from_smiles("c1ccccc1Br"),
   ]
   substituents = [
-    smores.rdkit_from_smiles("BrCCC"),
-    smores.rdkit_from_smiles("BrCC(C)(C)C"),
+      smores.rdkit_from_smiles("BrCCC"),
+      smores.rdkit_from_smiles("BrCC(C)(C)C"),
   ]
-  for combo in smores.combine(cores, subsituents):
-      molecule = smores.Molecule.from_rdkit(combo.product)
-      params = molecule.get_steric_parameters(
-          dummy_index=combo.dummy_index,
-          attached_index=combo.attached_index,
-      )
+  for combo in smores.combine(cores, substituents):
+      molecule = smores.Molecule.from_combination(combo)
+      params = molecule.get_steric_parameters()
       print(
-          f"Combination of {rdkit.MolToSmiles(combo.core)} and "
-          f"{rdkit.MolToSmiles(combo.substituent)} "
+          f"Combination of {rdkit.MolToSmiles(rdkit.RemoveHs(combo.core))} and "
+          f"{rdkit.MolToSmiles(rdkit.RemoveHs(combo.substituent))} "
           f"has SMORES parameters of {params}."
       )
 
 
-Note that this code allows you to easily identify what the dummy
-and attachment atoms are, which can be a bit of a burden otherwise.
+.. testoutput:: substituent-comparison
 
+  Combination of Brc1ccccc1 and CCCBr has SMORES parameters of StericParameters(L=5.6397512133212935, B1=1.7820154803719914, B5=3.4938688496917782).
+  Combination of Brc1ccccc1 and CC(C)(C)CBr has SMORES parameters of StericParameters(L=5.668756954899209, B1=1.747631456476209, B5=4.532148595320116).
 
 .. seealso::
 
@@ -197,12 +226,21 @@ Using electrostatic potentials
 :mod:`smores` can also calculate the steric parameters using electrostatic
 potentials defined on a voxel grid
 
-.. testcode:: quickstart
 
-  molecule = smores.EspMolecule.from_cube_file("my_molecule.cube")
-  params = molecule.get_steric_parameters(dummy_index=0, attached_index=1)
-  print(params.L, params.B1, params.B5)
+.. testcode:: using-electrostatic-potentials
+  :hide:
 
+  import os
+  import tempfile
+  tmp_dir = tempfile.TemporaryDirectory()
+  os.chdir(tmp_dir.name)
+
+.. doctest:: using-electrostatic-potentials
+
+  >>> import smores
+  >>> molecule = smores.EspMolecule.from_cube_file("HBr.cube", dummy_index=0, attached_index=1)
+  >>> molecule.get_steric_parameters()
+  StericParameters(L=3.57164113574581, B1=1.9730970556668774, B5=2.320611610648539)
 
 .. seealso::
 
@@ -228,24 +266,81 @@ Calculating electrostatic potentials
 
 .. _psi4: https://psicode.org/
 
+.. testcode:: calculate-electrostatic-potential
+  :hide:
+
+  import os
+  import tempfile
+  tmp_dir = tempfile.TemporaryDirectory()
+  os.chdir(tmp_dir.name)
 
 .. testcode:: calculate-electrostatic-potential
 
   import smores
   import smores.psi4
 
-  smores.psi4.calculate_electrostatic_potential(
+  cube_path = smores.psi4.calculate_electrostatic_potential(
       molecule=smores.rdkit_from_smiles("Br"),
       output_directory="outdir",
       grid_origin=(-3., -3., -3.),
       grid_length=10.,
-      num_voxels_per_dimension=50,
+      num_voxels_per_dimension=20,
   )
+  esp_molecule = smores.EspMolecule.from_cube_file(cube_path, dummy_index=0, attached_index=1)
 
-  esp_molecule = smores.EspMolecule.from_cube_file("outdir/ESP.cube")
-  params = esp_molecule.get_steric_parameters(dummy_index=0, attached_index=1)
-  print(params.L, params.B1, params.B5)
+.. doctest:: calculate-electrostatic-potential
+
+  >>> esp_molecule.get_steric_parameters()
+  StericParameters(L=3.57164113574581, B1=1.9730970556668774, B5=2.320611610648539)
 
 .. seealso::
 
-   * :func:`.calculate_electrostatic_potential`: For configuration options.
+   * :func:`.psi4.calculate_electrostatic_potential`: For configuration options.
+
+Optimizing molecules with xtb
+-----------------------------
+
+The values of the calculated steric parameters depend on the
+geometry of the molecule. There are many different ways to
+determine the geometry of a molecule. It may well be that the
+structure returned by :func:`.rdkit_from_smiles` is suitable
+for your purposes.
+
+However, if that's not the case, you may want to optimize the
+geometry yourself. To make your experience using
+:mod:`smores` a little smoother, we provide a little helper
+function in case you want to optimize your structures
+using xtb_
+
+.. _xtb: https://github.com/grimme-lab/xtb
+
+.. testcode:: xtb-optimize-the-geometry-of-a-molecule
+  :hide:
+
+  import os
+  import tempfile
+  tmp_dir = tempfile.TemporaryDirectory()
+  os.chdir(tmp_dir.name)
+
+.. doctest:: xtb-optimize-the-geometry-of-a-molecule
+
+  >>> import smores
+  >>> molecule = smores.rdkit_from_smiles("CBr")
+  >>> optimized = smores.xtb.optimize_geometry(molecule, "xtb_output")
+  >>> smores_molecule = smores.Molecule.from_rdkit(optimized, dummy_index=0, attached_index=1)
+  >>> smores_molecule.get_steric_parameters()
+  StericParameters(L=3.57164113574581, B1=1.9730970556668774, B5=2.320611610648539)
+
+Whether this is necessary or desirable, we leave to your judgement, but it's
+here if you need it.
+
+.. note::
+
+ This example assumes that you have xtb available in your PATH.
+ If that's not the case, you can set the location of the
+ xtb binary using the `xtb_path` parameter. For more details,
+ see :func:`.xtb.optimize_geometry`.
+
+.. seealso::
+
+   * :func:`.xtb.optimize_geometry`: For configuration options.
