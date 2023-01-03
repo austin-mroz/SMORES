@@ -59,7 +59,6 @@ def _calculate_electrostatic_potentials(
         reaction_directory = output_directory / molecule.reaction_name
         reaction_directory.mkdir(parents=True, exist_ok=True)
         csv_path = reaction_directory / "xyz_files.csv"
-
         with open(csv_path, "w") as csv_file:
             writer = csv.DictWriter(
                 csv_file,
@@ -72,7 +71,6 @@ def _calculate_electrostatic_potentials(
         csv_path = reaction_directory / "xyz_files.csv"
 
         calculation_directory = reaction_directory / molecule_input.name
-
         if not calculation_directory.exists():
             calculation_directory.mkdir(parents=True)
             try:
@@ -82,7 +80,7 @@ def _calculate_electrostatic_potentials(
                     output_directory=calculation_directory,
                     grid_origin=(-5, -5, -5),
                     grid_length=10.0,
-                    num_voxels_per_dimension=50,
+                    num_voxels_per_dimension=100,
                     optimize=False,
                     num_threads=20,
                 )
