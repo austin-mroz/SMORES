@@ -68,7 +68,7 @@ def calculate_electrostatic_potential_in_memory(
 
     grid_origin_val = -1 * (grid_length / 2)
     grid_origin = (grid_origin_val, grid_origin_val, grid_origin_val)
-    _ = _generate_voxel_grid(
+    voxel_grid = _generate_voxel_grid(
         output_directory=output_directory,
         grid_origin=grid_origin,
         grid_length=grid_length,
@@ -118,12 +118,10 @@ def calculate_electrostatic_potential_in_memory(
             properties=["GRID_ESP"],
             return_wfn=True,
         )
-        electrostatic_potential_calculation = psi4.core.ESPPropCalc(wfn)
+        esp_calculation = psi4.core.ESPPropCalc(wfn)
         psi4_grid = psi4.core.Matrix.from_array(np.asarray(voxel_grid))
         electrostatic_potential = np.array(
-            electrostatic_potential_calculation.compute_esp_over_grid_in_memory(
-                psi4_grid
-            )
+            esp_calculation.compute_esp_over_grid_in_memory(psi4_grid)
         )
 
         return electrostatic_potential.reshape(
@@ -246,7 +244,7 @@ def _generate_voxel_grid(
     grid_origin: tuple[float, float, float],
     grid_length: float,
     num_voxels_per_dimension: int,
-) -> list[float]:
+) -> list[list[float]]:
 
     origin_x, origin_y, origin_z = grid_origin
     voxel_size = grid_length / num_voxels_per_dimension
