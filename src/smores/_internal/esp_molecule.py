@@ -5,6 +5,7 @@ import typing
 import ase
 import ase.io.cube
 import dbstep.Dbstep as db
+import flour
 import numpy as np
 import numpy.typing as npt
 import rdkit.Chem.AllChem as rdkit
@@ -74,20 +75,26 @@ B1=1.9730970556668774, B5=2.320611610648539)
 
         """
 
-        self._atoms = tuple(atoms)
-        self._positions = np.array(positions)
+        self._atoms = np.array(
+            [rdkit.Atom(atom).GetAtomicNum() for atom in atoms],
+            dtype=np.uint8,
+        )
+        self._positions = np.array(positions, dtype=np.float64)
         self._dummy_index = dummy_index
         self._attached_index = attached_index
 
         with tempfile.TemporaryDirectory() as tmp_dir:
             electrostatic_potential_file = pathlib.Path(tmp_dir) / "esp.cube"
-            write_cube(
+            flour.write_cube(
                 path=electrostatic_potential_file,
-                voxels=electrostatic_potential.voxels,
+                title1="t1",
+                title2="t2",
+                atoms=self._atoms,
+                charges=np.zeros(len(self._atoms), dtype=np.float64),
                 positions=self._positions,
-                elements=self._atoms,
                 voxel_origin=electrostatic_potential.voxel_origin,
-                voxel_dimensions=electrostatic_potential.voxel_size,
+                voxel_size=electrostatic_potential.voxel_size,
+                voxels=electrostatic_potential.voxels,
             )
             streusel_molecule = streusel.gaussian_cube.Molecule(
                 electrostatic_potential_file,
@@ -116,15 +123,21 @@ B1=1.9730970556668774, B5=2.320611610648539)
 
         with tempfile.TemporaryDirectory() as tmp_dir:
             electric_field_surface_file = (
-                pathlib.Path(tmp_dir) / "ef_surface.cube"
+                pathlib.Path.cwd() / "ef_surface.cube"
             )
-            write_cube(
+            flour.write_cube(
                 path=electric_field_surface_file,
-                voxels=self._electric_field_surface.voxels,
+                title1="t1",
+                title2="t2",
+                atoms=self._atoms,
+                charges=np.zeros(len(self._atoms), dtype=np.float64),
                 positions=self._positions,
-                elements=self._atoms,
-                voxel_origin=self._electric_field_surface.voxel_origin,
-                voxel_dimensions=self._electric_field_surface.voxel_size,
+                voxel_origin=np.array(
+                    self._electric_field_surface.voxel_origin, dtype=np.float64
+                ),
+                voxel_size=self._electric_field_surface.voxel_size
+                * np.identity(3),
+                voxels=self._electric_field_surface.voxels.astype(float),
             )
 
             params = db.dbstep(
@@ -189,9 +202,9 @@ B1=1.9730970556668774, B5=2.320611610648539)
         """
 
         instance = cls.__new__(cls)
-        grid, atoms = ase.io.cube.read_cube_data(str(path))
-        instance._atoms = atoms.get_atomic_numbers()
-        instance._positions = atoms.positions / ase.units.Bohr
+        cube_data = flour.read_cube(path)
+        instance._atoms = cube_data.atoms
+        instance._positions = cube_data.positions
         instance._dummy_index = dummy_index
         instance._attached_index = attached_index
 
