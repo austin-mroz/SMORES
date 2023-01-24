@@ -1,5 +1,5 @@
 [project]
-name = "smores"
+name = "chem-smores"
 dynamic = ["version"]
 dependencies = [
   'numpy',
