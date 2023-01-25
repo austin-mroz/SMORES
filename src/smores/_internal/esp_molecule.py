@@ -212,8 +212,8 @@ B1=1.9730970556668774, B5=2.320611610648539)
 
         instance._electric_field_surface = VoxelGrid(
             voxels=_get_electric_field_surface(streusel_molecule),
-            voxel_size=streusel_molecule.res,
-            voxel_origin=streusel_molecule.origin,
+            voxel_size=cube_data.grid.voxel_size.sum(axis=0),
+            voxel_origin=cube_data.grid.origin,
         )
 
         return instance
