@@ -123,7 +123,7 @@ B1=1.9730970556668774, B5=2.320611610648539)
 
         with tempfile.TemporaryDirectory() as tmp_dir:
             electric_field_surface_file = (
-                pathlib.Path.cwd() / "ef_surface.cube"
+                pathlib.Path(tmp_dir) / "ef_surface.cube"
             )
             flour.write_cube(
                 path=electric_field_surface_file,
