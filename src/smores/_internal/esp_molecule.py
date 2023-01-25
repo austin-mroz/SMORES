@@ -2,8 +2,6 @@ import pathlib
 import tempfile
 import typing
 
-import ase
-import ase.io.cube
 import dbstep.Dbstep as db
 import flour
 import numpy as np
@@ -13,7 +11,6 @@ import streusel.gaussian_cube
 
 from smores._internal.steric_parameters import StericParameters
 from smores._internal.voxel_grid import VoxelGrid
-from smores._internal.write_cube import write_cube
 
 
 class EspMolecule:
