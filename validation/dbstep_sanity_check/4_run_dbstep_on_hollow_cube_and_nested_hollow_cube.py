@@ -5,9 +5,6 @@ import pathlib
 
 import dbstep.Dbstep as db
 import flour
-import matplotlib
-
-matplotlib.use("tkagg")
 import matplotlib.pyplot as plt
 import numpy as np
 import numpy.typing as npt
