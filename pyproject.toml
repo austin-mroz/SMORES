@@ -10,6 +10,7 @@ dependencies = [
   "dbstep",
   "streusel",
   "morfeus-ml",
+  "flour",
 ]
 requires-python = ">=3.10"
 

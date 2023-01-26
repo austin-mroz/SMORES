@@ -4,14 +4,10 @@ import functools
 import pathlib
 
 import dbstep.Dbstep as db
-import matplotlib
+import flour
 import matplotlib.pyplot as plt
 import numpy as np
 import numpy.typing as npt
-
-from smores._internal.write_cube import write_cube
-
-matplotlib.use("tkagg")
 
 
 def main() -> None:
@@ -29,16 +25,19 @@ def main() -> None:
         _plot_voxels(joint_voxel_cube)
 
     write_cube_ = functools.partial(
-        write_cube,
+        flour.write_cube,
+        title1="t1",
+        title2="t2",
         positions=np.array(
             [
                 [2.5, 2.5, 2.5],
                 [3.2, 3.2, 3.2],
             ],
         ),
-        elements=["1", "1"],
-        voxel_origin=np.array([-5, -5, -5]),
-        voxel_dimensions=np.array([1.0, 1.0, 1.0]),
+        charges=np.array([0.0, 0.0]),
+        atoms=np.array([1, 1], dtype=np.uint8),
+        voxel_origin=np.array([-5, -5, -5], dtype=np.float64),
+        voxel_size=np.identity(3),
     )
 
     big_path = args.output_directory / "big.cube"
@@ -47,15 +46,15 @@ def main() -> None:
 
     write_cube_(
         path=big_path,
-        voxels=big_voxel_cube,
+        voxels=big_voxel_cube.astype(np.float64),
     )
     write_cube_(
         path=small_path,
-        voxels=small_voxel_cube,
+        voxels=small_voxel_cube.astype(np.float64),
     )
     write_cube_(
         path=joint_path,
-        voxels=joint_voxel_cube,
+        voxels=joint_voxel_cube.astype(np.float64),
     )
     dbstep = functools.partial(
         db.dbstep,
