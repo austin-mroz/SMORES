@@ -2,55 +2,33 @@
 
 import argparse
 import pathlib
-from dataclasses import dataclass
 
-import ase.io.cube
+import flour
 import numpy as np
 import numpy.typing as npt
 import scipy.ndimage
-
-from smores._internal.write_cube import write_cube
 
 
 def main() -> None:
     args = _get_command_line_arguments()
     args.output_file.parent.mkdir(parents=True, exist_ok=True)
 
-    voxels, atoms = ase.io.cube.read_cube_data(str(args.input_file))
-    voxel_grid_params = _get_voxel_grid_params(args.input_file)
+    cube_data = flour.read_cube(args.input_file)
 
-    write_cube(
+    flour.write_cube(
         path=args.output_file,
-        voxels=_get_surface(voxels),
-        positions=atoms.get_positions() / ase.units.Bohr,
-        elements=atoms.get_atomic_numbers(),
-        voxel_origin=voxel_grid_params.origin,
-        voxel_dimensions=voxel_grid_params.voxel_dimensions,
+        title1="t1",
+        title2="t2",
+        charges=cube_data.charges,
+        voxels=_get_surface(cube_data.grid.voxels).astype(float),
+        positions=cube_data.positions,
+        atoms=cube_data.atoms,
+        voxel_origin=cube_data.grid.origin,
+        voxel_size=cube_data.grid.voxel_size,
     )
 
 
-@dataclass(frozen=True, slots=True)
-class VoxelGridParams:
-    origin: npt.NDArray
-    voxel_dimensions: npt.NDArray
-
-
-def _get_voxel_grid_params(cube_file: pathlib.Path) -> VoxelGridParams:
-    with open(cube_file) as f:
-        next(f)
-        next(f)
-        origin = np.array(list(map(float, next(f).split()[1:])))
-        x = float(next(f).split()[1])
-        y = float(next(f).split()[2])
-        z = float(next(f).split()[3])
-
-    return VoxelGridParams(
-        origin=origin,
-        voxel_dimensions=np.array([x, y, z]),
-    )
-
-
-def _get_surface(voxels: npt.NDArray[np.float32]) -> npt.NDArray[np.float32]:
+def _get_surface(voxels: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
     cv = 0.0004
     is_vacuum = voxels < cv
     is_non_vacuum = np.logical_not(is_vacuum)
