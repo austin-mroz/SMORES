@@ -14,9 +14,9 @@ __ https://github.com/austin-mroz/STREUSEL
 Installation
 ============
 
-``SMORES`` can be installed using ``pip``:
+``SMORES`` can be installed using ``pip``:: 
 
-``pip install chem-smores``
+  pip install chem-smores
 
 Validation
 ==========
