@@ -11,6 +11,13 @@ size metric.
 
 __ https://github.com/austin-mroz/STREUSEL
 
+Installation
+============
+
+``SMORES`` can be installed using ``pip``:
+
+``pip install chem-smores``
+
 Validation
 ==========
 
