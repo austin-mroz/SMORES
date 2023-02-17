@@ -1,6 +1,7 @@
 #!python
 
 import argparse
+import math
 import pathlib
 
 import flour
@@ -8,6 +9,7 @@ import numpy as np
 import numpy.typing as npt
 import pyvista as pv
 import scipy.ndimage
+from sklearn.preprocessing import minmax_scale
 
 
 def main() -> None:
@@ -24,11 +26,29 @@ def main() -> None:
     streusel_surface = _get_surface(cube_data.grid.voxels)
 
     print(streusel_surface.shape)
-    _calculate_L(
+    _calculate_L2(
         cube_data_positions_idx[0],
         cube_data_positions_idx[1],
         streusel_surface,
     )
+
+
+def _calculate_L2(
+    attached_atom_idx: npt.NDArray,  # substituent
+    dummy_atom_idx: npt.NDArray,  # core
+    streusel_surface: npt.NDArray[np.float64],
+    # cube_data_positions_idx: npt.NDArray[np.float64],
+) -> None:
+    streusel_surface_idx = np.argwhere(streusel_surface)
+    product = np.cross(streusel_surface_idx - dummy_atom_idx, attached_atom_idx - dummy_atom_idx)
+    if product.ndim == 2:
+        distances = np.linalg.norm(product, axis=1)
+    else:
+        distances = np.abs(product)
+
+    streusel_surface_L_point = streusel_surface_idx[distances.argmin()]
+
+    print(0.2*math.dist(attached_atom_idx, streusel_surface_L_point))
 
 
 def _calculate_L(
@@ -54,6 +74,30 @@ def _calculate_L(
     plane = plane.interpolate(streusel_surface_point_cloud)
     sample = plane.sample_over_line(dummy_atom_idx, attached_atom_idx)
     print(sample)
+
+    # normalize vector_L
+    u = np.divide(vector_L, np.linalg.norm(vector_L))
+
+    terminal_line_L_point = attached_atom_idx + 100*u
+
+    line_L = pv.Line(dummy_atom_idx, terminal_line_L_point)
+    sample = plane.sample_over_line(dummy_atom_idx, terminal_line_L_point)
+    p = pv.Plotter()
+    p.add_mesh(streusel_surface_point_cloud, style="wireframe", color="w")
+    p.add_mesh(line_L)
+    p.add_mesh(plane)
+    p.show()
+
+    streusel_surface_point_cloud.compute_implicit_distance(plane, inplace=True)
+    dist = streusel_surface_point_cloud['implicit_distance']
+    p = pv.Plotter()
+    p.add_mesh(streusel_surface_point_cloud, scalars='implicit_distance')
+    p.add_mesh(line_L)
+    # p.add_mesh(plane, color="w", style="wireframe")
+    p.show()
+
+    streusel_surface_point_cloud['values'] = np.full(streusel_surface_idx.shape[0], 1)
+    streusel_surface_point_cloud.plot_over_line(dummy_atom_idx, terminal_line_L_point, scalars='values')
 
 
 def _convert_euclidean_positions_to_indices(
