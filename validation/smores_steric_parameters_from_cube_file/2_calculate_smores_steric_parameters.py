@@ -26,21 +26,52 @@ def main() -> None:
     streusel_surface = _get_surface(cube_data.grid.voxels)
 
     print(streusel_surface.shape)
-    _calculate_L2(
+    _calculate_L(
         cube_data_positions_idx[0],
         cube_data_positions_idx[1],
         streusel_surface,
     )
 
 
-def _calculate_L2(
+def _calculate_B(
+    attached_atom_idx: npt.NDArray,
+    dummy_atom_idx: npt.NDArray,
+    streusel_surface: npt.NDArray[np.float64],
+) -> None:
+    streusel_surface_idx = np.argwhere(streusel_surface)
+
+    streusel_surface_point_cloud = pv.PolyData(streusel_surface_idx)
+
+    # define plane with center at core and normal along substituent
+    b_vector_plane = pv.Plane(attached_atom_idx, dummy_atom_idx)
+
+    (
+        intersection_between_molecule_and_b_vector_plane,
+        _,
+        _,
+    ) = streusel_surface_point_cloud.intersection(b_vector_plane)
+
+    p = pv.Plotter()
+    p.add_mesh(streusel_surface_point_cloud)
+    p.add_mesh(b_vector_plane)
+    p.add_mesh(
+        intersection_between_molecule_and_b_vector_plane,
+        color="r",
+        line_width=10,
+    )
+    p.show()
+
+
+def _calculate_L(
     attached_atom_idx: npt.NDArray,  # substituent
     dummy_atom_idx: npt.NDArray,  # core
     streusel_surface: npt.NDArray[np.float64],
-    # cube_data_positions_idx: npt.NDArray[np.float64],
-) -> None:
+) -> np.float64:
     streusel_surface_idx = np.argwhere(streusel_surface)
-    product = np.cross(streusel_surface_idx - dummy_atom_idx, attached_atom_idx - dummy_atom_idx)
+    product = np.cross(
+        streusel_surface_idx - dummy_atom_idx,
+        attached_atom_idx - dummy_atom_idx,
+    )
     if product.ndim == 2:
         distances = np.linalg.norm(product, axis=1)
     else:
@@ -48,15 +79,14 @@ def _calculate_L2(
 
     streusel_surface_L_point = streusel_surface_idx[distances.argmin()]
 
-    print(0.2*math.dist(attached_atom_idx, streusel_surface_L_point))
+    return 0.2 * math.dist(attached_atom_idx, streusel_surface_L_point)
 
 
-def _calculate_L(
+def _plot_L(
     attached_atom_idx: npt.NDArray,  # substituent
     dummy_atom_idx: npt.NDArray,  # core
     streusel_surface: npt.NDArray[np.float64],
-    # cube_data_positions_idx: npt.NDArray[np.float64],
-) -> float:
+) -> None:
     # vector along which L terminal point should lie on the surface
     vector_L = attached_atom_idx - dummy_atom_idx
 
@@ -78,7 +108,7 @@ def _calculate_L(
     # normalize vector_L
     u = np.divide(vector_L, np.linalg.norm(vector_L))
 
-    terminal_line_L_point = attached_atom_idx + 100*u
+    terminal_line_L_point = attached_atom_idx + 100 * u
 
     line_L = pv.Line(dummy_atom_idx, terminal_line_L_point)
     sample = plane.sample_over_line(dummy_atom_idx, terminal_line_L_point)
@@ -89,15 +119,18 @@ def _calculate_L(
     p.show()
 
     streusel_surface_point_cloud.compute_implicit_distance(plane, inplace=True)
-    dist = streusel_surface_point_cloud['implicit_distance']
+    dist = streusel_surface_point_cloud["implicit_distance"]
     p = pv.Plotter()
-    p.add_mesh(streusel_surface_point_cloud, scalars='implicit_distance')
+    p.add_mesh(streusel_surface_point_cloud, scalars="implicit_distance")
     p.add_mesh(line_L)
-    # p.add_mesh(plane, color="w", style="wireframe")
     p.show()
 
-    streusel_surface_point_cloud['values'] = np.full(streusel_surface_idx.shape[0], 1)
-    streusel_surface_point_cloud.plot_over_line(dummy_atom_idx, terminal_line_L_point, scalars='values')
+    streusel_surface_point_cloud["values"] = np.full(
+        streusel_surface_idx.shape[0], 1
+    )
+    streusel_surface_point_cloud.plot_over_line(
+        dummy_atom_idx, terminal_line_L_point, scalars="values"
+    )
 
 
 def _convert_euclidean_positions_to_indices(
