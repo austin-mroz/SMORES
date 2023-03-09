@@ -10,6 +10,7 @@ import numpy.typing as npt
 import pyvista as pv
 import scipy.ndimage
 from sklearn.preprocessing import minmax_scale
+from scipy.spatial import distance
 
 
 def main() -> None:
@@ -32,11 +33,21 @@ def main() -> None:
         streusel_surface,
     )
 
+    resolution = np.sum(cube_data.grid.voxel_size, axis=1)[0]
+
+    _calculate_B(
+            cube_data_positions_idx[0],
+            cube_data_positions_idx[1],
+            streusel_surface,
+            cube_data.grid.voxel_size,
+            )
+
 
 def _calculate_B(
     attached_atom_idx: npt.NDArray,
     dummy_atom_idx: npt.NDArray,
     streusel_surface: npt.NDArray[np.float64],
+    resolution: float,
 ) -> None:
     streusel_surface_idx = np.argwhere(streusel_surface)
 
@@ -45,22 +56,55 @@ def _calculate_B(
     # define plane with center at core and normal along substituent
     b_vector_plane = pv.Plane(attached_atom_idx, dummy_atom_idx)
 
-    (
-        intersection_between_molecule_and_b_vector_plane,
-        _,
-        _,
-    ) = streusel_surface_point_cloud.intersection(b_vector_plane)
+    clipped = streusel_surface_point_cloud.clip(normal=dummy_atom_idx, origin=attached_atom_idx)
 
     p = pv.Plotter()
-    p.add_mesh(streusel_surface_point_cloud)
-    p.add_mesh(b_vector_plane)
-    p.add_mesh(
-        intersection_between_molecule_and_b_vector_plane,
-        color="r",
-        line_width=10,
-    )
+    # p.add_mesh(streusel_surface_point_cloud, color="w")
+    p.add_mesh(clipped, color="b")
     p.show()
 
+    # project clipped surface to plane
+    projected = clipped.project_points_to_plane()
+    projected.plot()
+
+    print(type(projected))
+
+    print(clipped.points)
+    print(projected.points)
+
+    print(dummy_atom_idx)
+    print(attached_atom_idx)
+
+    p = pv.Plotter()
+    p.add_mesh(clipped)
+    p.add_mesh(pv.PolyData(dummy_atom_idx), point_size=20, color='#69FAAB')
+    p.show()
+
+    clipped_and_dummy = pv.PolyData(clipped.points) + pv.PolyData(dummy_atom_idx)
+    merged_projected = clipped_and_dummy.project_points_to_plane(origin=attached_atom_idx, normal=dummy_atom_idx)
+    
+    p = pv.Plotter()
+    p.add_mesh(clipped, color="w")
+    p.add_mesh(pv.PolyData(dummy_atom_idx), color="b", point_size=20)
+    p.add_mesh(clipped_and_dummy, color="g")
+    p.add_mesh(pv.PolyData(clipped_and_dummy.points[-1]), point_size=30, color="#69FAAB")
+    p.add_mesh(merged_projected)
+    p.add_mesh(pv.PolyData(merged_projected.points[-1]), point_size=20, color='#69FAAB')
+    p.show()
+
+    projected_dummy_atom_idx = merged_projected.points[-1]
+    substituent_shadow = merged_projected.points[:-1]
+
+    distances = []
+    for point in substituent_shadow:
+        distances.append(distance.euclidean(projected_dummy_atom_idx, point))
+
+    b5 = np.max(distances)*resolution
+    print(b5)
+
+
+def calc_distance(projected_dummy_atom_idx, point):
+    return distance.euclidean(projected_dummy_atom_idx, point)
 
 def _calculate_L(
     attached_atom_idx: npt.NDArray,  # substituent
