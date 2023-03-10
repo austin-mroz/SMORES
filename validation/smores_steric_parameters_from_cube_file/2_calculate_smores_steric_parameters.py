@@ -9,8 +9,8 @@ import numpy as np
 import numpy.typing as npt
 import pyvista as pv
 import scipy.ndimage
-from sklearn.preprocessing import minmax_scale
 from scipy.spatial import distance
+from sklearn.preprocessing import minmax_scale
 
 
 def main() -> None:
@@ -25,16 +25,18 @@ def main() -> None:
     )
 
     streusel_surface = _get_surface(cube_data.grid.voxels)
-
+    """
     print(streusel_surface.shape)
     _calculate_L(
         cube_data_positions_idx[0],
         cube_data_positions_idx[1],
         streusel_surface,
     )
-
+    _plot_L(cube_data_positions_idx[0],
+            cube_data_positions_idx[1],
+            streusel_surface,)
     resolution = np.sum(cube_data.grid.voxel_size, axis=1)[0]
-
+    """
     _calculate_B(
             cube_data_positions_idx[0],
             cube_data_positions_idx[1],
@@ -61,7 +63,7 @@ def _calculate_B(
     p = pv.Plotter()
     # p.add_mesh(streusel_surface_point_cloud, color="w")
     p.add_mesh(clipped, color="b")
-    p.show()
+    #p.show()
 
     # project clipped surface to plane
     projected = clipped.project_points_to_plane()
@@ -78,11 +80,10 @@ def _calculate_B(
     p = pv.Plotter()
     p.add_mesh(clipped)
     p.add_mesh(pv.PolyData(dummy_atom_idx), point_size=20, color='#69FAAB')
-    p.show()
+    #p.show()
 
     clipped_and_dummy = pv.PolyData(clipped.points) + pv.PolyData(dummy_atom_idx)
     merged_projected = clipped_and_dummy.project_points_to_plane(origin=attached_atom_idx, normal=dummy_atom_idx)
-    
     p = pv.Plotter()
     p.add_mesh(clipped, color="w")
     p.add_mesh(pv.PolyData(dummy_atom_idx), color="b", point_size=20)
@@ -90,7 +91,7 @@ def _calculate_B(
     p.add_mesh(pv.PolyData(clipped_and_dummy.points[-1]), point_size=30, color="#69FAAB")
     p.add_mesh(merged_projected)
     p.add_mesh(pv.PolyData(merged_projected.points[-1]), point_size=20, color='#69FAAB')
-    p.show()
+    #p.show()
 
     projected_dummy_atom_idx = merged_projected.points[-1]
     substituent_shadow = merged_projected.points[:-1]
@@ -100,7 +101,24 @@ def _calculate_B(
         distances.append(distance.euclidean(projected_dummy_atom_idx, point))
 
     b5 = np.max(distances)*resolution
-    print(b5)
+    print(b5[0].sum())
+    print(np.max(distances))
+    index_max = np.argmax(distances)
+    max_point = substituent_shadow[index_max]
+    print(index_max)
+    print(max_point)
+    circle = pv.Cylinder(center=merged_projected.points[-1], direction=clipped_and_dummy.points[-1], radius=np.max(distances), resolution=100)
+    circle_arc = pv.CircularArcFromNormal(center=merged_projected.points[-1],normal=clipped_and_dummy.points[-1], polar=substituent_shadow[index_max])
+
+    p = pv.Plotter()
+    p.add_mesh(merged_projected)
+    p.add_mesh(pv.PolyData(merged_projected.points[-1]), point_size=20, color='#69FAAB')
+    # p.add_mesh(circle)
+    p.add_mesh(circle_arc, color='#FFC0CB', line_width=10)
+    p.show()
+
+    r = np.max(distances)
+    circle_circumference_points = [(math.cos(2*pi/1000*x)*r,math.sin(2*pi/1000*x)*r) for x in range(0,1000)]
 
 
 def calc_distance(projected_dummy_atom_idx, point):
