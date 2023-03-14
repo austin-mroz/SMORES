@@ -3,12 +3,15 @@
 import argparse
 import math
 import pathlib
+from operator import add
 
 import flour
+import matplotlib.pyplot as plt
 import numpy as np
 import numpy.typing as npt
 import pyvista as pv
 import scipy.ndimage
+from mpl_toolkits.mplot3d import Axes3D
 from scipy.spatial import distance
 from sklearn.preprocessing import minmax_scale
 
@@ -25,18 +28,18 @@ def main() -> None:
     )
 
     streusel_surface = _get_surface(cube_data.grid.voxels)
-    """
-    print(streusel_surface.shape)
-    _calculate_L(
+
+    l = _calculate_L(
         cube_data_positions_idx[0],
         cube_data_positions_idx[1],
         streusel_surface,
     )
+    print(l)
     _plot_L(cube_data_positions_idx[0],
             cube_data_positions_idx[1],
             streusel_surface,)
     resolution = np.sum(cube_data.grid.voxel_size, axis=1)[0]
-    """
+
     _calculate_B(
             cube_data_positions_idx[0],
             cube_data_positions_idx[1],
@@ -69,14 +72,6 @@ def _calculate_B(
     projected = clipped.project_points_to_plane()
     projected.plot()
 
-    print(type(projected))
-
-    print(clipped.points)
-    print(projected.points)
-
-    print(dummy_atom_idx)
-    print(attached_atom_idx)
-
     p = pv.Plotter()
     p.add_mesh(clipped)
     p.add_mesh(pv.PolyData(dummy_atom_idx), point_size=20, color='#69FAAB')
@@ -102,23 +97,146 @@ def _calculate_B(
 
     b5 = np.max(distances)*resolution
     print(b5[0].sum())
-    print(np.max(distances))
     index_max = np.argmax(distances)
     max_point = substituent_shadow[index_max]
-    print(index_max)
-    print(max_point)
     circle = pv.Cylinder(center=merged_projected.points[-1], direction=clipped_and_dummy.points[-1], radius=np.max(distances), resolution=100)
     circle_arc = pv.CircularArcFromNormal(center=merged_projected.points[-1],normal=clipped_and_dummy.points[-1], polar=substituent_shadow[index_max])
 
-    p = pv.Plotter()
-    p.add_mesh(merged_projected)
-    p.add_mesh(pv.PolyData(merged_projected.points[-1]), point_size=20, color='#69FAAB')
-    # p.add_mesh(circle)
-    p.add_mesh(circle_arc, color='#FFC0CB', line_width=10)
-    p.show()
+    b1 = calculate_B1(distances, merged_projected.points, dummy_atom_idx)
+    print(b1)
 
-    r = np.max(distances)
-    circle_circumference_points = [(math.cos(2*pi/1000*x)*r,math.sin(2*pi/1000*x)*r) for x in range(0,1000)]
+def calculate_B1(distances, molecule_shadow, dummy_atom_idx) -> np.float64:
+
+    def rotateVector3D(v, theta, axis):
+        """ Takes a three-dimensional vector v and rotates it by the angle theta around the specified axis.
+        """
+        return np.dot(rotationMatrix3D(theta, axis), v)
+
+
+    def rotationMatrix3D(theta, axis):
+        """ Return the rotation matrix associated with counterclockwise rotation about
+            the given axis by theta radians.
+        """
+        axis = np.asarray(axis) / np.sqrt(np.dot(axis, axis)) 
+        a = np.cos(theta/2.0)
+        b, c, d = -axis*np.sin(theta/2.0)
+        aa, bb, cc, dd = a**2, b**2, c**2, d**2
+        bc, ad, ac, ab, bd, cd = b*c, a*d, a*c, a*b, b*d, c*d
+        return np.array([[aa+bb-cc-dd, 2*(bc+ad), 2*(bd-ac)],
+                         [2*(bc-ad), aa+cc-bb-dd, 2*(cd+ab)],
+                         [2*(bd+ac), 2*(cd-ab), aa+dd-bb-cc]])
+
+
+    def drawObject(ax, pts, color="red"):
+        """ Draws an object on a specified 3D axis with points and lines between consecutive points.
+        """
+        map(lambda pt: ax.scatter(*pt, s=10, color=color), pts)
+        for k in range(len(pts)-1):
+            x, y, z = zip(*pts[k:k+2])
+            ax.plot(x, y, z, color=color, linewidth=1.0)
+        x, y, z = zip(*[pts[-1],pts[0]])
+        ax.plot(x, y, z, color=color, linewidth=1.0)
+
+
+    def normalVector(obj):
+        """ Takes a set of points, assumed to be flat, and returns a normal vector with unit length.
+        """
+        n = np.cross(np.array(obj[1])-np.array(obj[0]), np.array(obj[2])-np.array(obj[0]))
+        return n/np.sqrt(np.dot(n,n))
+
+    print('===== CALCULATING B1 =====')
+    radius = np.max(distances)
+    center_point = molecule_shadow[-1]
+
+    circle_points = get_circle_points(radius, center_point)
+
+    # Set the original object (can be any set of points)
+    obj = list(map(tuple, circle_points))
+    mObj = tuple(center_point)
+    nVecObj = normalVector(obj)
+
+    # Given vector -- molecule_shadow_normal vector
+    vec = tuple(center_point - dummy_atom_idx)
+
+    # Find rotation axis and angle.
+    rotAxis = normalVector([(0,0,0), nVecObj, vec])
+    angle =  np.arccos(np.dot(nVecObj, vec) / (np.sqrt(np.dot(vec, vec)) * np.sqrt(np.dot(nVecObj, nVecObj))))
+
+    # Generate the rotated object.
+    rotObj = map(lambda pt: rotateVector3D(pt, angle, rotAxis), obj)
+    mRotObj = rotateVector3D(mObj, angle, rotAxis)
+    rotObj = np.array(list(rotObj))
+
+    nVecRotObj = normalVector(rotObj)
+
+    xadd = center_point[0] - mRotObj[0]
+    yadd = center_point[1] - mRotObj[1]
+    zadd = center_point[2] - mRotObj[2]
+
+    trotObj = []
+    
+    for point in rotObj:
+        trotObj.append(list(map(add, point, [xadd, yadd, zadd])))
+
+    # Set up Plot.
+    fig = plt.figure()
+    fig.set_size_inches(18,18)
+    ax = fig.add_subplot(111, projection='3d')
+
+    # Draw.
+    drawObject(ax, [[0,0,0], np.array(vec)/np.sqrt(np.dot(vec,vec))], color="gray")
+    drawObject(ax, [mObj, mObj+nVecObj], color="red")
+    drawObject(ax, obj, color="red")
+    drawObject(ax, [mRotObj, mRotObj + nVecRotObj], color="green")
+    drawObject(ax, rotObj, color="green")
+    ax.scatter(molecule_shadow[:,0], molecule_shadow[:,1], molecule_shadow[:,2], color="orange")
+    drawObject(ax, np.array(trotObj), color="purple")
+
+    # Plot cosmetics.
+    ax.set_xlabel('X axis')
+    ax.set_ylabel('Y axis')
+    ax.set_zlabel('Z axis')
+    plt.show()
+
+    # Check if the given vector and the normal of the rotated object are parallel (cross product should be zero).
+    b1_vecs = []
+    for circle_point in trotObj:
+        b1_vecs.append(_get_furthest_point_along_vector(center_point, circle_point, molecule_shadow))
+
+    return min(b1_vecs)
+
+
+def _get_furthest_point_along_vector(
+        starting_point: npt.NDArray,
+        ending_point: npt.NDArray,
+        molecule_shadow: npt.NDArray,
+        ) -> np.float64:
+    product = np.cross(molecule_shadow - ending_point,
+                       starting_point - ending_point,
+                       )
+    if product.ndim == 2:
+        distances = np.linalg.norm(product, axis=1)
+    else:
+        distances = np.abs(product)
+    b1 = molecule_shadow[distances.argmax()]
+    return 0.2 * math.dist(starting_point, b1)
+
+
+def get_circle_points(radius, center_point):
+    return np.asarray(
+            [[
+                center_point[0] + radius * math.cos(2*math.pi/1000*x),
+                center_point[1] + radius * math.sin(2*math.pi/1000*x),
+                center_point[2],
+                ] for x in range(0, 1000)]
+            )
+
+
+def calculate_angle_between(circle, molecule) -> float:
+    circle_unit_vector = circle / np.linalg.norm(circle)
+    molecule_unit_vector = molecule / np.linalg.norm(molecule)
+
+    return np.arccos(np.clip(np.dot(circle_unit_vector, molecule_unit_vector), -1.0, 1.0))
 
 
 def calc_distance(projected_dummy_atom_idx, point):
