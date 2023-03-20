@@ -4,6 +4,7 @@ import typing
 
 import dbstep.Dbstep as db
 import flour
+import math
 import numpy as np
 import numpy.typing as npt
 import rdkit.Chem.AllChem as rdkit
@@ -11,6 +12,7 @@ import streusel.gaussian_cube
 
 from smores._internal.steric_parameters import StericParameters
 from smores._internal.voxel_grid import VoxelGrid
+from smores._interal.from_esp import calculate_steric_parameters_from_esp
 
 
 class EspMolecule:
@@ -118,39 +120,13 @@ B1=1.9730970556668774, B5=2.320611610648539)
 
         """
 
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            electric_field_surface_file = (
-                pathlib.Path(tmp_dir) / "ef_surface.cube"
-            )
-            flour.write_cube(
-                path=electric_field_surface_file,
-                title1="t1",
-                title2="t2",
-                atoms=self._atoms,
-                charges=np.zeros(len(self._atoms), dtype=np.float64),
-                positions=self._positions,
-                voxel_origin=np.array(
-                    self._electric_field_surface.voxel_origin, dtype=np.float64
-                ),
-                voxel_size=self._electric_field_surface.voxel_size
-                * np.identity(3),
-                voxels=self._electric_field_surface.voxels.astype(float),
-            )
+        return calculate_steric_parameters_from_esp(
+                self._electric_field_surface.voxels.astype(float),
+                self._electric_field_surface.voxel_size * np.identity(3),
+                self._attached_index,
+                self._dummy_index,
+                )
 
-            params = db.dbstep(
-                str(electric_field_surface_file),
-                atom1=self._dummy_index,
-                atom2=self._attached_index,
-                surface="density",
-                sterimol=True,
-                quiet=True,
-            )
-
-        return StericParameters(
-            L=params.L,
-            B1=params.Bmin,
-            B5=params.Bmax,
-        )
 
     def get_dummy_index(self) -> int:
         """
