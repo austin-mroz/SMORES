@@ -11,6 +11,7 @@ dependencies = [
   "streusel",
   "morfeus-ml",
   "flour",
+  "pyvista",
 ]
 requires-python = ">=3.10"
 
