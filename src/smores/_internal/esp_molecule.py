@@ -1,18 +1,18 @@
+import math
 import pathlib
 import tempfile
 import typing
 
 import dbstep.Dbstep as db
 import flour
-import math
 import numpy as np
 import numpy.typing as npt
 import rdkit.Chem.AllChem as rdkit
 import streusel.gaussian_cube
 
+from smores._internal.from_esp import calculate_steric_parameters_from_esp
 from smores._internal.steric_parameters import StericParameters
 from smores._internal.voxel_grid import VoxelGrid
-from smores._interal.from_esp import calculate_steric_parameters_from_esp
 
 
 class EspMolecule:
@@ -119,14 +119,18 @@ B1=1.9730970556668774, B5=2.320611610648539)
             The parameters.
 
         """
-
+        cube_data_positions_idx = _convert_euclidean_positions_to_indices(
+            positions=self._positions,
+            origin=self._electric_field_surface.voxel_origin,
+            resolution=self._electric_field_surface.voxel_size,
+            voxel_grid_shape=self._electric_field_surface.voxels.shape,
+        )
         return calculate_steric_parameters_from_esp(
-                self._electric_field_surface.voxels.astype(float),
-                self._electric_field_surface.voxel_size * np.identity(3),
-                self._attached_index,
-                self._dummy_index,
-                )
-
+            self._electric_field_surface.voxels.astype(float),
+            self._electric_field_surface.voxel_size * np.identity(3),
+            cube_data_positions_idx[self._attached_index],
+            cube_data_positions_idx[self._dummy_index],
+        )
 
     def get_dummy_index(self) -> int:
         """
@@ -234,6 +238,24 @@ B1=1.9730970556668774, B5=2.320611610648539)
             attached_index=attached_index,
             electrostatic_potential=electrostatic_potential,
         )
+
+
+def _convert_euclidean_positions_to_indices(
+    positions,
+    origin,
+    resolution,
+    voxel_grid_shape,  # : flour.CubeData,
+) -> npt.NDArray:
+    # translate origin and positions to 0,0,0
+    translated_position_matrix = positions - origin
+
+    lattice_lengths = resolution.sum(axis=0) * np.asarray(voxel_grid_shape)
+
+    percent_along_lattice_vector = np.divide(
+        translated_position_matrix, lattice_lengths
+    )
+
+    return (percent_along_lattice_vector * voxel_grid_shape).astype(int)
 
 
 def _get_electric_field_surface(
