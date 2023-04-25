@@ -36,7 +36,7 @@ def main() -> None:
         writer.writeheader()
 
         for row in tuple(_get_rows(args.input_file)):
-
+            print(row.name)
             smores_molecule = smores.Molecule.from_xyz_file(
                 path=row.xyz_file,
                 dummy_index=row.dummy_index,
@@ -76,6 +76,28 @@ def main() -> None:
                         "B5": sterimol.B_5_value,
                     },
                 )
+            print("ESP molecule starting")
+            smores_esp_molecule = smores.EspMolecule.from_cube_file(
+                    path=row.xyz_file.parent / "ESP.cube",
+                    dummy_index=row.dummy_index,
+                    attached_index=row.attached_index,
+                    )
+            esp_smores_params = smores_esp_molecule.get_steric_parameters()
+            writer.writerow(
+                    {
+                        "name": row.name,
+                        "core": row.core,
+                        "substituent": row.substituent,
+                        "smiles": row.smiles,
+                        "xyz_file": row.xyz_file,
+                        "dummy_index": row.dummy_index,
+                        "attached_index": row.attached_index,
+                        "radii_type": "streusel_cube",
+                        "L": esp_smores_params.L,
+                        "B1": esp_smores_params.B1,
+                        "B5": esp_smores_params.B5,
+                        },
+                    )
 
 
 @dataclass(frozen=True, slots=True)
