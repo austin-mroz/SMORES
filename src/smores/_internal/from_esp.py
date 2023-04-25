@@ -26,16 +26,20 @@ def calculate_steric_parameters_from_esp(
         attached_atom_idx,
         dummy_atom_idx,
         streusel_surface,
-        resolution,
+        resolution.sum(axis=1),
     )
     b_values = _calculate_B(
         attached_atom_idx,
         dummy_atom_idx,
         streusel_surface,
-        resolution,
+        resolution.sum(axis=1),
     )
 
-    return StericParameters(L=l_value, B1=b_values.Bmin, B5=b_values.Bmax)
+    return StericParameters(
+        L=l_value.sum(axis=0),
+        B1=b_values.Bmin.sum(axis=0),
+        B5=b_values.Bmax.sum(axis=0),
+    )
 
 
 def _calculate_L(
@@ -81,7 +85,6 @@ def _calculate_B(
 
     # project clipped surface to plane
     projected = clipped.project_points_to_plane()
-    projected.plot()
 
     clipped_and_dummy = pv.PolyData(clipped.points) + pv.PolyData(
         dummy_atom_idx
@@ -89,22 +92,6 @@ def _calculate_B(
     merged_projected = clipped_and_dummy.project_points_to_plane(
         origin=attached_atom_idx, normal=dummy_atom_idx
     )
-    p = pv.Plotter()
-    p.add_mesh(clipped, color="w")
-    p.add_mesh(pv.PolyData(dummy_atom_idx), color="b", point_size=20)
-    p.add_mesh(clipped_and_dummy, color="g")
-    p.add_mesh(
-        pv.PolyData(clipped_and_dummy.points[-1]),
-        point_size=30,
-        color="#69FAAB",
-    )
-    p.add_mesh(merged_projected)
-    p.add_mesh(
-        pv.PolyData(merged_projected.points[-1]),
-        point_size=20,
-        color="#69FAAB",
-    )
-    p.show()
 
     projected_dummy_atom_idx = merged_projected.points[-1]
     substituent_shadow = merged_projected.points[:-1]
@@ -224,7 +211,7 @@ def _calculate_B1(
                 center_point,
                 np.asarray(circle_point),
                 molecule_shadow,
-                resolution.sum(axis=1),
+                resolution,
             )
         )
     return np.min(b1_vecs)
