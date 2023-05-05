@@ -6,7 +6,9 @@ import pathlib
 import typing
 from dataclasses import dataclass
 
+import flour
 import morfeus
+import numpy as np
 
 import smores
 
@@ -39,6 +41,7 @@ def main() -> None:
 
         for catalyst_input_file in args.input_file:
             for row in tuple(_get_rows(catalyst_input_file)):
+                print(row.xyz_file)
                 smores_molecule = smores.Molecule.from_xyz_file(
                     path=row.xyz_file,
                     dummy_index=row.dummy_index,
@@ -63,7 +66,9 @@ def main() -> None:
                 )
 
                 with open(row.fragments_file) as f:
-                    core_indices = json.load(f)["core_indices"]
+                    indices_dict = json.load(f)
+                    core_indices = indices_dict["core_indices"]
+                    substituent_indices = indices_dict["substituent_indices"]
 
                 smores_core_excluded_molecule = smores.Molecule.from_xyz_file(
                     path=row.xyz_file,
@@ -95,8 +100,29 @@ def main() -> None:
                     path=row.xyz_file.parent / "ESP.cube",
                     dummy_index=row.dummy_index,
                     attached_index=row.attached_index,
-                    excluded_indices=core_indices,
+                    included_indices=substituent_indices,
                 )
+
+                electric_field_surface = (
+                    smores_esp_molecule.get_electric_field_surface()
+                )
+                flour.write_cube(
+                    path=row.xyz_file.parent / "STREUSEL_core_excluded.cube",
+                    title1="t1",
+                    title2="t2",
+                    atoms=smores_esp_molecule._atoms,
+                    charges=np.zeros(
+                        len(smores_esp_molecule._atoms), dtype=np.float64
+                    ),
+                    positions=smores_esp_molecule._positions,
+                    voxel_origin=electric_field_surface.voxel_origin,
+                    voxel_size=np.identity(3)
+                    * electric_field_surface.voxel_size,
+                    voxels=np.array(
+                        electric_field_surface.voxels, dtype=np.float64
+                    ),
+                )
+
                 esp_smores_params = smores_esp_molecule.get_steric_parameters()
                 writer.writerow(
                     {
@@ -114,6 +140,7 @@ def main() -> None:
                         "B5": esp_smores_params.B5,
                     }
                 )
+
                 smores_esp_molecule = smores.EspMolecule.from_cube_file(
                     path=row.xyz_file.parent / "ESP.cube",
                     dummy_index=row.dummy_index,

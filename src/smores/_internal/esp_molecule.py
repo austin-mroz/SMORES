@@ -49,7 +49,7 @@ B1=1.9730970556668774, B5=2.320611610648539)
         dummy_index: int,
         attached_index: int,
         electrostatic_potential: VoxelGrid,
-        excluded_indices: typing.Iterable[int] | None = None,
+        included_indices: typing.Iterable[int] | None = None,
     ) -> None:
         """
         Initialize an :class:`.EspMolecule`.
@@ -73,7 +73,7 @@ B1=1.9730970556668774, B5=2.320611610648539)
                 The electrostatic potential used for calculating
                 the steric parameters.
 
-            excluded_indices (list[int]):
+            included_indices (list[int]):
                 The indices of atoms which are not included in the
                 parameter calculation.
 
@@ -86,6 +86,8 @@ B1=1.9730970556668774, B5=2.320611610648539)
         self._positions = np.array(positions, dtype=np.float64)
         self._dummy_index = dummy_index
         self._attached_index = attached_index
+
+        self._included_indices = included_indices
 
         with tempfile.TemporaryDirectory() as tmp_dir:
             electrostatic_potential_file = pathlib.Path(tmp_dir) / "esp.cube"
@@ -110,15 +112,19 @@ B1=1.9730970556668774, B5=2.320611610648539)
             )
             electric_field_surface[streusel_molecule.surface_ijk] = 1
 
-        if excluded_indices is not None:
-            exclude = np.ones(electrostatic_potential.voxels.shape)
-            exclude_size = 10
-            for index in excluded_indices:
+        if self._included_indices is not None:
+            include_size = 10
+            included = np.zeros(shape=electric_field_surface.shape, dtype=bool)
+            for index in self._included_indices:
                 position = self._positions[index]
                 voxel = position // electrostatic_potential.voxel_size
-                voxel_range = slice(voxel - exclude_size, voxel + exclude_size)
-                exclude[voxel_range, voxel_range, voxel_range] = False
-            electric_field_surface[exclude] = False
+                voxel_range = slice(voxel - include_size, voxel + include_size)
+                included[voxel_range, voxel_range, voxel_range] = True
+            electric_field_surface &= included
+            assert False
+
+        assert np.all(np.equal(electric_field_surface_before_block, electric_field_surface))
+        
         self._electric_field_surface = VoxelGrid(
             voxels=electric_field_surface,
             voxel_size=electrostatic_potential.voxel_size,
@@ -179,6 +185,7 @@ B1=1.9730970556668774, B5=2.320611610648539)
         path: pathlib.Path | str,
         dummy_index: int,
         attached_index: int,
+        included_indices: typing.Iterable[int] | None = None,
     ) -> "EspMolecule":
         """
         Get a molecule from a ``.cube`` file.
@@ -193,6 +200,11 @@ B1=1.9730970556668774, B5=2.320611610648539)
 
             attached_index:
                 The index of the attached atom of the substituent.
+            
+            included_indices (list[int]):
+                The indices of atoms which are not included in the
+                parameter calculation.
+
 
         Returns:
             The molecule.
@@ -208,11 +220,30 @@ B1=1.9730970556668774, B5=2.320611610648539)
 
         streusel_molecule = streusel.gaussian_cube.Molecule(str(path))
 
+        electric_field_surface = _get_electric_field_surface(streusel_molecule)
+
         instance._electric_field_surface = VoxelGrid(
-            voxels=_get_electric_field_surface(streusel_molecule),
+            voxels=electric_field_surface,
             voxel_size=cube_data.grid.voxel_size.sum(axis=0),
             voxel_origin=cube_data.grid.origin,
         )
+
+        instance._included_indices = included_indices
+
+        if instance._included_indices is not None:
+            include_size = 10
+            included = np.zeros(
+                shape=electric_field_surface.shape,
+                dtype=np.bool_,
+            )
+            for index in instance._included_indices:
+                position = instance._positions[index]
+                voxel_x, voxel_y, voxel_z = map(int, position // cube_data.grid.voxel_size.sum(axis=0))
+                range_x = slice(voxel_x - include_size, voxel_x + include_size)
+                range_y = slice(voxel_y - include_size, voxel_y + include_size)
+                range_z = slice(voxel_z - include_size, voxel_z + include_size)
+                included[range_x, range_y, range_z] = True
+            #electric_field_surface &= included
 
         return instance
 
