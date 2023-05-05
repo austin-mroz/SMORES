@@ -243,7 +243,7 @@ B1=1.9730970556668774, B5=2.320611610648539)
                 range_y = slice(voxel_y - include_size, voxel_y + include_size)
                 range_z = slice(voxel_z - include_size, voxel_z + include_size)
                 included[range_x, range_y, range_z] = True
-            #electric_field_surface &= included
+            electric_field_surface &= included
 
         return instance
 
