@@ -5,7 +5,9 @@ import pathlib
 import typing
 from dataclasses import dataclass
 
+import flour
 import morfeus
+import numpy as np
 
 import smores
 
@@ -78,26 +80,44 @@ def main() -> None:
                 )
             print("ESP molecule starting")
             smores_esp_molecule = smores.EspMolecule.from_cube_file(
-                    path=row.xyz_file.parent / "ESP.cube",
-                    dummy_index=row.dummy_index,
-                    attached_index=row.attached_index,
-                    )
+                path=row.xyz_file.parent / "ESP.cube",
+                dummy_index=row.dummy_index,
+                attached_index=row.attached_index,
+            )
             esp_smores_params = smores_esp_molecule.get_steric_parameters()
             writer.writerow(
-                    {
-                        "name": row.name,
-                        "core": row.core,
-                        "substituent": row.substituent,
-                        "smiles": row.smiles,
-                        "xyz_file": row.xyz_file,
-                        "dummy_index": row.dummy_index,
-                        "attached_index": row.attached_index,
-                        "radii_type": "streusel_cube",
-                        "L": esp_smores_params.L,
-                        "B1": esp_smores_params.B1,
-                        "B5": esp_smores_params.B5,
-                        },
-                    )
+                {
+                    "name": row.name,
+                    "core": row.core,
+                    "substituent": row.substituent,
+                    "smiles": row.smiles,
+                    "xyz_file": row.xyz_file,
+                    "dummy_index": row.dummy_index,
+                    "attached_index": row.attached_index,
+                    "radii_type": "streusel_cube",
+                    "L": esp_smores_params.L,
+                    "B1": esp_smores_params.B1,
+                    "B5": esp_smores_params.B5,
+                },
+            )
+            electric_field_surface = (
+                smores_esp_molecule.get_electric_field_surface()
+            )
+            flour.write_cube(
+                path=row.xyz_file.parent / "STREUSEL.cube",
+                title1="t1",
+                title2="t2",
+                atoms=smores_esp_molecule._atoms,
+                charges=np.zeros(
+                    len(smores_esp_molecule._atoms), dtype=np.float64
+                ),
+                positions=smores_esp_molecule._positions,
+                voxel_origin=electric_field_surface.voxel_origin,
+                voxel_size=np.identity(3) * electric_field_surface.voxel_size,
+                voxels=np.array(
+                    electric_field_surface.voxels, dtype=np.float64
+                ),
+            )
 
 
 @dataclass(frozen=True, slots=True)
@@ -114,7 +134,6 @@ class CsvRow:
 def _get_rows(
     path: pathlib.Path,
 ) -> typing.Iterator[CsvRow]:
-
     with open(path) as csv_file:
         reader = csv.DictReader(csv_file)
         for row in reader:
