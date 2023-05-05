@@ -38,9 +38,7 @@ def main() -> None:
         writer.writeheader()
 
         for catalyst_input_file in args.input_file:
-
             for row in tuple(_get_rows(catalyst_input_file)):
-
                 smores_molecule = smores.Molecule.from_xyz_file(
                     path=row.xyz_file,
                     dummy_index=row.dummy_index,
@@ -97,6 +95,7 @@ def main() -> None:
                     path=row.xyz_file.parent / "ESP.cube",
                     dummy_index=row.dummy_index,
                     attached_index=row.attached_index,
+                    excluded_indices=core_indices,
                 )
                 esp_smores_params = smores_esp_molecule.get_steric_parameters()
                 writer.writerow(
@@ -109,7 +108,29 @@ def main() -> None:
                         "fragments_file": row.fragments_file,
                         "dummy_index": row.dummy_index,
                         "attached_index": row.attached_index,
-                        "radii_type": "streusel_cube",
+                        "radii_type": "streusel_cube_core_excluded",
+                        "L": esp_smores_params.L,
+                        "B1": esp_smores_params.B1,
+                        "B5": esp_smores_params.B5,
+                    }
+                )
+                smores_esp_molecule = smores.EspMolecule.from_cube_file(
+                    path=row.xyz_file.parent / "ESP.cube",
+                    dummy_index=row.dummy_index,
+                    attached_index=row.attached_index,
+                )
+                esp_smores_params = smores_esp_molecule.get_steric_parameters()
+                writer.writerow(
+                    {
+                        "name": row.name,
+                        "core": row.core,
+                        "substituent": row.substituent,
+                        "smiles": row.smiles,
+                        "xyz_file": row.xyz_file,
+                        "fragments_file": row.fragments_file,
+                        "dummy_index": row.dummy_index,
+                        "attached_index": row.attached_index,
+                        "radii_type": "streusel_cube_core_included",
                         "L": esp_smores_params.L,
                         "B1": esp_smores_params.B1,
                         "B5": esp_smores_params.B5,
@@ -172,7 +193,6 @@ class CsvRow:
 def _get_rows(
     path: pathlib.Path,
 ) -> typing.Iterator[CsvRow]:
-
     with open(path) as csv_file:
         reader = csv.DictReader(csv_file)
         for row in reader:
@@ -193,7 +213,6 @@ def _get_sterimol(
     radii_type: str,
     excluded_indices: list[int] | None = None,
 ) -> morfeus.Sterimol:
-
     elements, coordinates = morfeus.read_xyz(molecule.xyz_file)
     return morfeus.Sterimol(
         elements=elements,

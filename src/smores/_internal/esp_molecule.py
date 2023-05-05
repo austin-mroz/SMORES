@@ -49,6 +49,7 @@ B1=1.9730970556668774, B5=2.320611610648539)
         dummy_index: int,
         attached_index: int,
         electrostatic_potential: VoxelGrid,
+        excluded_indices: typing.Iterable[int] | None = None,
     ) -> None:
         """
         Initialize an :class:`.EspMolecule`.
@@ -71,6 +72,10 @@ B1=1.9730970556668774, B5=2.320611610648539)
             electrostatic_potential:
                 The electrostatic potential used for calculating
                 the steric parameters.
+
+            excluded_indices (list[int]):
+                The indices of atoms which are not included in the
+                parameter calculation.
 
         """
 
@@ -105,10 +110,26 @@ B1=1.9730970556668774, B5=2.320611610648539)
             )
             electric_field_surface[streusel_molecule.surface_ijk] = 1
 
+        if excluded_indices is not None:
+            exclude = np.ones(electrostatic_potential.voxels.shape)
+            exclude_size = 10
+            for index in excluded_indices:
+                position = self._positions[index]
+                voxel = position // electrostatic_potential.voxel_size
+                voxel_range = slice(voxel - exclude_size, voxel + exclude_size)
+                exclude[voxel_range, voxel_range, voxel_range] = False
+            electric_field_surface[exclude] = False
         self._electric_field_surface = VoxelGrid(
             voxels=electric_field_surface,
             voxel_size=electrostatic_potential.voxel_size,
             voxel_origin=electrostatic_potential.voxel_origin,
+        )
+
+    def get_electric_field_surface(self) -> VoxelGrid:
+        return VoxelGrid(
+            voxels=np.array(self._electric_field_surface.voxels),
+            voxel_size=np.array(self._electric_field_surface.voxel_size),
+            voxel_origin=np.array(self._electric_field_surface.voxel_origin),
         )
 
     def get_steric_parameters(self) -> StericParameters:
