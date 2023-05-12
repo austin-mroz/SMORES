@@ -39,11 +39,11 @@ def main() -> None:
                 smores.psi4.calculate_electrostatic_potential(
                     molecule=molecule,
                     output_directory=calculation_directory,
-                    grid_origin=(-8, -8, -8),
-                    grid_length=16.0,
-                    num_voxels_per_dimension=50,
+                    grid_origin=(-20,-20,-20),
+                    grid_length=26.0,
+                    num_voxels_per_dimension=100,
                     optimize=True,
-                    num_threads=10,
+                    num_threads=20,
                 )
                 _append_to_csv(
                     path=csv_output,
