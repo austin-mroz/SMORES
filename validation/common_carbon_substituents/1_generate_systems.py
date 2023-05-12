@@ -3,6 +3,7 @@ import argparse
 import csv
 import pathlib
 
+import atomlite
 import rdkit.Chem as rdkit
 
 import smores
@@ -31,38 +32,30 @@ def main() -> None:
         smores.rdkit_from_smiles("CCC(Br)(CC)CC"): "CEt3",
     }
 
-    with open(args.output_directory / "xyz_files.csv", "w") as csv_file:
-        writer = csv.DictWriter(
-            csv_file,
-            fieldnames=[
-                "name",
-                "core",
-                "substituent",
-                "smiles",
-                "dummy_index",
-                "attached_index",
-                "xyz_file",
-            ],
-        )
-        writer.writeheader()
-        for combo in smores.combine(cores, substituents):
-            name = f"{cores[combo.core]}_{substituents[combo.substituent]}"
-            xyz_file = args.output_directory / f"{name}.xyz"
-            rdkit.MolToXYZFile(combo.product, str(xyz_file))
-            writer.writerow(
-                {
-                    "name": name,
+    system_database = atomlite.Database("common_carbon_substituents.db")
+
+    database_entries = []
+
+    for combo in smores.combine(cores, substituents):
+        name = f"{cores[combo.core]}_{substituents[combo.substituent]}"
+        xyz_file = args.output_directory / f"{name}.xyz"
+        rdkit.MolToXYZFile(combo.product, str(xyz_file))
+
+        database_entries.append(
+            atomlite.Entry.from_rdkit(
+                key=name,
+                molecule=combo.product,
+                properties={
                     "core": cores[combo.core],
                     "substituent": substituents[combo.substituent],
-                    "smiles": rdkit.MolToSmiles(
-                        rdkit.RemoveHs(combo.product),
-                        canonical=True,
-                    ),
                     "dummy_index": combo.dummy_index,
                     "attached_index": combo.attached_index,
                     "xyz_file": xyz_file.resolve(),
                 },
             )
+        )
+
+    system_database.add_entries(database_entries)
 
 
 def _get_command_line_arguments() -> argparse.Namespace:
