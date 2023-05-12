@@ -9,6 +9,9 @@ from dataclasses import dataclass
 import flour
 import morfeus
 import numpy as np
+import numpy.typing as npt
+import pyvista as pv
+import scipy
 
 import smores
 
@@ -121,6 +124,12 @@ def main() -> None:
                     voxels=np.array(
                         electric_field_surface.voxels, dtype=np.float64
                     ),
+                )
+
+                _plot_surface(
+                    row.xyz_file.parent / "STREUSEL_core_excluded.cube",
+                    attached_atom_idx=row.attached_index,
+                    dummy_atom_idx=row.dummy_index,
                 )
 
                 esp_smores_params = smores_esp_molecule.get_steric_parameters()
@@ -252,6 +261,83 @@ def _get_sterimol(
             if excluded_indices is None
             else [index + 1 for index in excluded_indices]
         ),
+    )
+
+
+def _plot_surface(
+    cube_file: pathlib.Path,
+    attached_atom_idx: int,
+    dummy_atom_idx: int,
+) -> None:
+    cube_data = flour.read_cube(cube_file)
+
+    cube_data_positions_idx = _convert_euclidean_positions_to_indices(
+        cube_data
+    )
+
+    streusel_surface = _get_surface(cube_data.grid.voxels)
+
+    streusel_surface_idx = np.argwhere(streusel_surface)
+    streusel_surface_point_cloud = pv.PolyData(streusel_surface_idx)
+
+    p = pv.Plotter()
+    p.add_mesh(streusel_surface_point_cloud)
+    p.add_mesh(
+        pv.PolyData(cube_data_positions_idx[dummy_atom_idx]),
+        point_size=20,
+        color="#69FAAB",
+    )
+    p.add_mesh(
+        pv.PolyData(cube_data_positions_idx[attached_atom_idx]),
+        point_size=20,
+        color="#69FAAB",
+    )
+    p.show()
+
+
+def _get_surface(voxels: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
+    cv = 0.0004
+    is_vacuum = voxels < cv
+    is_non_vacuum = np.logical_not(is_vacuum)
+
+    weights = np.zeros((3, 3, 3))
+    weights[1, 1, 2] = 1
+    weights[1, 1, 0] = 1
+    weights[:, :, 1] = [
+        [0, 1, 0],
+        [1, 0, 1],
+        [0, 1, 0],
+    ]
+
+    convolution_result = scipy.ndimage.convolve(
+        input=is_vacuum.view(np.int8),
+        weights=weights,
+        mode="wrap",
+    )
+    np.multiply(
+        convolution_result,
+        is_non_vacuum.view(np.int8),
+        out=convolution_result,
+    )
+    return (convolution_result > 0).view(np.int8)
+
+
+def _convert_euclidean_positions_to_indices(
+    cube_data,  # : flour.CubeData,
+) -> npt.NDArray:
+    # translate origin and positions to 0,0,0
+    translated_position_matrix = cube_data.positions - cube_data.grid.origin
+
+    lattice_lengths = (
+        cube_data.grid.voxel_size.sum(axis=0) * cube_data.grid.voxels.shape
+    )
+
+    percent_along_lattice_vector = np.divide(
+        translated_position_matrix, lattice_lengths
+    )
+
+    return (percent_along_lattice_vector * cube_data.grid.voxels.shape).astype(
+        int
     )
 
 

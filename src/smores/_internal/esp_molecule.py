@@ -123,8 +123,12 @@ B1=1.9730970556668774, B5=2.320611610648539)
             electric_field_surface &= included
             assert False
 
-        assert np.all(np.equal(electric_field_surface_before_block, electric_field_surface))
-        
+        assert np.all(
+            np.equal(
+                electric_field_surface_before_block, electric_field_surface
+            )
+        )
+
         self._electric_field_surface = VoxelGrid(
             voxels=electric_field_surface,
             voxel_size=electrostatic_potential.voxel_size,
@@ -200,7 +204,7 @@ B1=1.9730970556668774, B5=2.320611610648539)
 
             attached_index:
                 The index of the attached atom of the substituent.
-            
+
             included_indices (list[int]):
                 The indices of atoms which are not included in the
                 parameter calculation.
@@ -231,14 +235,16 @@ B1=1.9730970556668774, B5=2.320611610648539)
         instance._included_indices = included_indices
 
         if instance._included_indices is not None:
-            include_size = 10
+            include_size = 25
             included = np.zeros(
                 shape=electric_field_surface.shape,
                 dtype=np.bool_,
             )
             for index in instance._included_indices:
                 position = instance._positions[index]
-                voxel_x, voxel_y, voxel_z = map(int, position // cube_data.grid.voxel_size.sum(axis=0))
+                voxel_x, voxel_y, voxel_z = map(
+                    int, position // cube_data.grid.voxel_size.sum(axis=0)
+                )
                 range_x = slice(voxel_x - include_size, voxel_x + include_size)
                 range_y = slice(voxel_y - include_size, voxel_y + include_size)
                 range_z = slice(voxel_z - include_size, voxel_z + include_size)
