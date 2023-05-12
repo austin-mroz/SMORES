@@ -14,3 +14,4 @@ docker_testing_environment/requirements.txt
 validation/steric_parameter_distribution_plotting/plots
 /dist
 /build
+slurm*.out
