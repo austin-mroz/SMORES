@@ -50,12 +50,14 @@ def main() -> None:
                     "substituent": substituents[combo.substituent],
                     "dummy_index": combo.dummy_index,
                     "attached_index": combo.attached_index,
-                    "xyz_file": xyz_file.resolve(),
+                    "xyz_file": str(xyz_file),
                 },
             )
         )
 
     system_database.add_entries(database_entries)
+
+    system_database.connection.commit()
 
 
 def _get_command_line_arguments() -> argparse.Namespace:
