@@ -3,7 +3,6 @@ import pathlib
 import tempfile
 import typing
 
-import dbstep.Dbstep as db
 import flour
 import numpy as np
 import numpy.typing as npt
