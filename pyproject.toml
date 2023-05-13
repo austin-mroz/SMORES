@@ -7,12 +7,10 @@ dependencies = [
   'rdkit',
   'stk',
   "ase",
-  "dbstep",
   "streusel",
   "morfeus-ml",
   "flour",
   "pyvista",
-  "atomlite",
 ]
 requires-python = ">=3.10"
 

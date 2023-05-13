@@ -39,3 +39,11 @@ check:
 build-testing-environment:
   pip-compile -o docker_testing_environment/requirements.txt --extra dev pyproject.toml
   docker image build -t smores-testing-environment:latest docker_testing_environment
+
+# create python 3.10 environment
+venv-310:
+  conda create -p .py310 python=3.10
+
+# create python 3.11 environment
+venv-311:
+  conda create -p .py311 python=3.11
