@@ -42,6 +42,7 @@ def main() -> None:
                     ),
                 )
 
+                database.commit()
             except Exception as ex:
                 print(
                     f"Issue with: {molecule_input.name}\n{ex}",
