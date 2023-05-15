@@ -10,8 +10,7 @@ from dataclasses import dataclass
 import rdkit.Chem as rdkit
 
 import smores
-
-# import smores.psi4
+import smores.psi4
 
 
 def main() -> None:
@@ -25,6 +24,7 @@ def main() -> None:
         calculation_directory = args.output_directory / molecule_input.name
         if not calculation_directory.exists():
             try:
+                print(molecule_input.name)
                 molecule = rdkit.MolFromXYZFile(str(molecule_input.xyz_file))
                 smores.psi4.calculate_electrostatic_potential(
                     molecule=molecule,
