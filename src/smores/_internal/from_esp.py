@@ -84,7 +84,7 @@ def _calculate_B(
     )
 
     # project clipped surface to plane
-    projected = clipped.project_points_to_plane()
+    # projected = clipped.project_points_to_plane()
 
     clipped_and_dummy = pv.PolyData(clipped.points) + pv.PolyData(
         dummy_atom_idx
