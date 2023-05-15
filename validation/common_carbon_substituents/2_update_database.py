@@ -23,34 +23,17 @@ def main() -> None:
 
     for molecule_input in molecules:
         calculation_directory = args.output_directory / molecule_input.name
-        if True:  # not calculation_directory.exists():
-            try:
-                molecule = rdkit.MolFromXYZFile(str(molecule_input.xyz_file))
-                smores.psi4.calculate_electrostatic_potential(
-                    molecule=molecule,
-                    output_directory=calculation_directory,
-                    grid_origin=(-20, -20, -20),
-                    grid_length=26.0,
-                    num_voxels_per_dimension=100,
-                    optimize=True,
-                    num_threads=20,
-                )
 
-                cursor.execute(
-                    "UPDATE molecules SET properties=json_insert(properties,?,?) WHERE key=?",
-                    (
-                        "$.esp_file",
-                        str(calculation_directory / "ESP.cube"),
-                        molecule_input.name,
-                    ),
-                )
+        cursor.execute(
+            "UPDATE molecules SET properties=json_insert(properties,?,?) WHERE key=?",
+            (
+                "$.esp_file",
+                str(calculation_directory / "ESP.cube"),
+                molecule_input.name,
+            ),
+        )
 
-                database.commit()
-            except Exception as ex:
-                print(
-                    f"Issue with: {molecule_input.name}\n{ex}",
-                    file=sys.stderr,
-                )
+        database.commit()
 
     database.close()
 
