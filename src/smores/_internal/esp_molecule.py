@@ -155,6 +155,8 @@ B1=1.9730970556668774, B5=2.320611610648539)
             resolution=self._electric_field_surface.voxel_size,
             voxel_grid_shape=self._electric_field_surface.voxels.shape,
         )
+        print("within espmolecule")
+        print(cube_data_positions_idx[self._attached_index])
         return calculate_steric_parameters_from_esp(
             self._electric_field_surface.voxels.astype(float),
             self._electric_field_surface.voxel_size * np.identity(3),
@@ -306,7 +308,7 @@ def _convert_euclidean_positions_to_indices(
     # translate origin and positions to 0,0,0
     translated_position_matrix = positions - origin
 
-    lattice_lengths = resolution.sum(axis=0) * np.asarray(voxel_grid_shape)
+    lattice_lengths = resolution * np.asarray(voxel_grid_shape)
 
     percent_along_lattice_vector = np.divide(
         translated_position_matrix, lattice_lengths
