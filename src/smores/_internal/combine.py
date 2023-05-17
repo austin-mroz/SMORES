@@ -176,7 +176,6 @@ def _get_building_block(
     molecule: rdkit.Mol,
     join_atom: str,
 ) -> stk.BuildingBlock:
-
     factories = {
         "F": stk.FluoroFactory(),
         "Br": stk.BromoFactory(),
