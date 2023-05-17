@@ -37,7 +37,7 @@ def main() -> None:
                 )
 
                 cursor.execute(
-                    "UPDATE molecules SET properties=json_insert(properties,?,?) WHERE key=?",
+                    "UPDATE molecules SET properties=json_set(properties,?,?) WHERE key=?",
                     (
                         "$.esp_file",
                         str(calculation_directory / "ESP.cube"),
