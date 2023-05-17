@@ -75,6 +75,8 @@ def main() -> None:
             voxels=np.array(electric_field_surface.voxels, dtype=np.float64),
         )
 
+        esp_smores_params = smores_esp_molecule.get_steric_parameters()
+
         _plot_surface(
             pathlib.Path(system.properties["esp_file"]).parent
             / "STREUSEL.cube",
@@ -137,7 +139,7 @@ def _plot_surface(
         point_size=20,
         color="#69FAAB",
     )
-    p.show()
+    p.show(screenshot="c_h.png")
 
 
 def _convert_euclidean_positions_to_indices(
