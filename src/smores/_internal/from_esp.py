@@ -76,13 +76,15 @@ def _calculate_B(
 
     streusel_surface_point_cloud = pv.PolyData(streusel_surface_idx)
 
+    print(streusel_surface_point_cloud.points)
+    print(dummy_atom_idx, attached_atom_idx)
     # define plane with center at core and normal along substituent
     b_vector_plane = pv.Plane(attached_atom_idx, dummy_atom_idx)
 
     clipped = streusel_surface_point_cloud.clip(
         normal=dummy_atom_idx, origin=attached_atom_idx
     )
-
+    print(clipped.points)
     # project clipped surface to plane
     # projected = clipped.project_points_to_plane()
 
