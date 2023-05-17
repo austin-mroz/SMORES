@@ -19,8 +19,8 @@ class BValues:
 def calculate_steric_parameters_from_esp(
     streusel_surface: npt.NDArray[np.float64],
     resolution: np.float32,
-    attached_atom_idx: npt.NDArray[int],
-    dummy_atom_idx: npt.NDArray[int],
+    attached_atom_idx: npt.NDArray[np.int_],
+    dummy_atom_idx: npt.NDArray[np.int_],
 ) -> StericParameters:
     l_value = _calculate_L(
         attached_atom_idx,
