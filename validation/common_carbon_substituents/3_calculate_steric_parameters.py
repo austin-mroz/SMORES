@@ -15,7 +15,6 @@ import smores
 
 def main() -> None:
     args = _get_command_line_arguments()
-    args.output_directory.mkdir(parents=True, exist_ok=True)
 
     radii_types = ("alvarez", "bondi", "crc", "rahm", "pyykko", "truhlar")
 
@@ -57,33 +56,6 @@ def main() -> None:
             attached_index=int(system.properties["attached_index"]),
         )
 
-        electric_field_surface = (
-            smores_esp_molecule.get_electric_field_surface()
-        )
-        flour.write_cube(
-            path=pathlib.Path(system.properties["esp_file"]).parent
-            / "STREUSEL.cube",
-            title1="t1",
-            title2="t2",
-            atoms=smores_esp_molecule._atoms,
-            charges=np.zeros(
-                len(smores_esp_molecule._atoms), dtype=np.float64
-            ),
-            positions=smores_esp_molecule._positions,
-            voxel_origin=electric_field_surface.voxel_origin,
-            voxel_size=np.identity(3) * electric_field_surface.voxel_size,
-            voxels=np.array(electric_field_surface.voxels, dtype=np.float64),
-        )
-
-        esp_smores_params = smores_esp_molecule.get_steric_parameters()
-
-        _plot_surface(
-            pathlib.Path(system.properties["esp_file"]).parent
-            / "STREUSEL.cube",
-            attached_atom_idx=system.properties["attached_index"],
-            dummy_atom_idx=system.properties["dummy_index"],
-        )
-
         esp_smores_params = smores_esp_molecule.get_steric_parameters()
 
         new_entry = atomlite.PropertyEntry(
@@ -94,7 +66,7 @@ def main() -> None:
                 "streusel_cube_B5": esp_smores_params.B5,
             },
         )
-
+        database.update_properties(new_entry)
     database.connection.commit()
 
 
@@ -203,13 +175,6 @@ def _get_command_line_arguments() -> argparse.Namespace:
         type=pathlib.Path,
         default=pathlib.Path.cwd() / "common_carbon_substituents.db",
     )
-    parser.add_argument(
-        "-o",
-        "--output_directory",
-        type=pathlib.Path,
-        default=pathlib.Path.cwd() / "3_output",
-    )
-    return parser.parse_args()
 
 
 if __name__ == "__main__":
