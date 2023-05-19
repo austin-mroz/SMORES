@@ -36,9 +36,9 @@ def calculate_steric_parameters_from_esp(
     )
 
     return StericParameters(
-        L=l_value.sum(axis=0),
-        B1=b_values.Bmin.sum(axis=0),
-        B5=b_values.Bmax.sum(axis=0),
+        L=l_value,
+        B1=b_values.Bmin,
+        B5=b_values.Bmax,
     )
 
 
@@ -49,9 +49,6 @@ def _calculate_L(
     resolution: np.float32,
 ) -> np.float32:
     streusel_surface_idx = np.argwhere(streusel_surface)
-    print(streusel_surface_idx)
-    print(dummy_atom_idx)
-    print(attached_atom_idx)
     product = np.cross(
         streusel_surface_idx - dummy_atom_idx,
         attached_atom_idx - dummy_atom_idx,
@@ -62,8 +59,9 @@ def _calculate_L(
         distances = np.abs(product)
 
     streusel_surface_L_point = streusel_surface_idx[distances.argmin()]
-
-    return resolution * math.dist(attached_atom_idx, streusel_surface_L_point)
+    return np.average(
+        resolution * math.dist(attached_atom_idx, streusel_surface_L_point)
+    )
 
 
 def _calculate_B(
@@ -71,20 +69,17 @@ def _calculate_B(
     dummy_atom_idx: npt.NDArray,
     streusel_surface: npt.NDArray[np.float64],
     resolution: float,
-) -> None:
+) -> BValues:
     streusel_surface_idx = np.argwhere(streusel_surface)
 
     streusel_surface_point_cloud = pv.PolyData(streusel_surface_idx)
 
-    print(streusel_surface_point_cloud.points)
-    print(dummy_atom_idx, attached_atom_idx)
     # define plane with center at core and normal along substituent
     b_vector_plane = pv.Plane(attached_atom_idx, dummy_atom_idx)
 
     clipped = streusel_surface_point_cloud.clip(
         normal=dummy_atom_idx, origin=attached_atom_idx
     )
-    print(clipped.points)
     # project clipped surface to plane
     # projected = clipped.project_points_to_plane()
 
@@ -123,7 +118,7 @@ def _calculate_B(
     )
     return BValues(
         Bmin=b1,
-        Bmax=b5,
+        Bmax=np.average(b5),
     )
 
 
