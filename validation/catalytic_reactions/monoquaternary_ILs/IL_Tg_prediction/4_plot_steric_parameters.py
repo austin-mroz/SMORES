@@ -1,8 +1,10 @@
 #!python
 
 import argparse
+import itertools
 import pathlib
 
+import atomlite
 import pandas as pd
 import seaborn as sns
 
@@ -11,7 +13,7 @@ def main() -> None:
     args = _get_command_line_arguments()
     args.output_directory.mkdir(parents=True, exist_ok=True)
 
-    df = pd.read_csv(args.input_file)
+    df = _convert_database_to_dataframe(atomlite.Database(args.database))
     _plot_morfeus_sterimol_xyz_performance(df, args.output_directory)
 
     for core, core_df in df.groupby("core"):
@@ -30,6 +32,42 @@ def main() -> None:
             parameter="B5",
             figure_path=args.output_directory / f"{core}_B5.png",
         )
+
+
+def _convert_database_to_dataframe(
+    database: atomlite.Database,
+) -> pd.DataFrame:
+    df = pd.DataFrame()
+
+    # get list of unique radii
+    radii_types = [
+        k.replace("_B1", "")
+        for k, v in next(database.get_entries()).properties.items()
+        if "_B1" in k
+    ]
+
+    for radii_type, entry in itertools.product(
+        radii_types, database.get_entries()
+    ):
+        nrow = pd.DataFrame(
+            [
+                [
+                    entry.key,
+                    entry.properties["core"],
+                    entry.properties["substituent"],
+                    radii_type,
+                    entry.properties[f"{radii_type}_L"],
+                    entry.properties[f"{radii_type}_B1"],
+                    entry.properties[f"{radii_type}_B5"],
+                ]
+            ]
+        )
+        tempdf = pd.concat([df, nrow])
+        df = pd.DataFrame(tempdf)
+
+    df.columns = ["name", "core", "substituent", "radii_type", "L", "B1", "B5"]
+
+    return df.reset_index()
 
 
 def _plot_sterimol_parameter_by_radii_type(
@@ -57,7 +95,6 @@ def _plot_morfeus_sterimol_xyz_performance(
     df: pd.DataFrame,
     output_directory: pathlib.Path,
 ) -> None:
-
     plot = sns.stripplot(
         data=df.melt(
             id_vars=["radii_type"],
@@ -84,22 +121,27 @@ def _plot_morfeus_sterimol_xyz_performance(
 def _get_command_line_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-i",
-        "--input_file",
+        "-d",
+        "--database",
         help=(
-            'A csv file with columns: "name", "core", '
-            '"subsittuent", "radii_type", "L", "B1", "B5"'
+            'An atomlite database file with properties: "core", "substituent", '
+            '"xyz_file", "esp_file", dummy_index" and "attached_index".'
         ),
         type=pathlib.Path,
-        default=pathlib.Path.cwd() / "3_output" / "steric_parameters.csv",
+        default=pathlib.Path.cwd() / "catalyst_systems.db",
     )
     parser.add_argument(
         "-o",
         "--output_directory",
+        help="The directory into which the results are written.",
         type=pathlib.Path,
-        default=pathlib.Path.cwd() / "4_output",
+        default=_get_output_directory() / "4_output",
     )
     return parser.parse_args()
+
+
+def _get_output_directory() -> pathlib.Path:
+    return pathlib.Path(str(pathlib.Path.cwd()).replace("work", "data"))
 
 
 if __name__ == "__main__":

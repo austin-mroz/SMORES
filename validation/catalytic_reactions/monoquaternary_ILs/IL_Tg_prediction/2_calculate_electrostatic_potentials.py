@@ -86,11 +86,17 @@ def _get_command_line_arguments() -> argparse.Namespace:
     parser.add_argument(
         "-o",
         "--output_directory",
-        help="The directory into which the results are written.",
+        default=_get_output_directory(),
         type=pathlib.Path,
-        default=pathlib.Path.cwd() / "2_output",
+        help="The directory into which the output files are written.",
     )
     return parser.parse_args()
+
+
+def _get_output_directory() -> pathlib.Path:
+    return pathlib.Path(
+        str(pathlib.Path.cwd() / "2_output").replace("work", "data")
+    )
 
 
 if __name__ == "__main__":

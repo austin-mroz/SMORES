@@ -15,13 +15,14 @@ import smores
 
 def main() -> None:
     args = _get_command_line_arguments()
-    args.output_directory.mkdir(parents=True, exist_ok=True)
 
     radii_types = ("alvarez", "bondi", "crc", "rahm", "pyykko", "truhlar")
 
     database = atomlite.Database(args.database)
 
     for system in database.get_entries():
+        print(system.key)
+
         smores_molecule = smores.Molecule.from_xyz_file(
             path=pathlib.Path(system.properties["xyz_file"]),
             dummy_index=system.properties["dummy_index"],
@@ -50,38 +51,10 @@ def main() -> None:
             )
             database.update_properties(new_entry)
 
-        print(system.key)
         smores_esp_molecule = smores.EspMolecule.from_cube_file(
             path=pathlib.Path(system.properties["esp_file"]),
             dummy_index=int(system.properties["dummy_index"]),
             attached_index=int(system.properties["attached_index"]),
-        )
-
-        electric_field_surface = (
-            smores_esp_molecule.get_electric_field_surface()
-        )
-        flour.write_cube(
-            path=pathlib.Path(system.properties["esp_file"]).parent
-            / "STREUSEL.cube",
-            title1="t1",
-            title2="t2",
-            atoms=smores_esp_molecule._atoms,
-            charges=np.zeros(
-                len(smores_esp_molecule._atoms), dtype=np.float64
-            ),
-            positions=smores_esp_molecule._positions,
-            voxel_origin=electric_field_surface.voxel_origin,
-            voxel_size=np.identity(3) * electric_field_surface.voxel_size,
-            voxels=np.array(electric_field_surface.voxels, dtype=np.float64),
-        )
-
-        esp_smores_params = smores_esp_molecule.get_steric_parameters()
-
-        _plot_surface(
-            pathlib.Path(system.properties["esp_file"]).parent
-            / "STREUSEL.cube",
-            attached_atom_idx=system.properties["attached_index"],
-            dummy_atom_idx=system.properties["dummy_index"],
         )
 
         esp_smores_params = smores_esp_molecule.get_steric_parameters()
@@ -89,12 +62,12 @@ def main() -> None:
         new_entry = atomlite.PropertyEntry(
             key=system.key,
             properties={
-                "streusel_cube_L": esp_smores_params.L,
-                "streusel_cube_B1": esp_smores_params.B1,
-                "streusel_cube_B5": esp_smores_params.B5,
+                "streusel_cube_L": esp_smores_params.L * 0.529,
+                "streusel_cube_B1": esp_smores_params.B1 * 0.529,
+                "streusel_cube_B5": esp_smores_params.B5 * 0.529,
             },
         )
-
+        database.update_properties(new_entry)
     database.connection.commit()
 
 
@@ -111,83 +84,6 @@ def _get_sterimol(
     )
 
 
-def _plot_surface(
-    cube_file: pathlib.Path,
-    attached_atom_idx: int,
-    dummy_atom_idx: int,
-) -> None:
-    cube_data = flour.read_cube(cube_file)
-
-    cube_data_positions_idx = _convert_euclidean_positions_to_indices(
-        cube_data
-    )
-
-    streusel_surface = _get_surface(cube_data.grid.voxels)
-
-    streusel_surface_idx = np.argwhere(streusel_surface)
-    streusel_surface_point_cloud = pv.PolyData(streusel_surface_idx)
-
-    p = pv.Plotter()
-    p.add_mesh(streusel_surface_point_cloud)
-    p.add_mesh(
-        pv.PolyData(cube_data_positions_idx[dummy_atom_idx]),
-        point_size=20,
-        color="#69FAAB",
-    )
-    p.add_mesh(
-        pv.PolyData(cube_data_positions_idx[attached_atom_idx]),
-        point_size=20,
-        color="#69FAAB",
-    )
-    p.show(screenshot="c_h.png")
-
-
-def _convert_euclidean_positions_to_indices(
-    cube_data,  # : flour.CubeData,
-) -> npt.NDArray:
-    # translate origin and positions to 0,0,0
-    translated_position_matrix = cube_data.positions - cube_data.grid.origin
-
-    lattice_lengths = (
-        cube_data.grid.voxel_size.sum(axis=0) * cube_data.grid.voxels.shape
-    )
-
-    percent_along_lattice_vector = np.divide(
-        translated_position_matrix, lattice_lengths
-    )
-
-    return (percent_along_lattice_vector * cube_data.grid.voxels.shape).astype(
-        int
-    )
-
-
-def _get_surface(voxels: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
-    cv = 0.0004
-    is_vacuum = voxels < cv
-    is_non_vacuum = np.logical_not(is_vacuum)
-
-    weights = np.zeros((3, 3, 3))
-    weights[1, 1, 2] = 1
-    weights[1, 1, 0] = 1
-    weights[:, :, 1] = [
-        [0, 1, 0],
-        [1, 0, 1],
-        [0, 1, 0],
-    ]
-
-    convolution_result = scipy.ndimage.convolve(
-        input=is_vacuum.view(np.int8),
-        weights=weights,
-        mode="wrap",
-    )
-    np.multiply(
-        convolution_result,
-        is_non_vacuum.view(np.int8),
-        out=convolution_result,
-    )
-    return (convolution_result > 0).view(np.int8)
-
-
 def _get_command_line_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Calculate and SMORES and sterimol parameters.",
@@ -202,12 +98,6 @@ def _get_command_line_arguments() -> argparse.Namespace:
         ),
         type=pathlib.Path,
         default=pathlib.Path.cwd() / "catalyst_systems.db",
-    )
-    parser.add_argument(
-        "-o",
-        "--output_directory",
-        type=pathlib.Path,
-        default=pathlib.Path.cwd() / "3_output",
     )
     return parser.parse_args()
 

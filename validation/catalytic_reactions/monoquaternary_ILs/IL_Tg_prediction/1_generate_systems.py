@@ -5,7 +5,6 @@ import pathlib
 
 import atomlite
 import rdkit.Chem as rdkit
-import vanila
 
 import smores
 
@@ -13,34 +12,28 @@ import smores
 def main() -> None:
     args = _get_command_line_arguments()
     args.output_directory.mkdir(parents=True, exist_ok=True)
-
+    print(args.output_directory)
     cores = {
-        smores.rdkit_from_smiles("BrN1C=CN=C1C2N(Br)CC[NH+]2Br"): "JOC_2",
+        smores.rdkit_from_smiles("Br[NH+]1CCN(CCCC)C1C2=NC=CN2CCCC"): "JOC_2",
     }
 
     # naming scheme is R1_R1
 
     substituents = {
-        smores.rdkit_from_smiles("CBr"): "CH3",
-        smores.rdkit_from_smiles("CCBr"): "CH2CH3",
-        smores.rdkit_from_smiles("CCCBr"): "CH2CH2CH3",
+        # smores.rdkit_from_smiles("CBr"): "CH3",
+        # smores.rdkit_from_smiles("CCBr"): "CH2CH3",
+        # smores.rdkit_from_smiles("CCCBr"): "CH2CH2CH3",
         smores.rdkit_from_smiles("CCCCBr"): "CH2CH2CH2CH3",
-        smores.rdkit_from_smiles("FC(F)(F)CBr"): "CH2CF3",
-        smores.rdkit_from_smiles("FC(F)(F)CCBr"): "CH2CH2CF3",
+        # smores.rdkit_from_smiles("FC(F)(F)CBr"): "CH2CF3",
+        # smores.rdkit_from_smiles("FC(F)(F)CCBr"): "CH2CH2CF3",
+        smores.rdkit_from_smiles("FC(F)(F)CCCBr"): "CH2CH2CH2CF3",
     }
 
     system_database = atomlite.Database("catalyst_systems.db")
 
     database_entries = []
 
-    for combo in vanila.combine._get_one_core_n_cap_ions(
-        substituents,
-        cores,
-        join_atom="Br",
-        output_directory=pathlib.Path.cwd(),
-    ):
-        print(combo)
-        exit()
+    for combo in smores.combine(cores, substituents):
         name = f"{cores[combo.core]}_{substituents[combo.substituent]}"
         xyz_file = args.output_directory / f"{name}.xyz"
         rdkit.MolToXYZFile(combo.product, str(xyz_file))
@@ -73,11 +66,17 @@ def _get_command_line_arguments() -> argparse.Namespace:
     parser.add_argument(
         "-o",
         "--output_directory",
-        default=pathlib.Path.cwd() / "1_output",
+        default=_get_output_directory(),
         type=pathlib.Path,
         help="The directory into which the output files are written.",
     )
     return parser.parse_args()
+
+
+def _get_output_directory() -> pathlib.Path:
+    return pathlib.Path(
+        str(pathlib.Path.cwd() / "1_output").replace("work", "data")
+    )
 
 
 if __name__ == "__main__":

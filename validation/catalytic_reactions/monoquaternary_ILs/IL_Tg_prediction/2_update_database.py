@@ -28,9 +28,12 @@ def main() -> None:
                     pathlib.Path(system.properties["xyz_file"]),
                     args.output_directory,
                 ),
+                "esp_file": _replace_directory(
+                    pathlib.Path(system.properties["esp_file"]),
+                    args.output_directory,
+                ),
             },
         )
-
         database.update_properties(entry)
     database.connection.commit()
 
@@ -39,8 +42,13 @@ def _replace_directory(
     input_directory: pathlib.Path,
     output_directory: pathlib.Path,
 ) -> str:
-    input_parts = list(input_directory.parts)[-2:]
-    return str(output_directory / input_parts[0] / input_parts[1])
+    input_parts = list(input_directory.parts)[-3:]
+    if "xyz" in input_parts[-1]:
+        return str(output_directory / input_parts[1] / input_parts[2])
+    elif "cube" in input_parts[-1]:
+        return str(
+            output_directory / input_parts[0] / input_parts[1] / input_parts[2]
+        )
 
 
 def _get_command_line_arguments() -> argparse.Namespace:
