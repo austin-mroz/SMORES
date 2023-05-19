@@ -5,6 +5,7 @@ __pycache__
 *.egg-info
 method_tests/efield_generation/res_check
 **/?_output*
+**/*.db
 timer.dat
 docs/build
 docs/source/_autosummary
