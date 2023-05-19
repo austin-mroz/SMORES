@@ -176,6 +176,8 @@ def _get_command_line_arguments() -> argparse.Namespace:
         default=pathlib.Path.cwd() / "common_carbon_substituents.db",
     )
 
+    return parser.parse_args()
+
 
 if __name__ == "__main__":
     main()
