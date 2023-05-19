@@ -28,6 +28,7 @@ def calculate_steric_parameters_from_esp(
         streusel_surface,
         resolution.sum(axis=1),
     )
+
     b_values = _calculate_B(
         attached_atom_idx,
         dummy_atom_idx,
