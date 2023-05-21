@@ -61,9 +61,9 @@ def main() -> None:
         new_entry = atomlite.PropertyEntry(
             key=system.key,
             properties={
-                "streusel_cube_L": esp_smores_params.L,
-                "streusel_cube_B1": esp_smores_params.B1,
-                "streusel_cube_B5": esp_smores_params.B5,
+                "streusel_cube_L": esp_smores_params.L * 0.529,
+                "streusel_cube_B1": esp_smores_params.B1 * 0.529,
+                "streusel_cube_B5": esp_smores_params.B5 * 0.529,
             },
         )
         database.update_properties(new_entry)
