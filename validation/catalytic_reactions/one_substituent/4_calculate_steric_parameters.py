@@ -98,7 +98,7 @@ def main() -> None:
                         "B5": smores_core_excluded_params.B5,
                     }
                 )
-
+                """
                 smores_esp_molecule = smores.EspMolecule.from_cube_file(
                     path=row.xyz_file.parent / "ESP.cube",
                     dummy_index=row.dummy_index,
@@ -149,7 +149,7 @@ def main() -> None:
                         "B5": esp_smores_params.B5,
                     }
                 )
-
+                """
                 smores_esp_molecule = smores.EspMolecule.from_cube_file(
                     path=row.xyz_file.parent / "ESP.cube",
                     dummy_index=row.dummy_index,
@@ -167,9 +167,9 @@ def main() -> None:
                         "dummy_index": row.dummy_index,
                         "attached_index": row.attached_index,
                         "radii_type": "streusel_cube_core_included",
-                        "L": esp_smores_params.L,
-                        "B1": esp_smores_params.B1,
-                        "B5": esp_smores_params.B5,
+                        "L": esp_smores_params.L * 0.529,
+                        "B1": esp_smores_params.B1 * 0.529,
+                        "B5": esp_smores_params.B5 * 0.529,
                     }
                 )
 
@@ -354,7 +354,9 @@ def _get_command_line_arguments() -> argparse.Namespace:
             '"smiles", "xyz_file", "dummy_index" and "attached_index".'
         ),
         type=pathlib.Path,
-        default=pathlib.Path.cwd()
+        default=pathlib.Path(
+            "/home/bogosort/data/SMORES/implement-atomlite/validation/catalytic_reactions/one_substituent"
+        )
         .joinpath("3_output")
         .glob("*/xyz_files.csv"),
         nargs="+",
