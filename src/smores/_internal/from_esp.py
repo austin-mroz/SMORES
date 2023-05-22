@@ -97,9 +97,8 @@ def _calculate_B(
     distances = []
     for point in substituent_shadow:
         distances.append(distance.euclidean(projected_dummy_atom_idx, point))
-
-    b5 = np.max(distances) * resolution**3
-    print(f"Bmax: {b5}")  # [0].sum()}")
+    b5 = np.max(distances) * resolution
+    print(f"Bmax: {np.average(b5)}")  # [0].sum()}")
     index_max = np.argmax(distances)
     max_point = substituent_shadow[index_max]
     circle = pv.Cylinder(
@@ -230,7 +229,7 @@ def _get_furthest_point_along_vector(
     else:
         distances = np.abs(product)
     b1 = molecule_shadow[distances.argmax()]
-    return resolution**3 * math.dist(starting_point, b1)
+    return resolution * math.dist(starting_point, b1)
 
 
 def get_circle_points(radius, center_point):
