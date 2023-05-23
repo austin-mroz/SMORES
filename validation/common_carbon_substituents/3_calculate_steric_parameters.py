@@ -56,7 +56,10 @@ def main() -> None:
             attached_index=int(system.properties["attached_index"]),
         )
 
-        esp_smores_params = smores_esp_molecule.get_steric_parameters()
+        esp_smores_params = smores_esp_molecule.get_steric_parameters(
+            plot=True,
+            output_path=pathlib.Path.cwd() / f"{system.key}_pointcloud.png",
+        )
 
         new_entry = atomlite.PropertyEntry(
             key=system.key,
