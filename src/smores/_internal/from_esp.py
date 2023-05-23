@@ -11,9 +11,17 @@ from smores._internal.steric_parameters import StericParameters
 
 
 @dataclass(frozen=True, slots=True)
+class Lvalue:
+    L: float
+    L_idx: npt.NDArray[np.float64]
+
+
+@dataclass(frozen=True, slots=True)
 class BValues:
     Bmin: float
     Bmax: float
+    Bmin_idx: npt.NDArray[np.float64]
+    Bmax_idx: npt.NDArray[np.float64]
 
 
 def calculate_steric_parameters_from_esp(
@@ -35,9 +43,8 @@ def calculate_steric_parameters_from_esp(
         streusel_surface,
         resolution.sum(axis=1),
     )
-
     return StericParameters(
-        L=l_value,
+        L=l_value.L,
         B1=b_values.Bmin,
         B5=b_values.Bmax,
     )
@@ -48,7 +55,7 @@ def _calculate_L(
     dummy_atom_idx: npt.NDArray,  # core
     streusel_surface: npt.NDArray[np.float64],
     resolution: np.float32,
-) -> np.float32:
+) -> Lvalue:
     streusel_surface_idx = np.argwhere(streusel_surface)
     product = np.cross(
         streusel_surface_idx - dummy_atom_idx,
@@ -60,8 +67,11 @@ def _calculate_L(
         distances = np.abs(product)
 
     streusel_surface_L_point = streusel_surface_idx[distances.argmin()]
-    return np.average(
-        resolution * math.dist(attached_atom_idx, streusel_surface_L_point)
+    return Lvalue(
+        L=np.average(
+            resolution * math.dist(attached_atom_idx, streusel_surface_L_point)
+        ),
+        L_idx=np.array(streusel_surface_L_point),
     )
 
 
@@ -73,145 +83,46 @@ def _calculate_B(
 ) -> BValues:
     streusel_surface_idx = np.argwhere(streusel_surface)
 
-    streusel_surface_point_cloud = pv.PolyData(streusel_surface_idx)
-
-    # define plane with center at core and normal along substituent
-    b_vector_plane = pv.Plane(attached_atom_idx, dummy_atom_idx)
-
-    clipped = streusel_surface_point_cloud.clip(
-        normal=dummy_atom_idx, origin=attached_atom_idx
-    )
-    # project clipped surface to plane
-    # projected = clipped.project_points_to_plane()
-
-    clipped_and_dummy = pv.PolyData(clipped.points) + pv.PolyData(
-        dummy_atom_idx
-    )
-    merged_projected = clipped_and_dummy.project_points_to_plane(
-        origin=attached_atom_idx, normal=dummy_atom_idx
+    clipped = pv.PolyData(streusel_surface_idx).clip(
+        normal=attached_atom_idx - dummy_atom_idx,
+        origin=attached_atom_idx,
     )
 
-    projected_dummy_atom_idx = merged_projected.points[-1]
-    substituent_shadow = merged_projected.points[:-1]
-
-    distances = []
-    for point in substituent_shadow:
-        distances.append(distance.euclidean(projected_dummy_atom_idx, point))
-    b5 = np.max(distances) * resolution
-    print(f"Bmax: {np.average(b5)}")  # [0].sum()}")
-    index_max = np.argmax(distances)
-    max_point = substituent_shadow[index_max]
-    circle = pv.Cylinder(
-        center=merged_projected.points[-1],
-        direction=clipped_and_dummy.points[-1],
-        radius=np.max(distances),
-        resolution=100,
-    )
-    circle_arc = pv.CircularArcFromNormal(
-        center=merged_projected.points[-1],
-        normal=clipped_and_dummy.points[-1],
-        polar=substituent_shadow[index_max],
+    shadow = clipped.project_points_to_plane(
+        normal=attached_atom_idx - dummy_atom_idx,
+        origin=attached_atom_idx,
     )
 
-    b1 = _calculate_B1(
-        distances, merged_projected.points, dummy_atom_idx, resolution
-    )
-    return BValues(
-        Bmin=b1,
-        Bmax=np.average(b5),
-    )
-
-
-def _calculate_B1(
-    distances, molecule_shadow, dummy_atom_idx, resolution
-) -> np.float64:
-    def rotateVector3D(v, theta, axis):
-        """Takes a three-dimensional vector v and rotates it by the angle theta around the specified axis."""
-        return np.dot(rotationMatrix3D(theta, axis), v)
-
-    def rotationMatrix3D(theta, axis):
-        """Return the rotation matrix associated with counterclockwise rotation about
-        the given axis by theta radians.
-        """
-        axis = np.asarray(axis) / np.sqrt(np.dot(axis, axis))
-        a = np.cos(theta / 2.0)
-        b, c, d = -axis * np.sin(theta / 2.0)
-        aa, bb, cc, dd = a**2, b**2, c**2, d**2
-        bc, ad, ac, ab, bd, cd = b * c, a * d, a * c, a * b, b * d, c * d
-        return np.array(
-            [
-                [aa + bb - cc - dd, 2 * (bc + ad), 2 * (bd - ac)],
-                [2 * (bc - ad), aa + cc - bb - dd, 2 * (cd + ab)],
-                [2 * (bd + ac), 2 * (cd - ab), aa + dd - bb - cc],
-            ]
-        )
-
-    def drawObject(ax, pts, color="red"):
-        """Draws an object on a specified 3D axis with points and lines between consecutive points."""
-        map(lambda pt: ax.scatter(*pt, s=10, color=color), pts)
-        for k in range(len(pts) - 1):
-            x, y, z = zip(*pts[k : k + 2])
-            ax.plot(x, y, z, color=color, linewidth=1.0)
-        x, y, z = zip(*[pts[-1], pts[0]])
-        ax.plot(x, y, z, color=color, linewidth=1.0)
-
-    def normalVector(obj):
-        """Takes a set of points, assumed to be flat, and returns a normal vector with unit length."""
-        n = np.cross(
-            np.array(obj[1]) - np.array(obj[0]),
-            np.array(obj[2]) - np.array(obj[0]),
-        )
-        return n / np.sqrt(np.dot(n, n))
-
-    print("===== CALCULATING B1 =====")
-    radius = np.max(distances)
-    center_point = molecule_shadow[-1]
-
-    circle_points = get_circle_points(radius, center_point)
-
-    # Set the original object (can be any set of points)
-    obj = list(map(tuple, circle_points))
-    mObj = tuple(center_point)
-    nVecObj = normalVector(obj)
-
-    # Given vector -- molecule_shadow_normal vector
-    vec = tuple(center_point - dummy_atom_idx)
-
-    # Find rotation axis and angle.
-    rotAxis = normalVector([(0, 0, 0), nVecObj, vec])
-    angle = np.arccos(
-        np.dot(nVecObj, vec)
-        / (np.sqrt(np.dot(vec, vec)) * np.sqrt(np.dot(nVecObj, nVecObj)))
+    shadow_surface = shadow.delaunay_2d(alpha=1.0)
+    shadow_edges = shadow_surface.extract_feature_edges(
+        feature_angle=30,
+        boundary_edges=True,
+        non_manifold_edges=False,
+        feature_edges=False,
+        manifold_edges=False,
+        clear_data=True,
     )
 
-    # Generate the rotated object.
-    rotObj = map(lambda pt: rotateVector3D(pt, angle, rotAxis), obj)
-    mRotObj = rotateVector3D(mObj, angle, rotAxis)
-    rotObj = np.array(list(rotObj))
-
-    nVecRotObj = normalVector(rotObj)
-
-    xadd = center_point[0] - mRotObj[0]
-    yadd = center_point[1] - mRotObj[1]
-    zadd = center_point[2] - mRotObj[2]
-
-    trotObj = []
-
-    for point in rotObj:
-        trotObj.append(list(map(add, point, [xadd, yadd, zadd])))
-
-    # Check if the given vector and the normal of the rotated object are parallel (cross product should be zero).
-    b1_vecs = []
-    for circle_point in trotObj:
-        b1_vecs.append(
-            _get_furthest_point_along_vector(
-                center_point,
-                np.asarray(circle_point),
-                molecule_shadow,
-                resolution,
+    b_value_distances = []
+    for point in shadow_edges.points:
+        b_value_distances.append(
+            distance.euclidean(
+                point,
+                attached_atom_idx,
             )
         )
-    return np.min(b1_vecs)
+    b1_idx = shadow_edges.points[np.array(b_value_distances).argmin()]
+    b5_idx = shadow_edges.points[np.array(b_value_distances).argmax()]
+
+    b1 = min(b_value_distances)
+    b5 = max(b_value_distances)
+
+    return BValues(
+        Bmin=b1 * np.average(resolution),
+        Bmax=b5 * np.average(resolution),
+        Bmin_idx=np.array(b1_idx),
+        Bmax_idx=np.array(b5_idx),
+    )
 
 
 def _get_furthest_point_along_vector(
