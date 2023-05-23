@@ -141,7 +141,11 @@ B1=1.9730970556668774, B5=2.320611610648539)
             voxel_origin=np.array(self._electric_field_surface.voxel_origin),
         )
 
-    def get_steric_parameters(self) -> StericParameters:
+    def get_steric_parameters(
+        self,
+        plot: bool = False,
+        output_path: None | pathlib.Path = None,
+    ) -> StericParameters:
         """
         Get the steric parameters from the electrostatic potential.
 
@@ -162,6 +166,8 @@ B1=1.9730970556668774, B5=2.320611610648539)
             self._electric_field_surface.voxel_size * np.identity(3),
             cube_data_positions_idx[self._attached_index],
             cube_data_positions_idx[self._dummy_index],
+            plot=plot,
+            output_path=output_path,
         )
 
     def get_dummy_index(self) -> int:

@@ -1,4 +1,5 @@
 import math
+import pathlib
 from dataclasses import dataclass
 from operator import add
 
@@ -29,6 +30,8 @@ def calculate_steric_parameters_from_esp(
     resolution: np.float32,
     attached_atom_idx: npt.NDArray[np.int_],
     dummy_atom_idx: npt.NDArray[np.int_],
+    plot: bool = False,
+    output_path: None | pathlib.Path = None,
 ) -> StericParameters:
     l_value = _calculate_L(
         attached_atom_idx,
@@ -43,11 +46,89 @@ def calculate_steric_parameters_from_esp(
         streusel_surface,
         resolution.sum(axis=1),
     )
+
+    if plot:
+        plot_steric_parameters(
+            attached_atom_idx,
+            dummy_atom_idx,
+            streusel_surface,
+            l_value,
+            b_values,
+            output_path,
+        )
+
     return StericParameters(
         L=l_value.L,
         B1=b_values.Bmin,
         B5=b_values.Bmax,
     )
+
+
+def plot_steric_parameters(
+    attached_atom_idx: npt.NDArray,
+    dummy_atom_idx: npt.NDArray,
+    streusel_surface: npt.NDArray,
+    l_value: Lvalue,
+    b_values: BValues,
+    output_path: pathlib.Path,
+) -> None:
+    pink = "#ff79c6"
+    green = "#50fa7b"
+    cyan = "#8be9fd"
+    orange = "#ffb86c"
+    purple = "#bd93f9"
+    dustyblue = "#6277a4"
+
+    streusel_surface_idx = np.argwhere(streusel_surface)
+
+    clipped = pv.PolyData(streusel_surface_idx).clip(
+        normal=attached_atom_idx - dummy_atom_idx,
+        origin=attached_atom_idx,
+    )
+
+    shadow = clipped.project_points_to_plane(
+        normal=attached_atom_idx - dummy_atom_idx,
+        origin=attached_atom_idx,
+    )
+
+    p = pv.Plotter(off_screen=True)
+    p.add_mesh(
+        pv.PolyData(attached_atom_idx),
+        point_size=20,
+        color=pink,
+    )
+    p.add_mesh(
+        pv.PolyData(dummy_atom_idx),
+        point_size=20,
+        color=cyan,
+    )
+    p.add_mesh(
+        clipped,
+        opacity=0.3,
+    )
+    p.add_mesh(
+        shadow,
+        color=purple,
+        opacity=0.3,
+    )
+
+    p.add_mesh(
+        pv.PolyData(b_values.Bmin_idx),
+        point_size=20,
+        color=green,
+    )
+    p.add_mesh(
+        pv.PolyData(b_values.Bmax_idx),
+        point_size=20,
+        color=green,
+    )
+    p.add_mesh(
+        pv.PolyData(l_value.L_idx),
+        point_size=20,
+        color=green,
+    )
+
+    p.screenshot(output_path)
 
 
 def _calculate_L(
