@@ -155,7 +155,11 @@ def main() -> None:
                     dummy_index=row.dummy_index,
                     attached_index=row.attached_index,
                 )
-                esp_smores_params = smores_esp_molecule.get_steric_parameters()
+                esp_smores_params = smores_esp_molecule.get_steric_parameters(
+                    plot=True,
+                    output_path=args.output_directory
+                    / f"{row.name}_pointcloud.png",
+                )
                 writer.writerow(
                     {
                         "name": row.name,
