@@ -190,8 +190,14 @@ def _calculate_L(
     resolution: np.float32,
 ) -> Lvalue:
     streusel_surface_idx = np.argwhere(streusel_surface)
+
+    clipped = pv.PolyData(streusel_surface_idx).clip(
+        normal=attached_atom_idx - dummy_atom_idx,
+        origin=attached_atom_idx,
+    )
+
     product = np.cross(
-        streusel_surface_idx - dummy_atom_idx,
+        np.array(clipped.points) - dummy_atom_idx,
         attached_atom_idx - dummy_atom_idx,
     )
     if product.ndim == 2:
@@ -199,7 +205,7 @@ def _calculate_L(
     else:
         distances = np.abs(product)
 
-    streusel_surface_L_point = streusel_surface_idx[distances.argmin()]
+    streusel_surface_L_point = clipped.points[distances.argmin()]
     return Lvalue(
         L=np.average(
             resolution * math.dist(attached_atom_idx, streusel_surface_L_point)
