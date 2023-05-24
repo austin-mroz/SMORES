@@ -7,48 +7,47 @@ import sys
 import typing
 from dataclasses import dataclass
 
+import atomlite
 import rdkit.Chem as rdkit
 
 import smores
-
-# import smores.psi4
 
 
 def main() -> None:
     args = _get_command_line_arguments()
     args.output_directory.mkdir(parents=True, exist_ok=True)
-    database = sqlite3.connect(args.database)
-    cursor = database.cursor()
-    molecules = tuple(_get_molecules(database))
 
-    for molecule_input in molecules:
-        calculation_directory = args.output_directory / molecule_input.name
+    database = atomlite.Database(args.database)
 
-        cursor.execute(
-            "UPDATE molecules SET properties=json_insert(properties,?,?) WHERE key=?",
-            (
-                "$.esp_file",
-                str(calculation_directory / "ESP.cube"),
-                molecule_input.name,
-            ),
+    for system in database.get_entries():
+        print(system.key)
+        entry = atomlite.PropertyEntry(
+            key=system.key,
+            properties={
+                "xyz_file": _replace_directory(
+                    pathlib.Path(system.properties["xyz_file"]),
+                    args.output_directory,
+                ),
+                "esp_file": _replace_directory(
+                    pathlib.Path(system.properties["esp_file"]),
+                    args.output_directory,
+                ),
+            },
         )
-
-        database.commit()
-
-    database.close()
+        database.update_properties(entry)
+    database.connection.commit()
 
 
-@dataclass(frozen=True, slots=True)
-class Molecule:
-    name: str
-    xyz_file: pathlib.Path
-
-
-def _get_molecules(database: sqlite3.Connection) -> typing.Iterator[Molecule]:
-    for key, _, properties in database.execute("SELECT * FROM molecules"):
-        yield Molecule(
-            name=key,
-            xyz_file=json.loads(properties)["xyz_file"],
+def _replace_directory(
+    input_directory: pathlib.Path,
+    output_directory: pathlib.Path,
+) -> str:
+    input_parts = list(input_directory.parts)[-3:]
+    if "xyz" in input_parts[-1]:
+        return str(output_directory / input_parts[1] / input_parts[2])
+    elif "cube" in input_parts[-1]:
+        return str(
+            output_directory / input_parts[0] / input_parts[1] / input_parts[2]
         )
 
 
@@ -64,16 +63,21 @@ def _get_command_line_arguments() -> argparse.Namespace:
             '"dummy_index", "attached_index", "xyz_file".'
         ),
         type=pathlib.Path,
-        default=pathlib.Path.cwd() / "common_carbon_substituents.db",
+        default=pathlib.Path.cwd() / "smores_workflow_systems.db",
     )
+
     parser.add_argument(
         "-o",
         "--output_directory",
         help="The directory into which the results are written.",
         type=pathlib.Path,
-        default=pathlib.Path.cwd() / "2_output",
+        default=_get_output_directory(),
     )
     return parser.parse_args()
+
+
+def _get_output_directory() -> pathlib.Path:
+    return pathlib.Path(str(pathlib.Path.cwd()).replace("work", "data"))
 
 
 if __name__ == "__main__":
