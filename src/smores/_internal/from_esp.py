@@ -91,7 +91,10 @@ def plot_steric_parameters(
         origin=attached_atom_idx,
     )
 
-    p = pv.Plotter(off_screen=True)
+    p = pv.Plotter(off_screen=True, shape=(1, 2))
+
+    p.set_background("white")
+
     p.add_mesh(
         pv.PolyData(attached_atom_idx),
         point_size=20,
@@ -126,6 +129,55 @@ def plot_steric_parameters(
         pv.PolyData(l_value.L_idx),
         point_size=20,
         color=green,
+    )
+
+    p.view_vector(
+        vector=attached_atom_idx - dummy_atom_idx,
+        viewup=b_values.Bmax_idx - b_values.Bmin_idx,
+    )
+
+    p.subplot(0, 1)
+    p.set_background("white")
+    p.add_mesh(
+        pv.PolyData(attached_atom_idx),
+        point_size=20,
+        color=pink,
+    )
+    p.add_mesh(
+        pv.PolyData(dummy_atom_idx),
+        point_size=20,
+        color=cyan,
+    )
+    p.add_mesh(
+        clipped,
+        opacity=0.3,
+        color=dustyblue,
+    )
+    p.add_mesh(
+        shadow,
+        color=purple,
+        opacity=0.3,
+    )
+
+    p.add_mesh(
+        pv.PolyData(b_values.Bmin_idx),
+        point_size=20,
+        color=green,
+    )
+    p.add_mesh(
+        pv.PolyData(b_values.Bmax_idx),
+        point_size=20,
+        color=green,
+    )
+    p.add_mesh(
+        pv.PolyData(l_value.L_idx),
+        point_size=20,
+        color=green,
+    )
+
+    p.view_vector(
+        vector=b_values.Bmax_idx - b_values.Bmin_idx,
+        viewup=attached_atom_idx - dummy_atom_idx,
     )
 
     p.screenshot(output_path)
