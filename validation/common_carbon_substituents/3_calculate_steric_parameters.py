@@ -15,12 +15,14 @@ import smores
 
 def main() -> None:
     args = _get_command_line_arguments()
-
+    args.output_directory.mkdir(parents=True, exist_ok=True)
     radii_types = ("alvarez", "bondi", "crc", "rahm", "pyykko", "truhlar")
 
     database = atomlite.Database(args.database)
 
     for system in database.get_entries():
+        print(system.key)
+        print(system.properties["xyz_file"])
         smores_molecule = smores.Molecule.from_xyz_file(
             path=pathlib.Path(system.properties["xyz_file"]),
             dummy_index=system.properties["dummy_index"],
@@ -58,7 +60,7 @@ def main() -> None:
 
         esp_smores_params = smores_esp_molecule.get_steric_parameters(
             plot=True,
-            output_path=pathlib.Path.cwd() / f"{system.key}_pointcloud.png",
+            output_path=args.output_directory / f"{system.key}_pointcloud.png",
         )
 
         new_entry = atomlite.PropertyEntry(
@@ -177,6 +179,14 @@ def _get_command_line_arguments() -> argparse.Namespace:
         ),
         type=pathlib.Path,
         default=pathlib.Path.cwd() / "common_carbon_substituents.db",
+    )
+
+    parser.add_argument(
+        "-o",
+        "--output_directory",
+        default=pathlib.Path.cwd() / "3_output",
+        type=pathlib.Path,
+        help="The directory into which the output files are written.",
     )
 
     return parser.parse_args()
