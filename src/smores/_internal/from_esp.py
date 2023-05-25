@@ -111,7 +111,7 @@ def plot_steric_parameters(
     )
     p.add_mesh(
         shadow,
-        color=purple,
+        color=dustyblue,
         opacity=0.3,
     )
 
@@ -121,14 +121,24 @@ def plot_steric_parameters(
         color=green,
     )
     p.add_mesh(
+        pv.Line(attached_atom_idx, b_values.Bmin_idx),
+        line_width=10,
+        color=green,
+    )
+    p.add_mesh(
         pv.PolyData(b_values.Bmax_idx),
         point_size=20,
-        color=green,
+        color=orange,
+    )
+    p.add_mesh(
+        pv.Line(attached_atom_idx, b_values.Bmax_idx),
+        line_width=10,
+        color=orange,
     )
     p.add_mesh(
         pv.PolyData(l_value.L_idx),
         point_size=20,
-        color=green,
+        color=cyan,
     )
 
     p.view_vector(
@@ -151,11 +161,11 @@ def plot_steric_parameters(
     p.add_mesh(
         clipped,
         opacity=0.3,
-        color=dustyblue,
+        color=purple,
     )
     p.add_mesh(
         shadow,
-        color=purple,
+        color=dustyblue,
         opacity=0.3,
     )
 
@@ -167,12 +177,17 @@ def plot_steric_parameters(
     p.add_mesh(
         pv.PolyData(b_values.Bmax_idx),
         point_size=20,
-        color=green,
+        color=orange,
     )
     p.add_mesh(
         pv.PolyData(l_value.L_idx),
         point_size=20,
-        color=green,
+        color=cyan,
+    )
+    p.add_mesh(
+        pv.Line(attached_atom_idx, l_value.L_idx),
+        line_width=10,
+        color=cyan,
     )
 
     p.view_vector(
