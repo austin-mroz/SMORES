@@ -106,13 +106,9 @@ def plot_steric_parameters(
         color=cyan,
     )
     p.add_mesh(
-        clipped,
-        opacity=0.3,
-    )
-    p.add_mesh(
         shadow,
         color=dustyblue,
-        opacity=0.3,
+        opacity=0.2,
     )
 
     p.add_mesh(
