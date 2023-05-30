@@ -83,6 +83,11 @@ def _plot_sterimol_parameter_by_radii_type(
         x="radii_type",
         y=parameter,
         hue="substituent",
+        edgecolor="black",
+        linewidth=2,
+        size=10,
+        dodge=True,
+        jitter=True,
     )
     sns.move_legend(
         plot,
@@ -107,6 +112,11 @@ def _plot_morfeus_sterimol_xyz_performance(
         x="sterimol_parameter",
         y="value",
         hue="radii_type",
+        edgecolor="black",
+        linewidth=2,
+        size=10,
+        dodge=True,
+        jitter=True,
     )
     sns.move_legend(
         plot,
