@@ -87,7 +87,7 @@ def _plot_sterimol_parameter_by_radii_type(
         linewidth=2,
         size=10,
         dodge=True,
-        jitter=True,
+        jitter=False,
     )
     sns.move_legend(
         plot,
@@ -95,6 +95,12 @@ def _plot_sterimol_parameter_by_radii_type(
         bbox_to_anchor=(1.0, 1.0),
         title="substituent",
     )
+    if parameter == "L":
+        plot.set_ylim([0, 17])
+    elif parameter == "B1":
+        plot.set_ylim([0, 9])
+    elif parameter == "B5":
+        plot.set_ylim([0, 14])
     plot.get_figure().savefig(figure_path, bbox_inches="tight")
     plot.get_figure().clf()
 
